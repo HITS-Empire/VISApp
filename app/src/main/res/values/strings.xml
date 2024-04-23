@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">VISApp</string>
-    <string name="title_home">Главная</string>
-    <string name="title_dashboard">Дашборд</string>
-    <string name="title_notifications">Уведомления</string>
 </resources>
