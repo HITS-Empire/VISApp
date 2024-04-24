@@ -7,10 +7,6 @@
         android:icon="@drawable/home_icon"
         android:title="@string/navigation_title_home" />
     <item
-        android:id="@+id/navigationFilters"
-        android:icon="@drawable/library_icon"
-        android:title="@string/navigation_title_filters" />
-    <item
         android:id="@+id/navigationInteresting"
         android:icon="@drawable/fire_icon"
         android:title="@string/navigation_title_interesting" />
