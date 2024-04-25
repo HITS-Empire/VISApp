@@ -11,8 +11,32 @@
         android:layout_height="96dp"
         android:layout_marginEnd="40dp"
         android:layout_marginBottom="36dp"
-        android:background="@drawable/round_plus_button"
+        android:background="@drawable/round_primary_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/plus_36" />
+
+    <ImageButton
+        android:id="@+id/galleryButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/round_soft_button"
+        app:layout_constraintBottom_toTopOf="@+id/plusButton"
+        app:layout_constraintEnd_toEndOf="@+id/plusButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/plusButton"
+        app:srcCompat="@drawable/folder_baseline_24" />
+
+    <ImageButton
+        android:id="@+id/cameraButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/round_soft_button"
+        app:layout_constraintBottom_toTopOf="@+id/galleryButton"
+        app:layout_constraintEnd_toEndOf="@+id/galleryButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/galleryButton"
+        app:srcCompat="@drawable/camera_baseline_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>
