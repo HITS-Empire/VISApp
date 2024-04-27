@@ -26,7 +26,7 @@
         app:layout_constraintEnd_toStartOf="@+id/plusButton"
         app:layout_constraintTop_toTopOf="@+id/plusButton"
         app:layout_constraintVertical_bias="0.5"
-        app:srcCompat="@drawable/folder_baseline_24" />
+        app:srcCompat="@drawable/folder_baseline_27" />
 
     <ImageButton
         android:id="@+id/cameraButton"
