@@ -5,6 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="564dp"
+        android:layout_height="250dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/backgroung_image_rotated" />
+
     <ImageButton
         android:id="@+id/plusButton"
         android:layout_width="96dp"
@@ -39,4 +49,5 @@
         app:layout_constraintTop_toTopOf="@+id/galleryButton"
         app:layout_constraintVertical_bias="0.5"
         app:srcCompat="@drawable/camera_baseline_24" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
