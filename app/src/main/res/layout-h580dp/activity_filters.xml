@@ -10,10 +10,10 @@
         android:id="@+id/filtersImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="48dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginRight="280dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="108dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginBottom="256dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
         android:id="@+id/backButton"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:layout_marginStart="48dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:background="@null"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,7 +36,7 @@
         android:layout_width="144dp"
         android:layout_height="36dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="280dp"
+        android:layout_marginEnd="24dp"
         android:clickable="true"
         android:gravity="center"
         android:text="@string/save_button"
@@ -45,27 +45,26 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
-        android:id="@+id/filtersVerticalMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginTop="80dp"
-        android:layout_marginEnd="36dp"
+    <HorizontalScrollView
+        android:id="@+id/filtersHorizontalMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/filtersLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
             <FrameLayout
                 android:id="@+id/rotateFrame"
-                android:layout_width="192dp"
-                android:layout_height="96dp">
+                android:layout_width="96dp"
+                android:layout_height="128dp">
 
                 <ImageView
                     android:id="@+id/rotateImage"
@@ -75,9 +74,9 @@
 
                 <TextView
                     android:id="@+id/rotateTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="96dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
                     android:gravity="center"
                     android:text="@string/filters_rotate"
                     android:textColor="@color/white" />
@@ -85,8 +84,8 @@
 
             <FrameLayout
                 android:id="@+id/scalingFrame"
-                android:layout_width="192dp"
-                android:layout_height="96dp">
+                android:layout_width="96dp"
+                android:layout_height="128dp">
 
                 <ImageView
                     android:id="@+id/scalingImage"
@@ -96,9 +95,9 @@
 
                 <TextView
                     android:id="@+id/scalingTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="96dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
                     android:gravity="center"
                     android:text="@string/filters_scaling"
                     android:textColor="@color/white" />
@@ -107,8 +106,8 @@
 
             <FrameLayout
                 android:id="@+id/retouchFrame"
-                android:layout_width="192dp"
-                android:layout_height="96dp">
+                android:layout_width="96dp"
+                android:layout_height="128dp">
 
                 <ImageView
                     android:id="@+id/retouchImage"
@@ -118,9 +117,9 @@
 
                 <TextView
                     android:id="@+id/retouchTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="96dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
                     android:gravity="center"
                     android:text="@string/filters_retouch"
                     android:textColor="@color/white" />
@@ -129,8 +128,8 @@
 
             <FrameLayout
                 android:id="@+id/definitionFrame"
-                android:layout_width="192dp"
-                android:layout_height="96dp">
+                android:layout_width="96dp"
+                android:layout_height="128dp">
 
                 <ImageView
                     android:id="@+id/definitionImage"
@@ -140,9 +139,9 @@
 
                 <TextView
                     android:id="@+id/definitionTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="96dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
                     android:gravity="center"
                     android:text="@string/filters_definition"
                     android:textColor="@color/white" />
@@ -150,8 +149,8 @@
 
             <FrameLayout
                 android:id="@+id/affinisFrame"
-                android:layout_width="192dp"
-                android:layout_height="96dp">
+                android:layout_width="96dp"
+                android:layout_height="128dp">
 
                 <ImageView
                     android:id="@+id/affinisImage"
@@ -161,27 +160,27 @@
 
                 <TextView
                     android:id="@+id/affinisTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="96dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
                     android:gravity="center"
                     android:text="@string/filters_affinis"
                     android:textColor="@color/white" />
             </FrameLayout>
 
         </LinearLayout>
-    </ScrollView>
+    </HorizontalScrollView>
 
     <TextView
         android:id="@+id/selectFilters"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="12dp"
         android:text="@string/select_filters"
         android:textColor="@color/white"
         android:textSize="22sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/filtersHorizontalMenu"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
