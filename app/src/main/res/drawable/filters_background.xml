@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="@color/blur">
+android:color="@color/second_blur">
     <item android:id="@+id/mask">
         <shape android:shape="rectangle">
             <gradient
                 android:type="linear"
                 android:angle="0"
-                android:startColor="@color/green"
-                android:endColor="@color/blue" />
-            <size android:width="96dp" android:height="96dp" />
-            <corners android:radius="48dp" />
+                android:startColor="@color/second_green"
+                android:endColor="@color/second_blue" />
+            <size android:width="112dp" android:height="112dp" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
 </ripple>
