@@ -9,7 +9,7 @@ import android.content.ContentValues
 import android.graphics.BitmapFactory
 import android.content.ContentResolver
 
-class Editor(initContentResolver: ContentResolver) {
+class ImageEditor(initContentResolver: ContentResolver) {
     private val contentResolver = initContentResolver
 
     private val albumName = "VISApp"
