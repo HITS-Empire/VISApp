@@ -36,7 +36,7 @@
         app:layout_constraintEnd_toEndOf="@+id/plusButton"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/plusButton"
-        app:srcCompat="@drawable/folder_baseline_27" />
+        app:srcCompat="@drawable/folder_outline_27" />
 
     <ImageButton
         android:id="@+id/cameraButton"
@@ -48,6 +48,6 @@
         app:layout_constraintEnd_toEndOf="@+id/galleryButton"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/galleryButton"
-        app:srcCompat="@drawable/camera_baseline_24" />
+        app:srcCompat="@drawable/camera_outline_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
