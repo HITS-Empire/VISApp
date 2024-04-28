@@ -37,13 +37,13 @@ class HomeFragment: Fragment() {
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
                 sharedPreferences.edit().putString("selected_uri", uri.toString()).apply()
-                goToFiltersFragment()
+                goToFiltersActivity()
             }
         }
         val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { it: Boolean ->
             if (it) {
                 sharedPreferences.edit().putString("selected_uri", newImageURI.toString()).apply()
-                goToFiltersFragment()
+                goToFiltersActivity()
             }
         }
 
@@ -67,7 +67,7 @@ class HomeFragment: Fragment() {
         File(requireContext().filesDir, "visapp_image.png")
     )
 
-    private fun goToFiltersFragment() {
+    private fun goToFiltersActivity() {
         val intent = Intent(requireContext(), FiltersActivity::class.java)
         startActivity(intent)
     }

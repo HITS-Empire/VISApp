@@ -3,4 +3,11 @@
     <string name="navigation_title_home">Главная</string>
     <string name="navigation_title_filters">Фильтры</string>
     <string name="navigation_title_interesting">Интересненькое</string>
+    <string name="save_button">СОХРАНИТЬ</string>
+    <string name="select_filters">Выберите фильтры</string>
+    <string name="filters_rotate">Поворот</string>
+    <string name="filters_scaling">Масштаб</string>
+    <string name="filters_retouch">Ретушь</string>
+    <string name="filters_definition">Чёткость</string>
+    <string name="filters_affinis">Аффинис</string>
 </resources>
