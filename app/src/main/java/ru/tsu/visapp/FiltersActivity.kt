@@ -17,7 +17,7 @@ import androidx.appcompat.content.res.AppCompatResources
 class FiltersActivity: AppCompatActivity() {
     private val title = System.currentTimeMillis().toString() // Название изображения
 
-    private lateinit var editor: ImageEditor // Редактор изображений
+    private lateinit var imageEditor: ImageEditor // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
 
@@ -36,15 +36,15 @@ class FiltersActivity: AppCompatActivity() {
         )
 
         // Получить редактор изображений
-        editor = ImageEditor(contentResolver)
+        imageEditor = ImageEditor(contentResolver)
 
         // Получить картинку и установить её
         val selectedUri = sharedPreferences.getString("selected_uri", "")
-        bitmap = editor.createBitmapByURI(Uri.parse(selectedUri))
+        bitmap = imageEditor.createBitmapByURI(Uri.parse(selectedUri))
         imageView.setImageBitmap(bitmap)
 
         // Получить пиксели изображения
-        pixels = editor.getPixelsFromBitmap(bitmap)
+        pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
         // Example: Редактирование пикселей
         // pixels.forEachIndexed { index, _ ->
@@ -63,7 +63,7 @@ class FiltersActivity: AppCompatActivity() {
             var text = "Изображение успешно сохранено"
 
             try {
-                editor.saveImageToGallery(bitmap, title)
+                imageEditor.saveImageToGallery(bitmap, title)
             } catch (error: Error) {
                 text = "Не удалось сохранить изображение"
             }
