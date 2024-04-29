@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="@color/blur">
-    <item
-        android:id="@+id/mask"
-        android:drawable="@color/transparent" />
+    android:color="@color/light_blur">
+    <item>
+        <shape>
+            <solid android:color="@color/black" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
 </ripple>

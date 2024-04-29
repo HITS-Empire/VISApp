@@ -5,14 +5,128 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/mainCenterText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/navigation_title_interesting"
-        android:textSize="28sp"
+    <FrameLayout
+        android:id="@+id/stenographyFrame"
+        android:layout_width="140dp"
+        android:layout_height="180dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/neuralFrame"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.75">
+
+        <ImageView
+            android:id="@+id/stenographyImage"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:background="@drawable/blur_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@mipmap/ic_filters" />
+
+        <TextView
+            android:id="@+id/stenographyTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="140dp"
+            android:gravity="center"
+            android:text="@string/interesting_stenography"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/neuralFrame"
+        android:layout_width="140dp"
+        android:layout_height="180dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/vectorFrame"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/stenographyFrame"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.75">
+
+        <ImageView
+            android:id="@+id/neuralImage"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:background="@drawable/blur_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@mipmap/ic_filters" />
+
+        <TextView
+            android:id="@+id/neuralTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="140dp"
+            android:gravity="center"
+            android:text="@string/interesting_neural"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/vectorFrame"
+        android:layout_width="140dp"
+        android:layout_height="180dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/cubeFrame"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/neuralFrame"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.75">
+
+        <ImageView
+            android:id="@+id/vectorImage"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:background="@drawable/blur_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@mipmap/ic_filters" />
+
+        <TextView
+            android:id="@+id/vectorTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="140dp"
+            android:gravity="center"
+            android:text="@string/interesting_vector"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/cubeFrame"
+        android:layout_width="140dp"
+        android:layout_height="180dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/vectorFrame"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.75">
+
+        <ImageView
+            android:id="@+id/cubeImage"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:background="@drawable/blur_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@mipmap/ic_filters" />
+
+        <TextView
+            android:id="@+id/cubeTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="140dp"
+            android:gravity="center"
+            android:text="@string/interesting_cube"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

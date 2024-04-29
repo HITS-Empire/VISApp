@@ -5,9 +5,7 @@
     <color name="gray">#FF474747</color>
     <color name="green">#FF2BCB11</color>
     <color name="blue">#FF25AFFC</color>
-    <color name="blur">#22000000</color>
-    <color name="second_green">#FF24FF00</color>
-    <color name="second_blue">#FF00A3FF</color>
-    <color name="second_blur">#33000000</color>
+    <color name="dark_blur">#22000000</color>
+    <color name="light_blur">#22FFFFFF</color>
     <color name="transparent">#00000000</color>
 </resources>

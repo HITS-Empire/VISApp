@@ -5,7 +5,7 @@
         android:state_checked="false" />
     <item android:state_checked="true">
         <ripple
-            android:color="@color/second_blur"
+            android:color="@color/dark_blur"
             android:radius="56dp">
             <item>
                 <shape android:shape="rectangle">
