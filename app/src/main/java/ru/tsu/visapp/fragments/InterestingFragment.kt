@@ -13,6 +13,10 @@ import ru.tsu.visapp.VectorActivity
 import androidx.fragment.app.Fragment
 import ru.tsu.visapp.StenographyActivity
 
+/*
+ * Фрагмент "Интересное"
+ */
+
 class InterestingFragment: Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -9,6 +9,10 @@ import android.content.ContentValues
 import android.graphics.BitmapFactory
 import android.content.ContentResolver
 
+/*
+ * Вспомогательные методы для работы с изображениями
+ */
+
 class ImageEditor(initContentResolver: ContentResolver) {
     private val contentResolver = initContentResolver
 
