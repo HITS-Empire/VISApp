@@ -1,9 +1,7 @@
 package ru.tsu.visapp
 
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import android.content.Context
 import android.graphics.Bitmap
 import android.widget.TextView
 import android.widget.ImageView
@@ -29,12 +27,6 @@ class FiltersActivity: ChildActivity() {
 
         val imageView: ImageView = findViewById(R.id.filtersImageView)
 
-        // Получить локальное хранилище
-        val sharedPreferences = this.getSharedPreferences(
-            "ru.tsu.visapp",
-            Context.MODE_PRIVATE
-        )
-
         // Получить название изображения
         title = System.currentTimeMillis().toString()
 
@@ -42,8 +34,8 @@ class FiltersActivity: ChildActivity() {
         imageEditor = ImageEditor(contentResolver)
 
         // Получить картинку и установить её
-        val selectedUri = sharedPreferences.getString("selected_uri", "")
-        bitmap = imageEditor.createBitmapByURI(Uri.parse(selectedUri))
+        val savedImageUri = imageEditor.getSavedImageUri(this, null)
+        bitmap = imageEditor.createBitmapByUri(savedImageUri)
         imageView.setImageBitmap(bitmap)
 
         // Получить пиксели изображения
