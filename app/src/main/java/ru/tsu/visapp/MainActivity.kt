@@ -7,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import ru.tsu.visapp.fragments.InterestingFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+/*
+ * Главный экран приложения
+ */
+
 class MainActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

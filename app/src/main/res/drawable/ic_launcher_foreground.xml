@@ -5,18 +5,18 @@
     android:viewportHeight="147">
     <group>
         <clip-path
-            android:pathData="M0,0h147v147h-147z"/>
+            android:pathData="M0,0h147v147h-147z" />
         <path
             android:pathData="M0,0h147v147h-147z"
-            android:fillColor="#ffffff"/>
+            android:fillColor="#ffffff" />
         <path
             android:pathData="M47,0h100v49h-100z"
-            android:fillColor="#854245"/>
+            android:fillColor="#854245" />
         <path
             android:pathData="M47,98h100v49h-100z"
-            android:fillColor="#424585"/>
+            android:fillColor="#424585" />
         <path
             android:pathData="M0,0h48v147h-48z"
-            android:fillColor="#458642"/>
+            android:fillColor="#458642" />
     </group>
 </vector>
