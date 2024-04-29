@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <ripple
+            android:color="@color/second_blur"
+            android:radius="56dp">
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:type="linear"
+                        android:angle="0"
+                        android:startColor="@color/green"
+                        android:endColor="@color/blue" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:type="linear"
+                        android:angle="0"
+                        android:centerX="0.64"
+                        android:startColor="@color/transparent"
+                        android:centerColor="@color/transparent"
+                        android:endColor="@color/gray" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:type="linear"
+                        android:centerX="0.96"
+                        android:angle="90"
+                        android:startColor="@color/transparent"
+                        android:centerColor="@color/transparent"
+                        android:endColor="@color/gray" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:type="linear"
+                        android:centerX="0.64"
+                        android:angle="180"
+                        android:startColor="@color/transparent"
+                        android:centerColor="@color/transparent"
+                        android:endColor="@color/gray" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:type="linear"
+                        android:centerX="0.8"
+                        android:angle="270"
+                        android:startColor="@color/transparent"
+                        android:centerColor="@color/transparent"
+                        android:endColor="@color/gray" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:type="radial"
+                        android:centerY="0.56"
+                        android:gradientRadius="56dp"
+                        android:startColor="@color/transparent"
+                        android:endColor="@color/gray" />
+                </shape>
+            </item>
+        </ripple>
+    </item>
+    <item
+        android:drawable="@color/transparent"
+        android:state_checked="false" />
+</selector>
