@@ -6,10 +6,55 @@ android:color="@color/second_blur">
             <gradient
                 android:type="linear"
                 android:angle="0"
-                android:startColor="@color/second_green"
-                android:endColor="@color/second_blue" />
-            <size android:width="112dp" android:height="112dp" />
-            <corners android:radius="16dp" />
+                android:startColor="@color/green"
+                android:endColor="@color/blue" />
+        </shape>
+    </item>
+    <item android:id="@+id/mask_blur_1">
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:centerX="0.87"
+                android:startColor="@color/transparent"
+                android:centerColor="@color/transparent"
+                android:endColor="@color/black" />
+        </shape>
+    </item>
+    <item android:id="@+id/mask_blur_2">
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:centerX="0.87"
+                android:centerY="0"
+                android:angle="90"
+                android:startColor="@color/transparent"
+                android:centerColor="@color/transparent"
+                android:endColor="@color/black" />
+        </shape>
+    </item>
+    <item android:id="@+id/mask_blur_3">
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:centerX="0.87"
+                android:centerY="0"
+                android:angle="180"
+                android:startColor="@color/transparent"
+                android:centerColor="@color/transparent"
+                android:endColor="@color/black" />
+        </shape>
+    </item>
+    <item android:id="@+id/mask_blur_4">
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:centerX="0.87"
+                android:centerY="0"
+                android:angle="270"
+                android:startColor="@color/transparent"
+                android:centerColor="@color/transparent"
+                android:endColor="@color/black" />
         </shape>
     </item>
 </ripple>
