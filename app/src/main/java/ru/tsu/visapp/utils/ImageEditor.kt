@@ -4,10 +4,18 @@ import java.io.File
 import android.net.Uri
 import android.os.Environment
 import android.graphics.Bitmap
+import android.content.Context
 import android.provider.MediaStore
 import android.content.ContentValues
+import androidx.fragment.app.Fragment
 import android.graphics.BitmapFactory
 import android.content.ContentResolver
+import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatActivity
+
+/*
+ * Вспомогательные методы для работы с изображениями
+ */
 
 class ImageEditor(initContentResolver: ContentResolver) {
     private val contentResolver = initContentResolver
@@ -16,8 +24,30 @@ class ImageEditor(initContentResolver: ContentResolver) {
     private val albumRelativePath = "${Environment.DIRECTORY_PICTURES}/$albumName"
     private val albumFile = File(albumRelativePath)
 
+    // Получить URI сохранённой картинки
+    fun getSavedImageUri(activity: AppCompatActivity?, fragment: Fragment?): Uri {
+        var sharedPreferences: SharedPreferences? = null
+
+        if (activity != null) {
+            sharedPreferences = activity.getSharedPreferences(
+                "ru.tsu.visapp",
+                Context.MODE_PRIVATE
+            )
+        }
+        if (fragment != null) {
+            sharedPreferences = fragment.requireContext().getSharedPreferences(
+                "ru.tsu.visapp",
+                Context.MODE_PRIVATE
+            )
+        }
+
+        val savedImageUriString = sharedPreferences?.getString("selected_uri", "")
+
+        return Uri.parse(savedImageUriString)
+    }
+
     // Создать Bitmap по URI картинки
-    fun createBitmapByURI(uri: Uri): Bitmap {
+    fun createBitmapByUri(uri: Uri): Bitmap {
         val inputStream = contentResolver.openInputStream(uri)
         val staticBitmap = BitmapFactory.decodeStream(inputStream)
 
