@@ -3,20 +3,20 @@ package ru.tsu.visapp
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import android.content.Intent
 import android.content.Context
 import android.graphics.Bitmap
 import android.widget.TextView
 import android.widget.ImageView
-import android.widget.ImageButton
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 
-class FiltersActivity: AppCompatActivity() {
-    private val title = System.currentTimeMillis().toString() // Название изображения
+/*
+ * Экран для фильтров
+ */
 
+class FiltersActivity: ChildActivity() {
+    private lateinit var title: String // Название изображения
     private lateinit var imageEditor: ImageEditor // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
@@ -25,7 +25,7 @@ class FiltersActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_filters)
+        initializeView(R.layout.activity_filters)
 
         val imageView: ImageView = findViewById(R.id.filtersImageView)
 
@@ -34,6 +34,9 @@ class FiltersActivity: AppCompatActivity() {
             "ru.tsu.visapp",
             Context.MODE_PRIVATE
         )
+
+        // Получить название изображения
+        title = System.currentTimeMillis().toString()
 
         // Получить редактор изображений
         imageEditor = ImageEditor(contentResolver)
@@ -52,13 +55,10 @@ class FiltersActivity: AppCompatActivity() {
         // }
         // editor.setPixelsToBitmap(bitmap, pixels)
 
-        val backButton: ImageButton = findViewById(R.id.backButton) // Кнопка "Назад"
-        val saveButton: TextView = findViewById(R.id.saveButton) // Кнопка "Сохранить"
+        // Кнопка "Сохранить"
+        val saveButton: TextView = findViewById(R.id.saveButton)
 
-        // События кликов по кнопкам
-        backButton.setOnClickListener {
-            goToMainActivity()
-        }
+        // События кликов по кнопке
         saveButton.setOnClickListener {
             var text = "Изображение успешно сохранено"
 
@@ -117,11 +117,5 @@ class FiltersActivity: AppCompatActivity() {
             R.id.affinisImage -> {}
         }
         currentImage = image
-    }
-
-    // Перейти на главный экран
-    private fun goToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
     }
 }

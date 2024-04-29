@@ -24,8 +24,6 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:background="@drawable/blur_ripple"
-                android:clickable="true"
-                android:focusable="true"
                 app:srcCompat="@mipmap/ic_filters" />
 
             <TextView
@@ -50,8 +48,6 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:background="@drawable/blur_ripple"
-                android:clickable="true"
-                android:focusable="true"
                 app:srcCompat="@mipmap/ic_filters" />
 
             <TextView
@@ -76,8 +72,6 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:background="@drawable/blur_ripple"
-                android:clickable="true"
-                android:focusable="true"
                 app:srcCompat="@mipmap/ic_filters" />
 
             <TextView
@@ -103,8 +97,6 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:background="@drawable/blur_ripple"
-                android:clickable="true"
-                android:focusable="true"
                 app:srcCompat="@mipmap/ic_filters" />
 
             <TextView
