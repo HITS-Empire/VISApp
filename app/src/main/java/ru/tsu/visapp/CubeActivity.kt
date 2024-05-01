@@ -1,5 +1,5 @@
 package ru.tsu.visapp
-import android.util.Log
+
 import kotlin.math.*
 import android.os.Bundle
 import android.graphics.Bitmap
@@ -24,7 +24,10 @@ class Vec2( var x: Float, var y: Float) {
     }
 
     fun division(newVec2: Vec2) : Vec2 {
-        return Vec2(x / newVec2.x, y / newVec2.y)
+        val newX = if (newVec2.x == 0.0f) 0.0f else x / newVec2.x
+        val newY = if (newVec2.y == 0.0f) 0.0f else y / newVec2.y
+
+        return Vec2(newX, newY)
     }
 
     fun multiplication(newVec2: Vec2) : Vec2 {
@@ -54,7 +57,11 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
     }
 
     fun division(newVec3: Vec3) : Vec3 {
-        return Vec3(x / newVec3.x, y / newVec3.y, z / newVec3.z)
+        val newX = if (newVec3.x == 0.0f) 0.0f else x / newVec3.x
+        val newY = if (newVec3.y == 0.0f) 0.0f else y / newVec3.y
+        val newZ = if (newVec3.z == 0.0f) 0.0f else z / newVec3.z
+
+        return Vec3(newX, newY, newZ)
     }
 
     fun multiplication(newVec3: Vec3) : Vec3 {
@@ -141,7 +148,7 @@ class CubeActivity: ChildActivity() {
         val tN = max(max(t1.x, t1.y), t1.z)
         val tF = min(min(t2.x, t2.y), t2.z)
 
-        if (tN > tF || tF < 0.0f) {
+        if (tF != 0.0f && (tN > tF || tF < 0.0f)) {
             return Vec2(-1.0f)
         }
 
@@ -198,7 +205,6 @@ class CubeActivity: ChildActivity() {
                 val intersection = cube(camera, direction, Vec3(1.0f), box)
 
                 if (intersection.x >= 0.0f || intersection.y >= 0.0f) {
-                    Log.d("1", "${box.x}, ${box.y}, ${box.z}")
                     val point = direction
                         .multiplication(Vec3(intersection.x))
                         .plus(camera)
