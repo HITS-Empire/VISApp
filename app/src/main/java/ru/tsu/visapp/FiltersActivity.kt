@@ -1,7 +1,9 @@
 package ru.tsu.visapp
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
+import android.widget.SeekBar
 import android.graphics.Bitmap
 import android.widget.TextView
 import android.widget.ImageView
@@ -20,6 +22,7 @@ class FiltersActivity: ChildActivity() {
     private lateinit var pixels: IntArray // Массив пикселей
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
+    private lateinit var seekBar: SeekBar // Ползунок
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,11 +30,9 @@ class FiltersActivity: ChildActivity() {
 
         val imageView: ImageView = findViewById(R.id.filtersImageView)
 
-        // Получить название изображения
         title = System.currentTimeMillis().toString()
-
-        // Получить редактор изображений
         imageEditor = ImageEditor(contentResolver)
+        seekBar = findViewById(R.id.filtersSeekBar)
 
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
@@ -46,6 +47,9 @@ class FiltersActivity: ChildActivity() {
         //     pixels[index] = Color.BLUE
         // }
         // editor.setPixelsToBitmap(bitmap, pixels)
+
+        // Установить события ползунка
+        seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
 
         // Кнопка "Сохранить"
         val saveButton: TextView = findViewById(R.id.saveButton)
@@ -91,10 +95,38 @@ class FiltersActivity: ChildActivity() {
         }
     }
 
+    // События ползунка
+    private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            // Прогресс от 0 до 100
+            println("Progress: $progress")
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar) {
+            println("start tracking touch")
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar) {
+            println("stop tracking touch")
+        }
+    }
+
     // Сменить фильтр, ориентируясь на его картинку
     private fun changeFilter(image: ImageView) {
         if (::currentImage.isInitialized) {
+            if (image == currentImage) return
+
             currentImage.background = null
+
+            when (currentImage.id) {
+                R.id.rotateImage -> {}
+                R.id.scalingImage -> {}
+                R.id.retouchImage -> {}
+                R.id.definitionImage -> {}
+                R.id.affinisImage -> {
+                    seekBar.visibility = View.VISIBLE
+                }
+            }
         }
         image.background = AppCompatResources.getDrawable(
             this,
@@ -106,7 +138,9 @@ class FiltersActivity: ChildActivity() {
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}
-            R.id.affinisImage -> {}
+            R.id.affinisImage -> {
+                seekBar.visibility = View.GONE
+            }
         }
         currentImage = image
     }
