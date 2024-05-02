@@ -4,7 +4,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /*
- * Реализация фильтров поворота изображения
+ * Реализация фильтра поворота изображения на любой градус
  */
 
 class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
@@ -22,7 +22,7 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
     private var minRow: Double = 0.0
     private var minCol: Double = 0.0
 
-    private var pixelResult : Array<Array<Pixel>>
+    private var pixelsResult : Array<Array<Pixel>>
 
     private fun newPosition(isRow : Boolean, x : Int, y : Int, radians : Double) : Double {
         return if (isRow) {
@@ -70,6 +70,14 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
         return arrayOf(maxRow, maxCol, minRow, minCol)
     }
 
+    private fun notCheckedPixel(pixel : Pixel) : Boolean {
+        return pixel.red == -1 && pixel.green == -1 && pixel.blue == -1
+    }
+
+    private fun checkedPixel(pixel : Pixel) : Boolean {
+        return pixel.red != -1 && pixel.green != -1 && pixel.blue != -1
+    }
+
     private fun rotate(rows : Int, cols : Int, newRows : Int, newCols : Int,
                        defaultRows : Int, defaultColumns : Int, angle : Int) : Array<Array<Pixel>> {
         val pixelNew = Array(newRows) { Array(newCols) { Pixel(-1, -1, -1) } }
@@ -87,18 +95,12 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
                     pixelNew[newI][newJ] = pixels[i][j]
 
                     if (angle in 0..180) {
-                        if (newJ > 0 && (pixelNew[newI][newJ - 1].blue == -1 &&
-                                    pixelNew[newI][newJ - 1].green == -1 &&
-                                    pixelNew[newI][newJ - 1].red == -1)) {
-                            var tempJ = newJ
+                        if (newJ > 0 && notCheckedPixel(pixelNew[newI][newJ - 1])) {
+                            var tempJ: Int = newJ
                             if (i > 0 && j > 0) {
-                                while (pixelNew[newI][tempJ - 1].blue == -1 &&
-                                    pixelNew[newI][tempJ - 1].green == -1 &&
-                                    pixelNew[newI][tempJ - 1].red == -1) {
+                                while (notCheckedPixel(pixelNew[newI][tempJ - 1])) {
                                     tempJ--
-                                    if (pixelNew[newI + 1][tempJ + 1].blue != -1 &&
-                                        pixelNew[newI + 1][tempJ + 1].green != -1 &&
-                                        pixelNew[newI + 1][tempJ + 1].red != -1) {
+                                    if (checkedPixel(pixelNew[newI + 1][tempJ + 1])) {
                                         break
                                     }
                                 }
@@ -107,18 +109,12 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
                         }
                     } else {
                         if (newJ + 1 < defaultColumns &&
-                            (pixelNew[newI][newJ + 1].blue == -1 &&
-                                    pixelNew[newI][newJ + 1].green == -1 &&
-                                    pixelNew[newI][newJ + 1].red == -1)) {
-                            var tempJ = newJ
+                            notCheckedPixel(pixelNew[newI][newJ + 1])) {
+                            var tempJ : Int = newJ
                             if (i > 0 && j > 0) {
-                                while (pixelNew[newI][tempJ + 1].blue == -1 &&
-                                       pixelNew[newI][tempJ + 1].green == -1 &&
-                                       pixelNew[newI][tempJ + 1].red == -1) {
+                                while (notCheckedPixel(pixelNew[newI][tempJ + 1])) {
                                     tempJ++
-                                    if (pixelNew[newI - 1][tempJ - 1].blue != -1 &&
-                                        pixelNew[newI - 1][tempJ - 1].green != -1 &&
-                                        pixelNew[newI - 1][tempJ - 1].red != -1) {
+                                    if (checkedPixel(pixelNew[newI - 1][tempJ - 1])) {
                                         break
                                     }
                                 }
@@ -133,8 +129,8 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
         return pixelNew
     }
 
-    private fun getImage() : Array<Array<Pixel>> {
-        return pixelResult
+    fun getImage() : Array<Array<Pixel>> {
+        return pixelsResult
     }
 
     init {
@@ -148,9 +144,8 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
         val defaultRows = if (newRows < rows) rows else newRows
         val defaultColumns = if (newCols < cols) cols else newCols
 
-        pixelResult = rotate(rows, cols, newRows,
-                             newCols, defaultRows, defaultColumns, angle)
+        pixelsResult = rotate(rows, cols, newRows,
+                              newCols, defaultRows, defaultColumns, angle)
 
-        getImage()
     }
 }
