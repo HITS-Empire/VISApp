@@ -3,6 +3,8 @@ package ru.tsu.visapp
 import kotlin.math.*
 import android.os.Bundle
 import android.graphics.Bitmap
+import android.view.MotionEvent
+import android.view.View
 import android.widget.ImageView
 import ru.tsu.visapp.utils.ImageEditor
 
@@ -127,6 +129,63 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
 }
 
 class CubeActivity: ChildActivity() {
+    val width = 10
+    val height = 10
+    val ratioOfScreen : Float = (width / height).toFloat()
+
+    lateinit var bitmap : Bitmap
+
+    val imageView: ImageView = findViewById(R.id.cubeImageView)
+    val imageEditor = ImageEditor(contentResolver)
+
+    val colors = intArrayOf(
+        0x000000FF.toInt(),
+        0x333333FF.toInt(),
+        0x808080FF.toInt(),
+        0xDCDCDCFF.toInt(),
+        0xFFFFFFFF.toInt()
+    )
+    fun renderCube(
+        camera:Vec3,
+        light: Vec3,
+    ) {
+        val pixels = imageEditor.getPixelsFromBitmap(bitmap)
+
+        for (i in 0 until width) {
+            for (j in 0 until height) {
+                val xy = Vec2(i.toFloat(), j.toFloat())
+                    .division(Vec2(width.toFloat(), height.toFloat()))
+                    .multiplication(Vec2(2.0f))
+                    .minus(Vec2(1.0f))
+
+                xy.x *= ratioOfScreen
+
+                val direction = Vec3(1f, xy.x, xy.y).normalize()
+
+                val box = Vec3(0.0f, 0.0f, 0.0f)
+                val intersection = cube(camera, direction, Vec3(1.0f), box)
+
+                if (intersection.x >= 0.0f || intersection.y >= 0.0f) {
+                    val point = direction
+                        .multiplication(Vec3(intersection.x))
+                        .plus(camera)
+                        .normalize()
+
+                    val diff = point.dot(light)
+
+                    var indexOfColor = (diff * 5).toInt()
+                    indexOfColor = isCorrect(indexOfColor, 0, 4)
+
+                    val color = colors[indexOfColor]
+                    pixels[i + j * width] = color
+                }
+            }
+        }
+
+        imageEditor.setPixelsToBitmap(bitmap, pixels)
+        imageView.setImageBitmap(bitmap)
+    }
+
     fun isCorrect(value: Int, minValue: Int, maxValue: Int) : Int {
         return max(minValue, min(value, maxValue))
     }
@@ -169,16 +228,8 @@ class CubeActivity: ChildActivity() {
         super.onCreate(savedInstanceState)
 
         initializeView(R.layout.activity_cube)
-        val imageView: ImageView = findViewById(R.id.cubeImageView)
 
-        val imageEditor = ImageEditor(contentResolver)
-
-        val width = 300
-        val height = 300
-        val ratioOfScreen : Float = (width / height).toFloat()
-
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val pixels = imageEditor.getPixelsFromBitmap(bitmap)
+        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
         val colors = intArrayOf(
             0x000000FF.toInt(),
@@ -188,40 +239,21 @@ class CubeActivity: ChildActivity() {
             0xFFFFFFFF.toInt()
         )
 
-        val light = Vec3(-2.0f,0.0f,0.0f).normalize()
-        for (i in 0 until width) {
-            for (j in 0 until height) {
-                val xy = Vec2(i.toFloat(), j.toFloat())
-                    .division(Vec2(width.toFloat(), height.toFloat()))
-                    .multiplication(Vec2(2.0f))
-                    .minus(Vec2(1.0f))
+        var light = Vec3(-2.0f,0.0f,0.0f).normalize()
+        var camera = Vec3(-2.0f,0.0f,0.0f)
 
-                xy.x *= ratioOfScreen
+        renderCube(camera, light)
 
-                val camera = Vec3(-2.0f, 0.0f, 0.0f)
-                val direction = Vec3(1f, xy.x, xy.y).normalize()
-
-                val box = Vec3(0.0f, 0.0f, 0.0f)
-                val intersection = cube(camera, direction, Vec3(1.0f), box)
-
-                if (intersection.x >= 0.0f || intersection.y >= 0.0f) {
-                    val point = direction
-                        .multiplication(Vec3(intersection.x))
-                        .plus(camera)
-                        .normalize()
-
-                    var diff = point.dot(light)
-
-                    var indexOfColor = (diff * 5).toInt()
-                    indexOfColor = isCorrect(indexOfColor, 0, 4)
-
-                    var color = colors[indexOfColor]
-                    pixels[i + j * width] = color
+        imageView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    camera = Vec3(0.0f, event.x, event.y)
+                    light = camera
+                    renderCube(camera, light)
                 }
             }
-        }
 
-        imageEditor.setPixelsToBitmap(bitmap, pixels)
-        imageView.setImageBitmap(bitmap)
+            true
+        }
     }
 }
