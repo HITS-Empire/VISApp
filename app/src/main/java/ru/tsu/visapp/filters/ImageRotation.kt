@@ -2,17 +2,17 @@ package ru.tsu.visapp.filters
 
 import kotlin.math.cos
 import kotlin.math.sin
+import ru.tsu.visapp.utils.ImageEditor.Pixel
 
 /*
  * Реализация фильтра поворота изображения на любой градус
  */
 
-class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
-                    rows : Int, cols : Int) {
-    data class Pixel(val red: Int, val green: Int, val blue: Int)
-
+class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int) {
     private val pixels: Array<Array<Pixel>> by lazy { pixels }
 
+    private val rows = pixels.size
+    private val cols = pixels[0].size
     private val centerRow = rows / 2
     private val centerCol = cols / 2
 
@@ -78,7 +78,7 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
         return pixel.red != -1 && pixel.green != -1 && pixel.blue != -1
     }
 
-    private fun rotate(rows : Int, cols : Int, newRows : Int, newCols : Int,
+    private fun rotate(newRows : Int, newCols : Int,
                        defaultRows : Int, defaultColumns : Int, angle : Int) : Array<Array<Pixel>> {
         val pixelNew = Array(newRows) { Array(newCols) { Pixel(-1, -1, -1) } }
         val radians = toRadians(angle)
@@ -144,7 +144,7 @@ class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int,
         val defaultRows = if (newRows < rows) rows else newRows
         val defaultColumns = if (newCols < cols) cols else newCols
 
-        pixelsResult = rotate(rows, cols, newRows,
+        pixelsResult = rotate(newRows,
                               newCols, defaultRows, defaultColumns, angle)
 
     }

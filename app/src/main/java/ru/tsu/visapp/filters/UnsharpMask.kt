@@ -1,34 +1,9 @@
 package ru.tsu.visapp.filters
 
 import kotlin.math.abs
+import ru.tsu.visapp.utils.ImageEditor.Pixel
 
 class UnsharpMask {
-    data class Pixel(val red: Int, val green: Int, val blue: Int) {
-        operator fun minus(other: Pixel) : Pixel {
-            return Pixel(
-                this.red - other.red,
-                this.green - other.green,
-                this.blue - other.blue
-            )
-        }
-
-        operator fun plus(other: Pixel) : Pixel {
-            return Pixel(
-                this.red + other.red,
-                this.green + other.green,
-                this.blue + other.blue
-            )
-        }
-
-        operator fun times(percent: Double) : Pixel {
-            return Pixel(
-                (red * percent).toInt(),
-                (green * percent).toInt(),
-                (blue * percent).toInt()
-            )
-        }
-    }
-
     private fun gaussianBlur(image: Array<Array<Pixel>>, radius: Int): Array<Array<Pixel>> {
         val result = Array(image.size) { Array(image[0].size) { Pixel(0, 0, 0) } }
 

@@ -10,16 +10,24 @@ import android.widget.ImageView
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
 import androidx.appcompat.content.res.AppCompatResources
+import ru.tsu.visapp.utils.ImageEditor.Pixel
+import ru.tsu.visapp.filters.UnsharpMask
+import ru.tsu.visapp.filters.ImageRotation
 
 /*
  * Экран для фильтров
  */
 
 class FiltersActivity: ChildActivity() {
+    private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
     private lateinit var imageEditor: ImageEditor // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
+    private lateinit var pixels2d: Array<Array<Pixel>> // Двумерный массив пикселей
+
+    private lateinit var unsharpMask: UnsharpMask // Нерезкое маскирование
+    private lateinit var imageRotation: ImageRotation // Поворот изображения
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
     private lateinit var seekBar: SeekBar // Ползунок
@@ -28,11 +36,13 @@ class FiltersActivity: ChildActivity() {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
 
-        val imageView: ImageView = findViewById(R.id.filtersImageView)
+        imageView = findViewById(R.id.filtersImageView)
 
         title = System.currentTimeMillis().toString()
         imageEditor = ImageEditor(contentResolver)
         seekBar = findViewById(R.id.filtersSeekBar)
+
+        unsharpMask = UnsharpMask()
 
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
@@ -41,6 +51,9 @@ class FiltersActivity: ChildActivity() {
 
         // Получить пиксели изображения
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
+
+        // Получить двумерный массив пикселей
+        pixels2d = imageEditor.bitmapToPixels(bitmap)
 
         // Example: Редактирование пикселей
         // pixels.forEachIndexed { index, _ ->
@@ -134,10 +147,25 @@ class FiltersActivity: ChildActivity() {
         )
 
         when (image.id) {
-            R.id.rotateImage -> {}
+            R.id.rotateImage -> {
+                println("rotation clicked")
+
+                // imageRotation = ImageRotation(pixels2d, 100)
+                // val result : Array<Array<Pixel>> = imageRotation.getImage()
+
+                val newBitmap = imageEditor.pixelsToBitmap(pixels2d)
+                imageView.setImageBitmap(newBitmap)
+            }
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
-            R.id.definitionImage -> {}
+            R.id.definitionImage -> {
+                println("unsharp mask clicked")
+
+                val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 10, 100, 10)
+
+                val newBitmap = imageEditor.pixelsToBitmap(result)
+                imageView.setImageBitmap(newBitmap)
+            }
             R.id.affinisImage -> {
                 seekBar.visibility = View.GONE
             }
