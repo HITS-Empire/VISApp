@@ -109,7 +109,7 @@ class UnsharpMask {
         return (luminance.toDouble() / 255.0 * 100.0)
     }
 
-    fun pixelAbs(pixel : Pixel) : Int {
+    private fun pixelAbs(pixel : Pixel) : Int {
         return abs(pixel.red) + abs(pixel.green) + abs(pixel.blue)
     }
 
