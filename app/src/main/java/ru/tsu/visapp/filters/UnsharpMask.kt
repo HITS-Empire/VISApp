@@ -1,6 +1,5 @@
 package ru.tsu.visapp.filters
 
-import android.annotation.SuppressLint
 import kotlin.math.abs
 import ru.tsu.visapp.utils.ImageEditor.Pixel
 
@@ -61,9 +60,6 @@ class UnsharpMask {
 
     fun usm(image: Array<Array<Pixel>>, radius: Int,
             amountPercent: Int, threshold: Int) : Array<Array<Pixel>> {
-        // Копирование изображения
-        val resultArray = image.map { it.clone() }.toTypedArray()
-
         // Создание копии изображения с применением размытия по Гауссу
         val blurred = gaussianBlur(image, radius)
 
@@ -76,7 +72,8 @@ class UnsharpMask {
         for (row in image.indices) {
             for (col in image.indices) {
                 if (pixelAbs(unsharpImage[row][col]) > threshold)
-                unsharpImage[row][col] = image[row][col] + (unsharpMask[row][col] * amountPercent.toDouble())
+                unsharpImage[row][col] = image[row][col] + (unsharpMask[row][col] *
+                                                            amountPercent.toDouble())
             }
         }
 
