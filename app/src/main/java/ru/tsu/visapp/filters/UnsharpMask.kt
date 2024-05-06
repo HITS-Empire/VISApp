@@ -1,5 +1,6 @@
 package ru.tsu.visapp.filters
 
+import android.annotation.SuppressLint
 import kotlin.math.abs
 import ru.tsu.visapp.utils.ImageEditor.Pixel
 
@@ -54,36 +55,6 @@ class UnsharpMask {
         return result
     }
 
-    private fun increaseContrastColor(color : Int, amountPercent : Int) : Int {
-        return (((color - 255 / 2) * (100 + amountPercent) / 100) + 255 / 2).coerceIn(0, 255)
-    }
-
-    private fun increaseContrast(image: Array<Array<Pixel>>, amountPercent: Int): Array<Array<Pixel>> {
-        val result = Array(image.size) { Array(image[0].size) { Pixel(0, 0, 0) } }
-
-        for (i in image.indices) {
-            for (j in image[i].indices) {
-                val pixel = image[i][j]
-
-                val increasedRed = increaseContrastColor(pixel.red, amountPercent)
-                val increasedGreen = increaseContrastColor(pixel.green, amountPercent)
-                val increasedBlue = increaseContrastColor(pixel.blue, amountPercent)
-
-                result[i][j] = Pixel(increasedRed, increasedGreen, increasedBlue)
-            }
-        }
-
-        return result
-    }
-
-    // Преобразование цвета пикселя в яркость
-    private fun luminancePercent(pixel: Pixel): Double {
-        val luminance = (0.2126 * pixel.red + 0.7152 * pixel.green + 0.0722 * pixel.blue).toInt()
-
-        // Нормализация яркости к процентам от максимальной яркости
-        return (luminance.toDouble() / 255.0 * 100.0)
-    }
-
     private fun pixelAbs(pixel : Pixel) : Int {
         return abs(pixel.red) + abs(pixel.green) + abs(pixel.blue)
     }
@@ -99,27 +70,16 @@ class UnsharpMask {
         // Вычитание заблюренного изображения из оригинального попиксельно
         val unsharpMask = difference(image, blurred)
 
-        // Создание копии изображения с повышенным контрастом
-        val highContrast = increaseContrast(image, amountPercent)
+        val unsharpImage = image.map { it.clone() }.toTypedArray()
 
-        // Основной алгоритм
+        // Упрощенный алгоритм
         for (row in image.indices) {
-            for (col in image[row].indices) {
-                val originalPixel = image[row][col]
-                val contrastPixel = highContrast[row][col]
-
-                val difference = contrastPixel - originalPixel
-                val percent = luminancePercent(unsharpMask[row][col])
-
-                val delta = difference * percent
-
-                // Сравнение с пороговым значением
-                if (pixelAbs(delta) > threshold) {
-                    resultArray[row][col] += delta
-                }
+            for (col in image.indices) {
+                if (pixelAbs(unsharpImage[row][col]) > threshold)
+                unsharpImage[row][col] = image[row][col] + (unsharpMask[row][col] * amountPercent.toDouble())
             }
         }
 
-        return resultArray
+        return unsharpImage
     }
 }
