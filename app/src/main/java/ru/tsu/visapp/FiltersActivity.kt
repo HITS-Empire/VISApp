@@ -164,11 +164,12 @@ class FiltersActivity: ChildActivity() {
             R.id.definitionImage -> {
                 // Если изображение еще не было получено с использованием фильтра ранее
                 if (unsharpMaskImage.contentEquals(emptyArray())) {
-                    val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 10, 50, 10)
+                    val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 5, 10, 85)
                     val newBitmap = imageEditor.pixelsToBitmap(result)
                     imageView.setImageBitmap(newBitmap)
                     unsharpMaskImage = result
                 }
+                // Если изображение уже обрабатывалось этим фильтром
                 else {
                     imageView.setImageBitmap(imageEditor.pixelsToBitmap(unsharpMaskImage))
                 }
@@ -177,6 +178,7 @@ class FiltersActivity: ChildActivity() {
                 seekBar.visibility = View.GONE
             }
         }
+
         currentImage = image
     }
 }

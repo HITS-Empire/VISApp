@@ -1,6 +1,4 @@
 package ru.tsu.visapp.filters
-
-import kotlin.math.abs
 import ru.tsu.visapp.utils.ImageEditor.Pixel
 
 class UnsharpMask {
@@ -54,8 +52,12 @@ class UnsharpMask {
         return result
     }
 
-    private fun pixelAbs(pixel : Pixel) : Int {
-        return abs(pixel.red) + abs(pixel.green) + abs(pixel.blue)
+    // Преобразование цвета пикселя в яркость
+    private fun luminancePercent(pixel: Pixel): Double {
+        val luminance = (0.2126 * pixel.red + 0.7152 * pixel.green + 0.0722 * pixel.blue).toInt()
+
+        // Нормализация яркости к процентам от максимальной яркости
+        return (luminance.toDouble() / 255.0 * 100.0)
     }
 
     fun usm(image: Array<Array<Pixel>>, radius: Int,
@@ -68,13 +70,13 @@ class UnsharpMask {
 
         val unsharpImage = image.map { it.clone() }.toTypedArray()
 
-        // Упрощенный алгоритм
+        // Основной алгоритм
         for (row in image.indices) {
-            for (col in image.indices) {
-                if (pixelAbs(mask[row][col]) > 10 * threshold)
-                    unsharpImage[row][col] = image[row][col] +
-                                             (mask[row][col] *
-                                                     (amountPercent.toDouble() / 100))
+            for (col in image[0].indices) {
+                val resultPixel = image[row][col] + (mask[row][col] *
+                                  (amountPercent.toDouble() / 100))
+                if (luminancePercent(resultPixel) > threshold)
+                    unsharpImage[row][col] = resultPixel
             }
         }
 
