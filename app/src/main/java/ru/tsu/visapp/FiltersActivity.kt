@@ -29,6 +29,8 @@ class FiltersActivity: ChildActivity() {
     private lateinit var unsharpMask: UnsharpMask // Нерезкое маскирование
     private lateinit var imageRotation: ImageRotation // Поворот изображения
 
+    private lateinit var unsharpMaskImage : Array<Array<Pixel>>
+
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
     private lateinit var seekBar: SeekBar // Ползунок
 
@@ -43,6 +45,7 @@ class FiltersActivity: ChildActivity() {
         seekBar = findViewById(R.id.filtersSeekBar)
 
         unsharpMask = UnsharpMask()
+        unsharpMaskImage = emptyArray()
 
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
@@ -159,12 +162,16 @@ class FiltersActivity: ChildActivity() {
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {
-                println("unsharp mask clicked")
-
-                val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 10, 100, 10)
-
-                val newBitmap = imageEditor.pixelsToBitmap(result)
-                imageView.setImageBitmap(newBitmap)
+                // Если изображение еще не было получено с использованием фильтра ранее
+                if (unsharpMaskImage.contentEquals(emptyArray())) {
+                    val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 10, 50, 10)
+                    val newBitmap = imageEditor.pixelsToBitmap(result)
+                    imageView.setImageBitmap(newBitmap)
+                    unsharpMaskImage = result
+                }
+                else {
+                    imageView.setImageBitmap(imageEditor.pixelsToBitmap(unsharpMaskImage))
+                }
             }
             R.id.affinisImage -> {
                 seekBar.visibility = View.GONE

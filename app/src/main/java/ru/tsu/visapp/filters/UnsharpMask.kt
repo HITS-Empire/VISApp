@@ -43,11 +43,11 @@ class UnsharpMask {
     }
 
     private fun difference(image1: Array<Array<Pixel>>, image2: Array<Array<Pixel>>): Array<Array<Pixel>> {
-        val result = Array(image1.size) { Array(image1[0].size) { Pixel(0, 0, 0) } }
+        val result = image1.map { it.clone() }.toTypedArray()
 
-        for (i in image1.indices) {
-            for (j in image1[i].indices) {
-                result[i][j] = image1[i][j] - image2[i][j]
+        for (row in image1.indices) {
+            for (col in image1[row].indices) {
+                result[row][col] = image1[row][col] - image2[row][col]
             }
         }
 
@@ -64,16 +64,17 @@ class UnsharpMask {
         val blurred = gaussianBlur(image, radius)
 
         // Вычитание заблюренного изображения из оригинального попиксельно
-        val unsharpMask = difference(image, blurred)
+        val mask = difference(image, blurred)
 
         val unsharpImage = image.map { it.clone() }.toTypedArray()
 
         // Упрощенный алгоритм
         for (row in image.indices) {
             for (col in image.indices) {
-                if (pixelAbs(unsharpImage[row][col]) > threshold)
-                unsharpImage[row][col] = image[row][col] + (unsharpMask[row][col] *
-                                                            amountPercent.toDouble())
+                if (pixelAbs(mask[row][col]) > 10 * threshold)
+                    unsharpImage[row][col] = image[row][col] +
+                                             (mask[row][col] *
+                                                     (amountPercent.toDouble() / 100))
             }
         }
 
