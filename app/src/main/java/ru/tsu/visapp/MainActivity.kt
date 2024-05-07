@@ -12,6 +12,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
  */
 
 class MainActivity: AppCompatActivity() {
+    private val homeFragment = HomeFragment() // Главная
+    private val interestingFragment = InterestingFragment() // Интересное
+
+    private var currentFragmentId = R.id.frameLayout // ID текущего фрагмента
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -19,25 +24,37 @@ class MainActivity: AppCompatActivity() {
         // Нижнее меню навигации
         val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
 
-        val homeFragment = HomeFragment() // Главная
-        val interestingFragment = InterestingFragment() // Интересное
-
-        // Установить Главную по умолчанию
-        setCurrentFragment(homeFragment)
-
         // События кликов по элементам меню
-        bottomNavigationView.setOnNavigationItemSelectedListener {
-            when (it.itemId) {
-                R.id.navigationHome -> setCurrentFragment(homeFragment)
-                R.id.navigationInteresting -> setCurrentFragment(interestingFragment)
-            }
+        bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+            currentFragmentId = menuItem.itemId
+            updateCurrentFragment()
             true
         }
+
+        currentFragmentId = (
+            savedInstanceState?.getInt("currentFragmentId") // Сохранённый фрагмент
+        ) ?: (
+            R.id.navigationHome // Главная по умолчанию
+        )
+        updateCurrentFragment()
     }
 
-    private fun setCurrentFragment(fragment: Fragment) {
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt("currentFragmentId", currentFragmentId)
+    }
+
+    // Обновить нужный фрагмент
+    private fun updateCurrentFragment() {
+        var fragment: Fragment? = null
+        when (currentFragmentId) {
+            R.id.navigationHome -> fragment = homeFragment
+            R.id.navigationInteresting -> fragment = interestingFragment
+        }
+
         supportFragmentManager.beginTransaction().apply {
-            replace(R.id.frameLayout, fragment)
+            replace(R.id.frameLayout, fragment!!)
             commit()
         }
     }
