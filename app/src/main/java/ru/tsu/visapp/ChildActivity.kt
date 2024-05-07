@@ -1,6 +1,5 @@
 package ru.tsu.visapp
 
-import android.content.Intent
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 
@@ -17,13 +16,7 @@ open class ChildActivity: AppCompatActivity() {
 
         // События кликов по кнопке
         backButton.setOnClickListener {
-            goToMainActivity()
+            onBackPressed()
         }
-    }
-
-    // Перейти на главный экран
-    private fun goToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
     }
 }
