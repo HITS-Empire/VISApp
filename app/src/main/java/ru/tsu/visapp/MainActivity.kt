@@ -18,14 +18,12 @@ class MainActivity: AppCompatActivity() {
 
     private var currentFragmentId = R.id.frameLayout // ID текущего фрагмента
 
-    // Нижнее меню навигации
-    private lateinit var bottomNavigationView: BottomNavigationView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        bottomNavigationView = findViewById(R.id.bottomNavigationView)
+        // Нижнее меню навигации
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
 
         // События кликов по элементам меню
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
