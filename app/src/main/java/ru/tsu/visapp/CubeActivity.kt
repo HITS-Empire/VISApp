@@ -2,13 +2,17 @@ package ru.tsu.visapp
 
 import kotlin.math.*
 import android.os.Bundle
-import android.graphics.Bitmap
+import android.widget.SeekBar
 import android.graphics.Color
-import android.util.Log
+import android.graphics.Bitmap
 import android.view.MotionEvent
-import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.addTextChangedListener
 import ru.tsu.visapp.utils.ImageEditor
+import ru.tsu.visapp.utils.filtersSeekBar.*
 
 /*
  * Экран для 3D-куба
@@ -151,8 +155,17 @@ class CubeActivity: ChildActivity() {
     private val height = 100
     private val ratioOfScreen : Float = (width / height).toFloat()
 
+    private lateinit var seekBarLayout: ConstraintLayout // Контейнеры для ползунков
+    private lateinit var seekBarTitle: TextView // Названия ползунков
+    private lateinit var seekBar: SeekBar // Сами ползунки
+    private lateinit var seekBarEditor: EditText // Отображения текущего значения
+    private lateinit var seekBarUnit: TextView // Единицы измерения ползунка
+
+    private lateinit var instruction: Instruction // Текущая инструкция
+
     private lateinit var bitmap : Bitmap
 
+    private lateinit var imageView: ImageView
     private lateinit var imageEditor: ImageEditor
 
     private val colors = intArrayOf(
@@ -205,10 +218,6 @@ class CubeActivity: ChildActivity() {
         imageView.setImageBitmap(bitmap)
     }
 
-    fun isCorrect(value: Int, minValue: Int, maxValue: Int) : Int {
-        return max(minValue, min(value, maxValue))
-    }
-
     // Функция пересечения с кубом
     fun cube(
         camera: Vec3,
@@ -251,23 +260,75 @@ class CubeActivity: ChildActivity() {
         })
     }
 
+    fun stop() {
+        //
+    }
+
+    private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            if (!fromUser) return
+
+            instruction.items[0].progress = progress
+            seekBarEditor.setText(progress.toString())
+            renderCube(0.0f, 0.0f, -progress.toFloat(), imageView)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        override fun onStopTrackingTouch(seekBar: SeekBar) = stop()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         initializeView(R.layout.activity_cube)
 
-        val imageView: ImageView = findViewById(R.id.cubeImageView)
+        imageView = findViewById(R.id.cubeImageView)
         imageEditor = ImageEditor(contentResolver)
 
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        seekBarLayout = findViewById(R.id.cubeSeekBarLayout)
 
-        val colors = intArrayOf(
-            0x000000FF.toInt(),
-            0x333333FF.toInt(),
-            0x808080FF.toInt(),
-            0xDCDCDCFF.toInt(),
-            0xFFFFFFFF.toInt()
+        seekBarTitle = findViewById(R.id.cubeSeekBarTitle)
+
+        seekBar = findViewById(R.id.cubeSeekBar)
+
+        seekBarEditor = findViewById(R.id.cubeSeekBarEditor)
+
+        seekBarUnit = findViewById(R.id.cubeSeekBarUnit)
+
+        instruction = Instruction(
+            R.id.cubeImageView,
+            arrayOf(
+                Item(),
+                Item(0, 10, "Дальность камеры"),
+                Item()
+            )
         )
+
+        seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
+
+        seekBarEditor.addTextChangedListener { editable ->
+            val item = instruction.items[0]
+
+            val text = editable.toString()
+            val progress = Integer.min(
+                item.max,
+                Integer.max(
+                    0,
+                    if (text == "") 0 else text.toInt()
+                )
+            )
+            val trim = progress.toString()
+
+            if (text == trim) {
+                item.progress = progress
+                seekBar.progress = progress
+
+                renderCube(0.0f, 0.0f, -progress.toFloat(), imageView)
+            } else {
+                seekBarEditor.setText(trim)
+            }
+        }
+
+        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
         renderCube(1.0f, 1.0f, 0f, imageView)
 
@@ -304,26 +365,3 @@ class CubeActivity: ChildActivity() {
         }
     }
 }
-/*override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-    when (event?.action) {
-        MotionEvent.ACTION_DOWN -> {
-            previousX = event.x
-            previousY = event.y
-        }
-        MotionEvent.ACTION_MOVE -> {
-            val currentX = event.x
-            val currentY = event.y
-
-            val deltaX = currentX - previousX
-            val deltaY = currentY - previousY
-
-            val angle = atan2(deltaY, deltaX)
-            val angleDegrees = angle * 180 / PI
-
-            // Используйте angleDegrees для поворота куба
-
-            previousX = currentX
-            previousY = currentY
-        }
-    }
-    return true*/
