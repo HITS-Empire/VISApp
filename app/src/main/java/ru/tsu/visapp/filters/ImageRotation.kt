@@ -103,7 +103,7 @@ class ImageRotation {
                             if (i > 0 && j > 0) {
                                 while (newImage[newI][newJ + 1].equals(-1)) {
                                     newJ++
-                                    if (newImage[newI - 1][newJ - 1].notEquals(-1) || newJ > newCols - 1)
+                                    if (newImage[newI - 1][newJ - 1].notEquals(-1) || newJ >= newCols - 1)
                                         break
                                 }
                             }

@@ -15,18 +15,26 @@ import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+import ru.tsu.visapp.utils.ImageEditor.Pixel
+import ru.tsu.visapp.filters.UnsharpMask
+import ru.tsu.visapp.filters.ImageRotation
 
 /*
  * Экран для фильтров
  */
 
 class FiltersActivity: ChildActivity() {
+    private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
     private lateinit var imageEditor: ImageEditor // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
+    private lateinit var pixels2d: Array<Array<Pixel>> // Двумерный массив пикселей
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
+
+    private lateinit var unsharpMask: UnsharpMask // Нерезкое маскирование
+    private lateinit var imageRotation: ImageRotation // Поворот изображения
 
     private lateinit var seekBarLayouts: Array<ConstraintLayout> // Контейнеры для ползунков
     private lateinit var seekBarTitles: Array<TextView> // Названия ползунков
@@ -41,10 +49,13 @@ class FiltersActivity: ChildActivity() {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
 
-        val imageView: ImageView = findViewById(R.id.filtersImageView)
+        imageView = findViewById(R.id.filtersImageView)
 
         title = System.currentTimeMillis().toString()
         imageEditor = ImageEditor(contentResolver)
+
+        unsharpMask = UnsharpMask()
+        imageRotation = ImageRotation()
 
         seekBarLayouts = arrayOf(
             findViewById(R.id.firstSeekBarLayout),
@@ -116,11 +127,41 @@ class FiltersActivity: ChildActivity() {
         // Получить пиксели изображения
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
+        // Получить двумерный массив пикселей
+        pixels2d = imageEditor.bitmapToPixels(bitmap)
+
         // Example: Редактирование пикселей
         // pixels.forEachIndexed { index, _ ->
         //     pixels[index] = Color.BLUE
         // }
         // editor.setPixelsToBitmap(bitmap, pixels)
+
+        // Окошки фильтров
+        val framesWithFilters: Array<FrameLayout> = arrayOf(
+            findViewById(R.id.rotateFrame),
+            findViewById(R.id.scalingFrame),
+            findViewById(R.id.retouchFrame),
+            findViewById(R.id.definitionFrame),
+            findViewById(R.id.affinisFrame)
+        )
+
+        // Иконки фильтров (для подсветки)
+        val imagesWithFilters: Array<ImageView> = arrayOf(
+            findViewById(R.id.rotateImage),
+            findViewById(R.id.scalingImage),
+            findViewById(R.id.retouchImage),
+            findViewById(R.id.definitionImage),
+            findViewById(R.id.affinisImage)
+        )
+
+        changeFilter(imagesWithFilters[0])
+
+        // События кликов по фреймам
+        framesWithFilters.forEachIndexed { index, frame ->
+            frame.setOnClickListener {
+                changeFilter(imagesWithFilters[index])
+            }
+        }
 
         // Установить события ползунка
         seekBars.forEach { seekBar ->
@@ -166,38 +207,31 @@ class FiltersActivity: ChildActivity() {
 
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
         }
-
-        // Окошки фильтров
-        val framesWithFilters: Array<FrameLayout> = arrayOf(
-            findViewById(R.id.rotateFrame),
-            findViewById(R.id.scalingFrame),
-            findViewById(R.id.retouchFrame),
-            findViewById(R.id.definitionFrame),
-            findViewById(R.id.affinisFrame)
-        )
-
-        // Иконки фильтров (для подсветки)
-        val imagesWithFilters: Array<ImageView> = arrayOf(
-            findViewById(R.id.rotateImage),
-            findViewById(R.id.scalingImage),
-            findViewById(R.id.retouchImage),
-            findViewById(R.id.definitionImage),
-            findViewById(R.id.affinisImage)
-        )
-
-        changeFilter(imagesWithFilters[0])
-
-        // События кликов по фреймам
-        framesWithFilters.forEachIndexed { index, frame ->
-            frame.setOnClickListener {
-                changeFilter(imagesWithFilters[index])
-            }
-        }
     }
 
     // Запустить функцию фильтра
     fun startFilter() {
-        //
+        when (currentImage.id) {
+            R.id.rotateImage -> {
+                val angle = currentInstruction.items[1].progress
+
+                val result: Array<Array<Pixel>> = imageRotation.rotate(pixels2d, angle)
+                val newBitmap = imageEditor.pixelsToBitmap(result)
+                imageView.setImageBitmap(newBitmap)
+            }
+            R.id.scalingImage -> {}
+            R.id.retouchImage -> {}
+            R.id.definitionImage -> {
+                val percent = currentInstruction.items[0].progress
+                val radius = currentInstruction.items[1].progress
+                val threshold = currentInstruction.items[2].progress
+
+                val result = unsharpMask.usm(pixels2d, radius, percent, threshold)
+                val newBitmap = imageEditor.pixelsToBitmap(result)
+                imageView.setImageBitmap(newBitmap)
+            }
+            R.id.affinisImage -> {}
+        }
     }
 
     // События ползунка
