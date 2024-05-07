@@ -29,7 +29,9 @@ class FiltersActivity: ChildActivity() {
     private lateinit var unsharpMask: UnsharpMask // Нерезкое маскирование
     private lateinit var imageRotation: ImageRotation // Поворот изображения
 
+    // Изображения с наложенными ранее фильтрами
     private lateinit var unsharpMaskImage : Array<Array<Pixel>>
+    private lateinit var rotatedImage : Array<Array<Pixel>>
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
     private lateinit var seekBar: SeekBar // Ползунок
@@ -45,7 +47,10 @@ class FiltersActivity: ChildActivity() {
         seekBar = findViewById(R.id.filtersSeekBar)
 
         unsharpMask = UnsharpMask()
+        imageRotation = ImageRotation()
+
         unsharpMaskImage = emptyArray()
+        rotatedImage = emptyArray()
 
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
@@ -151,20 +156,25 @@ class FiltersActivity: ChildActivity() {
 
         when (image.id) {
             R.id.rotateImage -> {
-                println("rotation clicked")
+                // Если изображение еще не было получено с использованием фильтра ранее
+                if (rotatedImage.contentEquals(emptyArray())) {
+                    val result: Array<Array<Pixel>> = imageRotation.rotate(pixels2d, 15)
 
-                // imageRotation = ImageRotation(pixels2d, 100)
-                // val result : Array<Array<Pixel>> = imageRotation.getImage()
-
-                val newBitmap = imageEditor.pixelsToBitmap(pixels2d)
-                imageView.setImageBitmap(newBitmap)
+                    val newBitmap = imageEditor.pixelsToBitmap(result)
+                    imageView.setImageBitmap(newBitmap)
+                    rotatedImage = result
+                }
+                // Если изображение уже обрабатывалось этим фильтром
+                else {
+                    imageView.setImageBitmap(imageEditor.pixelsToBitmap(rotatedImage))
+                }
             }
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {
                 // Если изображение еще не было получено с использованием фильтра ранее
                 if (unsharpMaskImage.contentEquals(emptyArray())) {
-                    val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 5, 10, 85)
+                    val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 10, 30, 60)
                     val newBitmap = imageEditor.pixelsToBitmap(result)
                     imageView.setImageBitmap(newBitmap)
                     unsharpMaskImage = result

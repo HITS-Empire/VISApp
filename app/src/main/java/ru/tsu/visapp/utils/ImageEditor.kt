@@ -96,6 +96,14 @@ class ImageEditor(initContentResolver: ContentResolver) {
                 (blue * percent).toInt()
             )
         }
+
+        fun equals(digit: Int): Boolean {
+            return (red == digit && blue == digit && green == digit)
+        }
+
+        fun notEquals(digit: Int): Boolean {
+            return (red != digit && blue != digit && green != digit)
+        }
     }
 
     fun bitmapToPixels(bitmap: Bitmap) : Array<Array<Pixel>> {

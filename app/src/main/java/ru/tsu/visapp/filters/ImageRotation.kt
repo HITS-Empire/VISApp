@@ -8,144 +8,112 @@ import ru.tsu.visapp.utils.ImageEditor.Pixel
  * Реализация фильтра поворота изображения на любой градус
  */
 
-class ImageRotation(pixels : Array<Array<Pixel>>, angle : Int) {
-    private val pixels: Array<Array<Pixel>> by lazy { pixels }
-
-    private val rows = pixels.size
-    private val cols = pixels[0].size
-    private val centerRow = rows / 2
-    private val centerCol = cols / 2
-
-    // Вершины нового изображения
-    private var maxRow: Double = 0.0
-    private var maxCol: Double = 0.0
-    private var minRow: Double = 0.0
-    private var minCol: Double = 0.0
-
-    private var pixelsResult : Array<Array<Pixel>>
-
-    private fun newPosition(isRow : Boolean, x : Int, y : Int, radians : Double) : Double {
-        return if (isRow) {
-            centerRow + (x - centerRow) * cos(radians) - (y - centerCol) * sin(radians)
-        } else {
-            centerCol + (x - centerCol) * cos(radians) - (y - centerRow) * sin(radians)
-        }
+class ImageRotation {
+    private fun toRadians(angle : Int) : Float {
+        return angle * (kotlin.math.PI / 180).toFloat()
     }
 
-    private fun toRadians(angle : Int) : Double {
-        return angle * (kotlin.math.PI / 180)
+    private fun getRotatedImageSize(maxRow : Float, maxCol : Float,
+                                    minRow : Float, minCol : Float) : Array<Int> {
+        val newRows = (maxRow - minRow + 1).toInt()
+        val newCols = (maxCol - minCol + 1).toInt()
+
+        return arrayOf(newRows, newCols)
     }
 
-    private fun getNewCoordinates(angle : Int, rows : Int, cols : Int) : Array<Double> {
-        // Координаты вершин нового изображения
+    private fun getEdges(rows : Int, cols : Int, angle : Int) : Array<Float> {
         val radians = toRadians(angle)
 
-        when (angle) {
-            in 0..90 -> {
-                maxRow = newPosition(true, rows, 0, radians)
-                maxCol = newPosition(false, cols, rows, radians)
-                minRow = newPosition(true, 0, cols, radians)
-                minCol = newPosition(false, 0, 0, radians)
-            }
-            in 91..180 -> {
-                maxRow = newPosition(true, 0, 0, radians)
-                maxCol = newPosition(false, 0, rows, radians)
-                minRow = newPosition(true, rows, cols, radians)
-                minCol = newPosition(false, cols, 0, radians)
-            }
-            in 181..270 -> {
-                maxRow = newPosition(true, 0, cols, radians)
-                maxCol = newPosition(false, 0, 0, radians)
-                minRow = newPosition(true, rows, 0, radians)
-                minCol = newPosition(false, cols, rows, radians)
-            }
-            else -> {
-                maxRow = newPosition(true, rows, cols, radians)
-                maxCol = newPosition(false, cols, 0, radians)
-                minRow = newPosition(true, 0, 0, radians)
-                minCol = newPosition(false, 0, rows, radians)
-            }
+        var maxRow: Float
+        var maxCol: Float
+        var minRow: Float
+        var minCol: Float
+
+        val centerRow = rows / 2
+        val centerCol = cols / 2
+
+        if (angle in 0..90) {
+            maxRow = centerRow + (rows - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
+            maxCol = centerCol + (cols - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
+            minRow = centerRow + (0 - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
+            minCol = centerCol + (0 - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
+        } else if (angle in 91..180) {
+            maxRow = centerRow + (0 - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
+            maxCol = centerCol + (0 - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
+            minRow = centerRow + (rows - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
+            minCol = centerCol + (cols - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
+        } else if (angle in 181..270) {
+            maxRow = centerRow + (0 - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
+            maxCol = centerCol + (0 - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
+            minRow = centerRow + (rows - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
+            minCol = centerCol + (cols - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
+        } else {
+            maxRow = centerRow + (rows - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
+            maxCol = centerCol + (cols - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
+            minRow = centerRow + (0 - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
+            minCol = centerCol + (0 - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
         }
 
         return arrayOf(maxRow, maxCol, minRow, minCol)
     }
 
-    private fun notCheckedPixel(pixel : Pixel) : Boolean {
-        return pixel.red == -1 && pixel.green == -1 && pixel.blue == -1
-    }
-
-    private fun checkedPixel(pixel : Pixel) : Boolean {
-        return pixel.red != -1 && pixel.green != -1 && pixel.blue != -1
-    }
-
-    private fun rotate(newRows : Int, newCols : Int,
-                       defaultRows : Int, defaultColumns : Int, angle : Int) : Array<Array<Pixel>> {
-        val pixelNew = Array(newRows) { Array(newCols) { Pixel(-1, -1, -1) } }
+    fun rotate(image: Array<Array<Pixel>>, angle: Int) : Array<Array<Pixel>> {
         val radians = toRadians(angle)
 
-        for (i in 0 until defaultRows) {
-            for (j in 0 until defaultColumns) {
+        val rows = image.size
+        val cols = image[0].size
+
+        // Получение вершин нового изображения
+        val (maxRow, maxCol, minRow, minCol) = getEdges(rows, cols, angle)
+
+        // Получение размера нового изображения
+        var (newRows, newCols) = getRotatedImageSize(maxRow, maxCol, minRow, minCol)
+        newRows = maxOf(newRows, rows)
+        newCols = maxOf(newCols, cols)
+
+        val newImage = Array(newRows) { Array(newCols) { Pixel(-1, -1, -1) } }
+
+        for (i in 0 until newRows) {
+            for (j in 0 until newCols) {
                 if (i < rows && j < cols) {
-                    val x = newPosition(true, i, j, radians)
-                    val y = newPosition(false, j, i, radians)
+                    // Вычисление координат для пикселя в новом изображении
+                    var newI = (rows / 2 + (i - rows / 2) * cos(radians) -
+                               (j - cols / 2) * sin(radians) - minRow).toInt()
+                    var newJ = (cols / 2 + (j - cols / 2) * cos(radians) +
+                               (i - rows / 2) * sin(radians) - minCol).toInt()
 
-                    val newI = x.toInt() - minRow.toInt()
-                    val newJ = y.toInt() - minCol.toInt()
+                    newImage[newI][newJ] = image[i][j]
 
-                    pixelNew[newI][newJ] = pixels[i][j]
-
+                    // Заполнение пропущенных пикселей
                     if (angle in 0..180) {
-                        if (newJ > 0 && notCheckedPixel(pixelNew[newI][newJ - 1])) {
-                            var tempJ: Int = newJ
+                        // Если предыдущее значение пустой пиксель
+                        if (newJ > 0 && newImage[newI][newJ - 1].equals(-1)) {
                             if (i > 0 && j > 0) {
-                                while (notCheckedPixel(pixelNew[newI][tempJ - 1])) {
-                                    tempJ--
-                                    if (checkedPixel(pixelNew[newI + 1][tempJ + 1])) {
+                                while (newImage[newI][newJ - 1].equals(-1)) {
+                                    newJ -= 1
+                                    if (newImage[newI + 1][newJ + 1].notEquals(-1) || newJ < 1)
                                         break
-                                    }
                                 }
                             }
-                            pixelNew[newI][tempJ] = pixels[i][j]
+                            newImage[newI][newJ] = image[i][j]
                         }
                     } else {
-                        if (newJ + 1 < defaultColumns &&
-                            notCheckedPixel(pixelNew[newI][newJ + 1])) {
-                            var tempJ : Int = newJ
+                        // Если следующее значение - пустой пиксель
+                        if (newJ + 1 < newCols && newImage[newI][newJ + 1].equals(-1)) {
                             if (i > 0 && j > 0) {
-                                while (notCheckedPixel(pixelNew[newI][tempJ + 1])) {
-                                    tempJ++
-                                    if (checkedPixel(pixelNew[newI - 1][tempJ - 1])) {
+                                while (newImage[newI][newJ + 1].equals(-1)) {
+                                    newJ++
+                                    if (newImage[newI - 1][newJ - 1].notEquals(-1) || newJ > newCols - 1)
                                         break
-                                    }
                                 }
                             }
-                            pixelNew[newI][tempJ] = pixels[i][j]
+                            newImage[newI][newJ] = image[i][j]
                         }
                     }
                 }
             }
         }
 
-        return pixelNew
-    }
-
-    fun getImage() : Array<Array<Pixel>> {
-        return pixelsResult
-    }
-
-    init {
-        val (maxRow, maxCol, minRow, minCol) = getNewCoordinates(angle, rows, cols)
-
-        // Размер матрицы для нового изображения
-        val newRows : Int = (maxRow - minRow + 1).toInt()
-        val newCols : Int = (maxCol - minCol + 1).toInt()
-
-        // Дефолтные значения если угол кратен 90 градусам
-        val defaultRows = if (newRows < rows) rows else newRows
-        val defaultColumns = if (newCols < cols) cols else newCols
-
-        pixelsResult = rotate(newRows,
-                              newCols, defaultRows, defaultColumns, angle)
-
+        return newImage
     }
 }
