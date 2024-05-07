@@ -3,6 +3,8 @@ package ru.tsu.visapp
 import kotlin.math.*
 import android.os.Bundle
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
@@ -126,28 +128,46 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
     fun dot(newVec3: Vec3) : Float {
         return x * newVec3.x + y * newVec3.y + z * newVec3.z
     }
+
+    fun rotateY(angle: Float) {
+        val newX = x * cos(angle) - z * sin(angle)
+        val newZ = x * sin(angle) + z * cos(angle)
+
+        x = newX
+        z = newZ
+    }
+
+    fun rotateZ(angle: Float) {
+        val newX = x * cos(angle) - y * sin(angle)
+        val newY = x * sin(angle) + y * cos(angle)
+
+        x = newX
+        y = newY
+    }
 }
 
 class CubeActivity: ChildActivity() {
-    val width = 10
-    val height = 10
-    val ratioOfScreen : Float = (width / height).toFloat()
+    private val width = 100
+    private val height = 100
+    private val ratioOfScreen : Float = (width / height).toFloat()
 
-    lateinit var bitmap : Bitmap
+    private lateinit var bitmap : Bitmap
 
-    val imageView: ImageView = findViewById(R.id.cubeImageView)
-    val imageEditor = ImageEditor(contentResolver)
+    private lateinit var imageEditor: ImageEditor
 
-    val colors = intArrayOf(
+    private val colors = intArrayOf(
         0x000000FF.toInt(),
         0x333333FF.toInt(),
         0x808080FF.toInt(),
         0xDCDCDCFF.toInt(),
         0xFFFFFFFF.toInt()
     )
+
     fun renderCube(
-        camera:Vec3,
-        light: Vec3,
+        dx: Float,
+        dy: Float,
+        imageView: ImageView,
+        t: Float,
     ) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
@@ -160,23 +180,22 @@ class CubeActivity: ChildActivity() {
 
                 xy.x *= ratioOfScreen
 
+                var camera = Vec3(-2.5f,0.0f,0.0f)
                 val direction = Vec3(1f, xy.x, xy.y).normalize()
 
+                camera.rotateY((dy / 3000))
+                direction.rotateY((dy / 3000))
+
+                camera.rotateZ((dx / 3000))
+                direction.rotateZ((dx / 3000))
+
                 val box = Vec3(0.0f, 0.0f, 0.0f)
-                val intersection = cube(camera, direction, Vec3(1.0f), box)
 
-                if (intersection.x >= 0.0f || intersection.y >= 0.0f) {
-                    val point = direction
-                        .multiplication(Vec3(intersection.x))
-                        .plus(camera)
-                        .normalize()
+                val result = cube(camera, direction, Vec3(1.0f), box)
+                val intersection = result.first
+                val color = result.second
 
-                    val diff = point.dot(light)
-
-                    var indexOfColor = (diff * 5).toInt()
-                    indexOfColor = isCorrect(indexOfColor, 0, 4)
-
-                    val color = colors[indexOfColor]
+                if (intersection.x > 0.0f) {
                     pixels[i + j * width] = color
                 }
             }
@@ -196,7 +215,7 @@ class CubeActivity: ChildActivity() {
         direction: Vec3,
         size: Vec3,
         normal: Vec3
-    ) : Vec2 {
+    ) : Pair<Vec2, Int> {
         val m = Vec3(1.0f).division(direction)
         val n = m.multiplication(camera)
         val k = m.module().multiplication(size)
@@ -206,9 +225,10 @@ class CubeActivity: ChildActivity() {
 
         val tN = max(max(t1.x, t1.y), t1.z)
         val tF = min(min(t2.x, t2.y), t2.z)
+//if (tF != 0.0f && (tN > tF || tF < 0.0f)) {
 
-        if (tF != 0.0f && (tN > tF || tF < 0.0f)) {
-            return Vec2(-1.0f)
+        if ((tN > tF || tF < 0.0f)) {
+            return Pair(Vec2(-1.0f), Color.BLACK)
         }
 
         val yzx = Vec3(t1.y, t1.z, t1.x)
@@ -221,13 +241,23 @@ class CubeActivity: ChildActivity() {
             .changeSign()
         )
 
-        return Vec2(tN, tF)
+        return Pair(Vec2(tN, tF), when {
+            t1.x > t1.y && t1.x > t1.z -> Color.RED// Передняя грань
+            t1.y > t1.x && t1.y > t1.z -> Color.BLUE // Правая грань
+            t1.z > t1.x && t1.z > t1.y -> Color.WHITE // Верхняя грань
+            t1.x < t1.y && t1.x < t1.z -> Color.GREEN // Нижняя грань
+            t1.y < t1.x && t1.y < t1.z -> Color.YELLOW // Левая грань
+            else -> Color.CYAN // Нижняя грань
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         initializeView(R.layout.activity_cube)
+
+        val imageView: ImageView = findViewById(R.id.cubeImageView)
+        imageEditor = ImageEditor(contentResolver)
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
@@ -239,17 +269,38 @@ class CubeActivity: ChildActivity() {
             0xFFFFFFFF.toInt()
         )
 
-        var light = Vec3(-2.0f,0.0f,0.0f).normalize()
-        var camera = Vec3(-2.0f,0.0f,0.0f)
+        renderCube(1.0f, 1.0f, imageView, 0f)
+        var t = 1f
+        var previousX = 0.0f
+        var previousY = 0.0f
 
-        renderCube(camera, light)
-
+        var previousAngle = Pair(0.0f, 0.0f)
         imageView.setOnTouchListener { _, event ->
             when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    previousX = event.x
+                    previousY = event.y
+
+                }
+
                 MotionEvent.ACTION_MOVE -> {
-                    camera = Vec3(0.0f, event.x, event.y)
-                    light = camera
-                    renderCube(camera, light)
+                    imageEditor.clearBitmap(bitmap)
+
+                    val dx = event.x - previousX
+                    val dy = event.y - previousY
+
+                    val angle = Pair(dx, dy)
+                    renderCube(
+                        angle.first + previousAngle.first,
+                        angle.second + previousAngle.second,
+                            imageView,
+                            t)
+                    t++
+
+                    previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
+
+//                    previousX = event.x
+//                    previousY = event.y
                 }
             }
 
@@ -257,3 +308,26 @@ class CubeActivity: ChildActivity() {
         }
     }
 }
+/*override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+    when (event?.action) {
+        MotionEvent.ACTION_DOWN -> {
+            previousX = event.x
+            previousY = event.y
+        }
+        MotionEvent.ACTION_MOVE -> {
+            val currentX = event.x
+            val currentY = event.y
+
+            val deltaX = currentX - previousX
+            val deltaY = currentY - previousY
+
+            val angle = atan2(deltaY, deltaX)
+            val angleDegrees = angle * 180 / PI
+
+            // Используйте angleDegrees для поворота куба
+
+            previousX = currentX
+            previousY = currentY
+        }
+    }
+    return true*/
