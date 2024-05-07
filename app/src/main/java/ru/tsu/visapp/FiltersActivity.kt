@@ -143,6 +143,8 @@ class FiltersActivity: ChildActivity() {
                 if (text == trim) {
                     item.progress = progress
                     seekBars[index].progress = progress
+
+                    startFilter()
                 } else {
                     seekBarEditor.setText(trim)
                 }
