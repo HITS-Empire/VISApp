@@ -6,14 +6,11 @@ import android.widget.SeekBar
 import android.graphics.Color
 import android.graphics.Bitmap
 import android.widget.EditText
-import android.widget.TextView
 import android.view.MotionEvent
 import android.widget.ImageView
 import ru.tsu.visapp.utils.cube.*
 import ru.tsu.visapp.utils.ImageEditor
-import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
-import androidx.constraintlayout.widget.ConstraintLayout
 
 /*
  * Экран для 3D-куба
@@ -22,7 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 class CubeActivity: ChildActivity() {
     private val width = 100
     private val height = 100
-    private val ratioOfScreen : Float = (width / height).toFloat()
+    private val ratioOfScreen = (width / height).toFloat()
 
     private lateinit var seekBar: SeekBar // Ползунок
     private lateinit var seekBarEditor: EditText // Отображение текущего значения
