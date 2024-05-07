@@ -13,17 +13,18 @@
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
-        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cubeImageView">
 
         <TextView
             android:id="@+id/cubeSeekBarTitle"
-            android:layout_width="82dp"
+            android:layout_width="96dp"
             android:layout_height="match_parent"
             android:gravity="right|center_vertical"
+            android:text="@string/title_cube_seekbar"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -34,7 +35,7 @@
             android:id="@+id/cubeSeekBar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="82dp"
+            android:layout_marginLeft="96dp"
             android:layout_marginRight="60dp"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
@@ -42,7 +43,7 @@
             android:thumb="@drawable/seekbar_thumb"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
@@ -62,6 +63,7 @@
             android:layout_width="20dp"
             android:layout_height="match_parent"
             android:gravity="left|center_vertical"
+            android:text="@string/percent"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -73,16 +75,12 @@
         android:id="@+id/cubeImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="24dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginTop="92dp"
+        android:layout_marginBottom="160dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.333"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/backButton"
