@@ -166,8 +166,8 @@ class CubeActivity: ChildActivity() {
     fun renderCube(
         dx: Float,
         dy: Float,
+        dz: Float,
         imageView: ImageView,
-        t: Float,
     ) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
@@ -269,8 +269,8 @@ class CubeActivity: ChildActivity() {
             0xFFFFFFFF.toInt()
         )
 
-        renderCube(1.0f, 1.0f, imageView, 0f)
-        var t = 1f
+        renderCube(1.0f, 1.0f, 0f, imageView)
+
         var previousX = 0.0f
         var previousY = 0.0f
 
@@ -293,14 +293,10 @@ class CubeActivity: ChildActivity() {
                     renderCube(
                         angle.first + previousAngle.first,
                         angle.second + previousAngle.second,
-                            imageView,
-                            t)
-                    t++
+                        0f,
+                            imageView)
 
                     previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
-
-//                    previousX = event.x
-//                    previousY = event.y
                 }
             }
 
