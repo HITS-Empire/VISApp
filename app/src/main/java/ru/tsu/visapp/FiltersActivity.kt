@@ -1,56 +1,112 @@
 package ru.tsu.visapp
 
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
+import java.lang.Integer.min
+import java.lang.Integer.max
 import android.widget.SeekBar
 import android.graphics.Bitmap
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.ImageView
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
+import ru.tsu.visapp.utils.filtersSeekBar.*
+import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
-import ru.tsu.visapp.utils.ImageEditor.Pixel
-import ru.tsu.visapp.filters.UnsharpMask
-import ru.tsu.visapp.filters.ImageRotation
+import androidx.constraintlayout.widget.ConstraintLayout
 
 /*
  * Экран для фильтров
  */
 
 class FiltersActivity: ChildActivity() {
-    private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
     private lateinit var imageEditor: ImageEditor // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
-    private lateinit var pixels2d: Array<Array<Pixel>> // Двумерный массив пикселей
-
-    private lateinit var unsharpMask: UnsharpMask // Нерезкое маскирование
-    private lateinit var imageRotation: ImageRotation // Поворот изображения
-
-    // Изображения с наложенными ранее фильтрами
-    private lateinit var unsharpMaskImage : Array<Array<Pixel>>
-    private lateinit var rotatedImage : Array<Array<Pixel>>
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
-    private lateinit var seekBar: SeekBar // Ползунок
+
+    private lateinit var seekBarLayouts: Array<ConstraintLayout> // Контейнеры для ползунков
+    private lateinit var seekBarTitles: Array<TextView> // Названия ползунков
+    private lateinit var seekBars: Array<SeekBar> // Сами ползунки
+    private lateinit var seekBarEditors: Array<EditText> // Отображения текущего значения
+    private lateinit var seekBarUnits: Array<TextView> // Единицы измерения ползунка
+
+    private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
+    private lateinit var currentInstruction: Instruction // Текущая инструкция
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
 
-        imageView = findViewById(R.id.filtersImageView)
+        val imageView: ImageView = findViewById(R.id.filtersImageView)
 
         title = System.currentTimeMillis().toString()
         imageEditor = ImageEditor(contentResolver)
-        seekBar = findViewById(R.id.filtersSeekBar)
 
-        unsharpMask = UnsharpMask()
-        imageRotation = ImageRotation()
+        seekBarLayouts = arrayOf(
+            findViewById(R.id.firstSeekBarLayout),
+            findViewById(R.id.secondSeekBarLayout),
+            findViewById(R.id.thirdSeekBarLayout)
+        )
+        seekBarTitles = arrayOf(
+            findViewById(R.id.firstSeekBarTitle),
+            findViewById(R.id.secondSeekBarTitle),
+            findViewById(R.id.thirdSeekBarTitle)
+        )
+        seekBars = arrayOf(
+            findViewById(R.id.firstSeekBar),
+            findViewById(R.id.secondSeekBar),
+            findViewById(R.id.thirdSeekBar)
+        )
+        seekBarEditors = arrayOf(
+            findViewById(R.id.firstSeekBarEditor),
+            findViewById(R.id.secondSeekBarEditor),
+            findViewById(R.id.thirdSeekBarEditor)
+        )
+        seekBarUnits = arrayOf(
+            findViewById(R.id.firstSeekBarUnit),
+            findViewById(R.id.secondSeekBarUnit),
+            findViewById(R.id.thirdSeekBarUnit)
+        )
 
-        unsharpMaskImage = emptyArray()
-        rotatedImage = emptyArray()
+        filtersSeekBarInstructions = arrayOf(
+            Instruction(
+                R.id.rotateImage,
+                arrayOf(
+                    Item(),
+                    Item(0, 360, "Угол", "°"),
+                    Item()
+                )
+            ),
+            Instruction(
+                R.id.scalingImage,
+                arrayOf(
+                    Item(),
+                    Item(50, 100, "Масштаб", "%"),
+                    Item()
+                )
+            ),
+            Instruction(
+                R.id.retouchImage,
+                arrayOf(
+                    Item(),
+                    Item(10, 20, "Размер"),
+                    Item()
+                )
+            ),
+            Instruction(
+                R.id.definitionImage,
+                arrayOf(
+                    Item(0, 100, "Эффект", "%"),
+                    Item(0, 100, "Радиус"),
+                    Item(0, 100, "Изогелия")
+                )
+            ),
+            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item()))
+        )
 
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
@@ -60,9 +116,6 @@ class FiltersActivity: ChildActivity() {
         // Получить пиксели изображения
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
-        // Получить двумерный массив пикселей
-        pixels2d = imageEditor.bitmapToPixels(bitmap)
-
         // Example: Редактирование пикселей
         // pixels.forEachIndexed { index, _ ->
         //     pixels[index] = Color.BLUE
@@ -70,7 +123,33 @@ class FiltersActivity: ChildActivity() {
         // editor.setPixelsToBitmap(bitmap, pixels)
 
         // Установить события ползунка
-        seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
+        seekBars.forEach { seekBar ->
+            seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
+        }
+        seekBarEditors.forEachIndexed { index, seekBarEditor ->
+            seekBarEditor.addTextChangedListener { editable ->
+                val item = currentInstruction.items[index]
+
+                val text = editable.toString()
+                val progress = min(
+                    item.max,
+                    max(
+                        0,
+                        if (text == "") 0 else text.toInt()
+                    )
+                )
+                val trim = progress.toString()
+
+                if (text == trim) {
+                    item.progress = progress
+                    seekBars[index].progress = progress
+
+                    startFilter()
+                } else {
+                    seekBarEditor.setText(trim)
+                }
+            }
+        }
 
         // Кнопка "Сохранить"
         val saveButton: TextView = findViewById(R.id.saveButton)
@@ -116,20 +195,37 @@ class FiltersActivity: ChildActivity() {
         }
     }
 
+    // Запустить функцию фильтра
+    fun startFilter() {
+        //
+    }
+
     // События ползунка
     private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            // Прогресс от 0 до 100
-            println("Progress: $progress")
+            if (!fromUser) return
+
+            seekBars.forEachIndexed { index, otherSeekBar ->
+                if (seekBar.id == otherSeekBar.id) {
+                    currentInstruction.items[index].progress = progress
+                    seekBarEditors[index].setText(progress.toString())
+                }
+            }
         }
 
-        override fun onStartTrackingTouch(seekBar: SeekBar) {
-            println("start tracking touch")
+        override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        override fun onStopTrackingTouch(seekBar: SeekBar) = startFilter()
+    }
+
+    // Получить нужную инструкцию для фильтра
+    private fun getInstructionByFilterImageId(imageId: Int): Instruction {
+        filtersSeekBarInstructions.forEach { instruction ->
+            if (instruction.id == imageId) {
+                return instruction
+            }
         }
 
-        override fun onStopTrackingTouch(seekBar: SeekBar) {
-            println("stop tracking touch")
-        }
+        return filtersSeekBarInstructions[0]
     }
 
     // Сменить фильтр, ориентируясь на его картинку
@@ -144,9 +240,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.scalingImage -> {}
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
-                R.id.affinisImage -> {
-                    seekBar.visibility = View.VISIBLE
-                }
+                R.id.affinisImage -> {}
             }
         }
         image.background = AppCompatResources.getDrawable(
@@ -154,41 +248,28 @@ class FiltersActivity: ChildActivity() {
             R.drawable.filters_background
         )
 
-        when (image.id) {
-            R.id.rotateImage -> {
-                // Если изображение еще не было получено с использованием фильтра ранее
-                if (rotatedImage.contentEquals(emptyArray())) {
-                    val result: Array<Array<Pixel>> = imageRotation.rotate(pixels2d, 15)
+        currentInstruction = getInstructionByFilterImageId(image.id)
 
-                    val newBitmap = imageEditor.pixelsToBitmap(result)
-                    imageView.setImageBitmap(newBitmap)
-                    rotatedImage = result
-                }
-                // Если изображение уже обрабатывалось этим фильтром
-                else {
-                    imageView.setImageBitmap(imageEditor.pixelsToBitmap(rotatedImage))
-                }
-            }
-            R.id.scalingImage -> {}
-            R.id.retouchImage -> {}
-            R.id.definitionImage -> {
-                // Если изображение еще не было получено с использованием фильтра ранее
-                if (unsharpMaskImage.contentEquals(emptyArray())) {
-                    val result : Array<Array<Pixel>> = unsharpMask.usm(pixels2d, 10, 30, 60)
-                    val newBitmap = imageEditor.pixelsToBitmap(result)
-                    imageView.setImageBitmap(newBitmap)
-                    unsharpMaskImage = result
-                }
-                // Если изображение уже обрабатывалось этим фильтром
-                else {
-                    imageView.setImageBitmap(imageEditor.pixelsToBitmap(unsharpMaskImage))
-                }
-            }
-            R.id.affinisImage -> {
-                seekBar.visibility = View.GONE
-            }
+        // Изменить настройки ползунков
+        seekBarLayouts.forEachIndexed { index, seekBarLayout ->
+            val item = currentInstruction.items[index]
+            item.reset()
+
+            seekBarLayout.visibility = item.visibility
+            seekBarTitles[index].text = item.title
+            seekBars[index].progress = item.start
+            seekBars[index].max = item.max
+            seekBarEditors[index].setText(item.start.toString())
+            seekBarUnits[index].text = item.unit
         }
 
+        when (image.id) {
+            R.id.rotateImage -> {}
+            R.id.scalingImage -> {}
+            R.id.retouchImage -> {}
+            R.id.definitionImage -> {}
+            R.id.affinisImage -> {}
+        }
         currentImage = image
     }
 }
