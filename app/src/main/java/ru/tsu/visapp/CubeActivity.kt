@@ -1,5 +1,6 @@
 package ru.tsu.visapp
 
+import android.annotation.SuppressLint
 import kotlin.math.*
 import android.os.Bundle
 import android.widget.SeekBar
@@ -131,6 +132,7 @@ class CubeActivity: ChildActivity() {
         override fun onStopTrackingTouch(seekBar: SeekBar) {}
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -151,7 +153,7 @@ class CubeActivity: ChildActivity() {
             val progress = Integer.min(
                 100,
                 Integer.max(
-                    0,
+                    15,
                     if (text == "") 0 else text.toInt()
                 )
             )
@@ -174,8 +176,19 @@ class CubeActivity: ChildActivity() {
         var previousX = 0.0f
         var previousY = 0.0f
 
+        var startX1 = 0.0f
+        var startX2 = 0.0f
+        var startDistance = 0.0f
         imageView.setOnTouchListener { _, event ->
-            when (event.action) {
+            when (event.actionMasked) {
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    if (event.pointerCount == 2) {
+                        startX1 = event.getX(0)
+                        startX2 = event.getX(1)
+                        startDistance = Math.abs(startX1 - startX2)
+                    }
+                }
+
                 MotionEvent.ACTION_DOWN -> {
                     previousX = event.x
                     previousY = event.y
@@ -183,17 +196,28 @@ class CubeActivity: ChildActivity() {
 
                 MotionEvent.ACTION_MOVE -> {
                     imageEditor.clearBitmap(bitmap)
+                    if (event.pointerCount == 1) {
+                        val dx = event.x - previousX
+                        val dy = event.y - previousY
 
-                    val dx = event.x - previousX
-                    val dy = event.y - previousY
+                        val angle = Pair(dx, dy)
+                        renderCube(
+                            angle.first + previousAngle.first,
+                            angle.second + previousAngle.second
+                        )
 
-                    val angle = Pair(dx, dy)
-                    renderCube(
-                        angle.first + previousAngle.first,
-                        angle.second + previousAngle.second
-                    )
+                        previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
+                    } else if (event.pointerCount == 2) {
+                        val x1 = event.getX(0)
+                        val x2 = event.getX(1)
+                        val currentDistance = Math.abs(x1 - x2)
 
-                    previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
+                        if (currentDistance > startDistance && currentProgress < 100) {
+                            currentProgress += 1
+                        } else if (currentDistance < startDistance && currentProgress > 15) {
+                            currentProgress -= 1
+                        }
+                    }
                 }
             }
 
