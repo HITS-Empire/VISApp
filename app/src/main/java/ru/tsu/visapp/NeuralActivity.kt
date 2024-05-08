@@ -13,7 +13,7 @@ import ru.tsu.visapp.utils.ImageGetter
  */
 
 class NeuralActivity: ChildActivity() {
-    private lateinit var imageEditor: ImageEditor // Редактор изображений
+    private val imageEditor = ImageEditor() // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,9 +30,6 @@ class NeuralActivity: ChildActivity() {
     }
 
     private val setImage = fun() {
-        // Получить редактор изображений
-        imageEditor = ImageEditor(contentResolver)
-
         // Получить imageView
         val imageView: ImageView = findViewById(R.id.neuralImageView)
 
