@@ -28,7 +28,8 @@ class CubeActivity: ChildActivity() {
     private lateinit var bitmap: Bitmap
 
     private lateinit var imageView: ImageView
-    private lateinit var imageEditor: ImageEditor
+
+    private val imageEditor = ImageEditor()
 
     private var previousAngle = Pair(0.0f, 0.0f)
 
@@ -136,7 +137,6 @@ class CubeActivity: ChildActivity() {
         initializeView(R.layout.activity_cube)
 
         imageView = findViewById(R.id.cubeImageView)
-        imageEditor = ImageEditor(contentResolver)
 
         seekBar = findViewById(R.id.cubeSeekBar)
         seekBarEditor = findViewById(R.id.cubeSeekBarEditor)

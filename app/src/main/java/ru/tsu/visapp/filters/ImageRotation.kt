@@ -1,48 +1,58 @@
 package ru.tsu.visapp.filters
 
-import kotlin.math.cos
+import kotlin.math.PI
 import kotlin.math.sin
-import ru.tsu.visapp.utils.ImageEditor.Pixel
+import kotlin.math.cos
+import kotlin.math.max
+import android.graphics.Bitmap
+import ru.tsu.visapp.utils.ImageEditor
+import ru.tsu.visapp.utils.PixelsEditor
 
 /*
  * Реализация фильтра поворота изображения на любой градус
  */
 
 class ImageRotation {
-    private fun toRadians(angle : Int) : Float {
-        return angle * (kotlin.math.PI / 180).toFloat()
+    private val imageEditor = ImageEditor() // Редактор изображений
+
+    private fun toRadians(angle: Int): Float {
+        return angle * (PI / 180).toFloat()
     }
 
-    private fun getRotatedImageSize(maxRow : Float, maxCol : Float,
-                                    minRow : Float, minCol : Float) : Array<Int> {
+    private fun getRotatedImageSize(
+        maxRow: Float,
+        maxCol: Float,
+        minRow: Float,
+        minCol: Float
+    ): Array<Int> {
         val newRows = (maxRow - minRow + 1).toInt()
         val newCols = (maxCol - minCol + 1).toInt()
 
         return arrayOf(newRows, newCols)
     }
 
-    private fun getEdges(rows : Int, cols : Int, angle : Int) : Array<Float> {
+    private fun getEdges(rows: Int, cols: Int, angle: Int): Array<Float> {
         val radians = toRadians(angle)
 
-        var maxRow: Float
-        var maxCol: Float
-        var minRow: Float
-        var minCol: Float
+        val maxRow: Float
+        val maxCol: Float
+        val minRow: Float
+        val minCol: Float
 
         val centerRow = rows / 2
         val centerCol = cols / 2
 
-        if (angle in 0..90) {
+        if (angle in 0 .. 90) {
             maxRow = centerRow + (rows - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
             maxCol = centerCol + (cols - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
             minRow = centerRow + (0 - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
             minCol = centerCol + (0 - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
-        } else if (angle in 91..180) {
+        } else if (angle in 90 .. 180) {
             maxRow = centerRow + (0 - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
             maxCol = centerCol + (0 - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
             minRow = centerRow + (rows - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
             minCol = centerCol + (cols - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
-        } else if (angle in 181..270) {
+        } else if (angle in 180 .. 270) {
             maxRow = centerRow + (0 - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
             maxCol = centerCol + (0 - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
             minRow = centerRow + (rows - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
@@ -57,63 +67,97 @@ class ImageRotation {
         return arrayOf(maxRow, maxCol, minRow, minCol)
     }
 
-    fun rotate(image: Array<Array<Pixel>>, angle: Int) : Array<Array<Pixel>> {
+    fun rotate(
+        initPixels: IntArray,
+        initWidth: Int,
+        initHeight: Int,
+        angle: Int
+    ): Bitmap {
         val radians = toRadians(angle)
 
-        val rows = image.size
-        val cols = image[0].size
-
         // Получение вершин нового изображения
-        val (maxRow, maxCol, minRow, minCol) = getEdges(rows, cols, angle)
+        val (
+            maxWidth,
+            maxHeight,
+            minWidth,
+            minHeight
+        ) = getEdges(initWidth, initHeight, angle)
 
         // Получение размера нового изображения
-        var (newRows, newCols) = getRotatedImageSize(maxRow, maxCol, minRow, minCol)
-        newRows = maxOf(newRows, rows)
-        newCols = maxOf(newCols, cols)
+        var (newWidth, newHeight) = getRotatedImageSize(
+            maxWidth,
+            maxHeight,
+            minWidth,
+            minHeight
+        )
+        newWidth = max(initWidth, newWidth)
+        newHeight = max(initHeight, newHeight)
 
-        val newImage = Array(newRows) { Array(newCols) { Pixel(-1, -1, -1) } }
+        val bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val newPixels = imageEditor.getPixelsFromBitmap(bitmap)
 
-        for (i in 0 until newRows) {
-            for (j in 0 until newCols) {
-                if (i < rows && j < cols) {
-                    // Вычисление координат для пикселя в новом изображении
-                    var newI = (rows / 2 + (i - rows / 2) * cos(radians) -
-                               (j - cols / 2) * sin(radians) - minRow).toInt()
-                    var newJ = (cols / 2 + (j - cols / 2) * cos(radians) +
-                               (i - rows / 2) * sin(radians) - minCol).toInt()
+        val initPixelsEditor = PixelsEditor(initPixels, initWidth, initHeight)
+        val newPixelsEditor = PixelsEditor(newPixels, newWidth, newHeight)
 
-                    newImage[newI][newJ] = image[i][j]
+        val halfWidth = initWidth / 2
+        val halfHeight = initHeight / 2
 
-                    // Заполнение пропущенных пикселей
-                    if (angle in 0..180) {
-                        // Если предыдущее значение пустой пиксель
-                        if (newJ > 0 && newImage[newI][newJ - 1].equals(-1)) {
-                            if (i > 0 && j > 0) {
-                                while (newImage[newI][newJ - 1].equals(-1)) {
-                                    newJ -= 1
-                                    if (newImage[newI + 1][newJ + 1].notEquals(-1) || newJ < 1)
-                                        break
+        for (i in 0 until newWidth) {
+            for (j in 0 until newHeight) {
+                if (i >= initWidth || j >= initHeight) continue
+
+                // Вычисление координат для пикселя в новом изображении
+                var newI = (halfWidth + (i - halfWidth) * cos(radians) -
+                    (j - halfHeight) * sin(radians) - minWidth).toInt()
+                var newJ = (halfHeight + (j - halfHeight) * cos(radians) +
+                    (i - halfWidth) * sin(radians) - minHeight).toInt()
+
+                newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
+
+                // Заполнение пропущенных пикселей
+                if (angle in 0 .. 180) {
+                    // Если предыдущее значение пустой пиксель
+                    if (newJ > 0 && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
+                        if (i > 0 && j > 0) {
+                            while (newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
+                                newJ--
+
+                                if ((
+                                    newPixelsEditor.getPixel(newI + 1, newJ + 1) != 0
+                                ) || (
+                                    newJ < 1
+                                )) {
+                                    break
                                 }
                             }
-                            newImage[newI][newJ] = image[i][j]
                         }
-                    } else {
-                        // Если следующее значение - пустой пиксель
-                        if (newJ + 1 < newCols && newImage[newI][newJ + 1].equals(-1)) {
-                            if (i > 0 && j > 0) {
-                                while (newImage[newI][newJ + 1].equals(-1)) {
-                                    newJ++
-                                    if (newImage[newI - 1][newJ - 1].notEquals(-1) || newJ >= newCols - 1)
-                                        break
-                                }
+                        newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
+                    }
+                    continue
+                }
+
+                // Если следующее значение - пустой пиксель
+                if (newJ + 1 < newHeight && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
+                    if (i > 0 && j > 0) {
+                        while (newPixelsEditor.getPixel(newI, newJ + 1) == 0) {
+                            newJ++
+
+                            if ((
+                                newPixelsEditor.getPixel(newI - 1, newJ - 1) != 0
+                            ) || (
+                                newJ + 1 >= newHeight
+                            )) {
+                                break
                             }
-                            newImage[newI][newJ] = image[i][j]
                         }
                     }
+                    newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
                 }
             }
         }
 
-        return newImage
+        imageEditor.setPixelsToBitmap(bitmap, newPixels)
+
+        return bitmap
     }
 }
