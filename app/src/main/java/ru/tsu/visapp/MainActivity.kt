@@ -11,6 +11,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
  * Главный экран приложения
  */
 
+@Suppress("DEPRECATION")
 class MainActivity: AppCompatActivity() {
     private val homeFragment = HomeFragment() // Главная
     private val interestingFragment = InterestingFragment() // Интересное
