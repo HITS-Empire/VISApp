@@ -18,4 +18,6 @@
     <string name="title_neural">Распознавание лиц</string>
     <string name="title_vector">Векторный редактор</string>
     <string name="title_cube">3D-куб</string>
+    <string name="title_cube_seekbar">Отдаление</string>
+    <string name="percent">%</string>
 </resources>
