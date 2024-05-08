@@ -88,7 +88,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage,
                 arrayOf(
                     Item(),
-                    Item(0, 360, "Угол", "°"),
+                    Item(0, 359, "Угол", "°"),
                     Item()
                 )
             ),

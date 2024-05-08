@@ -73,8 +73,15 @@ class UnsharpMask {
         // Основной алгоритм
         for (row in image.indices) {
             for (col in image[0].indices) {
-                val resultPixel = image[row][col] + (mask[row][col] *
+                var resultPixel = image[row][col] + (mask[row][col] *
                                   (amountPercent.toDouble() / 100))
+
+                if (resultPixel.red > 255 ||
+                    resultPixel.green > 255 ||
+                    resultPixel.blue > 255) {
+                    resultPixel = Pixel(255, 255, 255)
+                }
+
                 if (luminancePercent(resultPixel) > threshold)
                     unsharpImage[row][col] = resultPixel
             }
