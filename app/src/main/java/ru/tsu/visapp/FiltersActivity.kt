@@ -45,6 +45,8 @@ class FiltersActivity: ChildActivity() {
     private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
     private lateinit var currentInstruction: Instruction // Текущая инструкция
 
+    private var filtersIsAvailable = false // Можно ли запускать фильтры
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
@@ -211,6 +213,8 @@ class FiltersActivity: ChildActivity() {
 
     // Запустить функцию фильтра
     fun startFilter() {
+        if (!filtersIsAvailable) return
+
         when (currentImage.id) {
             R.id.rotateImage -> {
                 val angle = currentInstruction.items[1].progress
@@ -264,6 +268,8 @@ class FiltersActivity: ChildActivity() {
 
     // Сменить фильтр, ориентируясь на его картинку
     private fun changeFilter(image: ImageView) {
+        filtersIsAvailable = false
+
         if (::currentImage.isInitialized) {
             if (image == currentImage) return
 
@@ -305,5 +311,7 @@ class FiltersActivity: ChildActivity() {
             R.id.affinisImage -> {}
         }
         currentImage = image
+
+        filtersIsAvailable = true
     }
 }
