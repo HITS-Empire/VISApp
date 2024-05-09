@@ -234,9 +234,14 @@ class FiltersActivity: ChildActivity() {
                     val radius = currentInstruction.items[1].progress
                     val threshold = currentInstruction.items[2].progress
 
-                    // val result = unsharpMask.usm(pixels2d, radius, percent, threshold)
-                    // val newBitmap = imageEditor.pixelsToBitmap(result)
-                    // imageView.setImageBitmap(newBitmap)
+                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
+                        pixels,
+                        width,
+                        height,
+                        radius,
+                        percent,
+                        threshold
+                    ))
                 }
 
                 R.id.affinisImage -> {}

@@ -13,7 +13,6 @@ import android.content.ContentResolver
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 
-
 /*
  * Вспомогательные методы для работы с изображениями
  */
@@ -37,6 +36,7 @@ class ImageEditor {
 
         setPixelsToBitmap(bitmap, pixels)
     }
+
     // Получить URI сохранённой картинки
     fun getSavedImageUri(activity: AppCompatActivity?, fragment: Fragment?): Uri {
         var sharedPreferences: SharedPreferences? = null
@@ -82,39 +82,6 @@ class ImageEditor {
         )
 
         return pixels
-    }
-    data class Pixel(val red: Int, val green: Int, val blue: Int) {
-        operator fun minus(other: Pixel) : Pixel {
-            return Pixel(
-                this.red - other.red,
-                this.green - other.green,
-                this.blue - other.blue
-            )
-        }
-
-        operator fun plus(other: Pixel) : Pixel {
-            return Pixel(
-                this.red + other.red,
-                this.green + other.green,
-                this.blue + other.blue
-            )
-        }
-
-        operator fun times(percent: Double) : Pixel {
-            return Pixel(
-                (red * percent).toInt(),
-                (green * percent).toInt(),
-                (blue * percent).toInt()
-            )
-        }
-
-        fun equals(digit: Int): Boolean {
-            return (red == digit && blue == digit && green == digit)
-        }
-
-        fun notEquals(digit: Int): Boolean {
-            return (red != digit && blue != digit && green != digit)
-        }
     }
 
     // Установить пиксели в изображение
