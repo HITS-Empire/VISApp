@@ -1,29 +1,44 @@
 package ru.tsu.visapp.filters
-import ru.tsu.visapp.utils.ImageEditor.Pixel
+
+import java.lang.Integer.min
+import android.graphics.Color
+import androidx.core.graphics.red
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.alpha
+import ru.tsu.visapp.utils.PixelsEditor
 
 class UnsharpMask {
-    private fun gaussianBlur(image: Array<Array<Pixel>>, radius: Int): Array<Array<Pixel>> {
-        val result = Array(image.size) { Array(image[0].size) { Pixel(0, 0, 0) } }
+    private fun gaussianBlur(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        radius: Int
+    ): IntArray {
+        val result = IntArray(pixels.size) { 0 }
+
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+        val resultEditor = PixelsEditor(result, width, height)
 
         // Основной цикл по изображению
-        for (i in image.indices) {
-            for (j in image[i].indices) {
+        for (i in 0 ..< width) {
+            for (j in 0 ..< height) {
                 var totalRed = 0
                 var totalGreen = 0
                 var totalBlue = 0
                 var count = 0
 
                 // Цикл по окрестности пикселя с радиусом размытия
-                for (x in -radius..radius) {
-                    for (y in -radius..radius) {
+                for (x in -radius .. radius) {
+                    for (y in -radius .. radius) {
                         val newX = i + x
                         val newY = j + y
 
-                        if (newX in image.indices && newY in image[newX].indices) {
-                            val neighbor = image[newX][newY]
-                            totalRed += neighbor.red
-                            totalGreen += neighbor.green
-                            totalBlue += neighbor.blue
+                        if (newX in 0 ..< width && newY in 0 ..< height) {
+                            val neighbor = pixelsEditor.getPixel(newX, newY)
+                            totalRed += neighbor?.red ?: 0
+                            totalGreen += neighbor?.green ?: 0
+                            totalBlue += neighbor?.blue ?: 0
                             count++
                         }
                     }
@@ -33,19 +48,18 @@ class UnsharpMask {
                 val avgGreen = totalGreen / count
                 val avgBlue = totalBlue / count
 
-                result[i][j] = Pixel(avgRed, avgGreen, avgBlue)
-            }
-        }
+                val pixel: Int = pixelsEditor.getPixel(i, j) ?: 0
 
-        return result
-    }
-
-    private fun difference(image1: Array<Array<Pixel>>, image2: Array<Array<Pixel>>): Array<Array<Pixel>> {
-        val result = image1.map { it.clone() }.toTypedArray()
-
-        for (row in image1.indices) {
-            for (col in image1[row].indices) {
-                result[row][col] = image1[row][col] - image2[row][col]
+                resultEditor.setPixel(
+                    i,
+                    j,
+                    Color.argb(
+                        pixel.alpha,
+                        pixel.red - avgRed,
+                        pixel.green - avgGreen,
+                        pixel.blue - avgBlue
+                    )
+                )
             }
         }
 
@@ -53,33 +67,39 @@ class UnsharpMask {
     }
 
     // Преобразование цвета пикселя в яркость
-    private fun luminancePercent(pixel: Pixel): Double {
+    private fun luminancePercent(pixel: Int): Double {
         val luminance = (0.2126 * pixel.red + 0.7152 * pixel.green + 0.0722 * pixel.blue).toInt()
 
         // Нормализация яркости к процентам от максимальной яркости
-        return (luminance.toDouble() / 255.0 * 100.0)
+        return luminance.toDouble() / 255.0 * 100.0
     }
 
-    fun usm(image: Array<Array<Pixel>>, radius: Int,
-            amountPercent: Int, threshold: Int) : Array<Array<Pixel>> {
+    fun usm(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        radius: Int,
+        amountPercent: Int,
+        threshold: Int
+    ): IntArray {
+        val coefficient = amountPercent.toDouble() / 100
+
         // Создание копии изображения с применением размытия по Гауссу
-        val blurred = gaussianBlur(image, radius)
+        val result = gaussianBlur(pixels, width, height, radius)
 
-        // Вычитание заблюренного изображения из оригинального попиксельно
-        val mask = difference(image, blurred)
+        pixels.forEachIndexed { index, pixel ->
+            val resultPixel = Color.argb(
+                pixel.alpha,
+                min(255, (pixel.red + coefficient * result[index].red).toInt()),
+                min(255, (pixel.green + coefficient * result[index].green).toInt()),
+                min(255, (pixel.blue + coefficient * result[index].blue).toInt())
+            )
 
-        val unsharpImage = image.map { it.clone() }.toTypedArray()
-
-        // Основной алгоритм
-        for (row in image.indices) {
-            for (col in image[0].indices) {
-                val resultPixel = image[row][col] + (mask[row][col] *
-                                  (amountPercent.toDouble() / 100))
-                if (luminancePercent(resultPixel) > threshold)
-                    unsharpImage[row][col] = resultPixel
-            }
+            result[index] = if (
+                luminancePercent(resultPixel) > threshold
+            ) resultPixel else pixel
         }
 
-        return unsharpImage
+        return result
     }
 }

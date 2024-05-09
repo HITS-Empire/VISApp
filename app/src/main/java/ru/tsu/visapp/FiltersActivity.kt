@@ -9,8 +9,10 @@ import android.graphics.Bitmap
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ImageView
+import kotlinx.coroutines.launch
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
+import androidx.lifecycle.lifecycleScope
 import ru.tsu.visapp.filters.UnsharpMask
 import ru.tsu.visapp.filters.ImageRotation
 import ru.tsu.visapp.utils.filtersSeekBar.*
@@ -199,40 +201,54 @@ class FiltersActivity: ChildActivity() {
     }
 
     // Получить пиксели изображения
-    fun updatePixelsInfo() {
+    private fun updatePixelsInfo() {
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
         width = bitmap.width
         height = bitmap.height
     }
 
     // Запустить функцию фильтра
-    fun startFilter() {
+    private fun startFilter() {
         if (!filtersIsAvailable || filterIsActive) return
 
         filterIsActive = true
 
-        when (currentImage.id) {
-            R.id.rotateImage -> {
-                val angle = currentInstruction.items[1].progress
+        lifecycleScope.launch {
+            when (currentImage.id) {
+                R.id.rotateImage -> {
+                    val angle = currentInstruction.items[1].progress
 
-                bitmap = imageRotation.rotate(pixels, width, height, angle)
-                imageView.setImageBitmap(bitmap)
-            }
-            R.id.scalingImage -> {}
-            R.id.retouchImage -> {}
-            R.id.definitionImage -> {
-                val percent = currentInstruction.items[0].progress
-                val radius = currentInstruction.items[1].progress
-                val threshold = currentInstruction.items[2].progress
+                    bitmap = imageRotation.rotate(
+                        pixels,
+                        width,
+                        height,
+                        angle
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
 
-                // val result = unsharpMask.usm(pixels2d, radius, percent, threshold)
-                // val newBitmap = imageEditor.pixelsToBitmap(result)
-                // imageView.setImageBitmap(newBitmap)
+                R.id.scalingImage -> {}
+                R.id.retouchImage -> {}
+                R.id.definitionImage -> {
+                    val percent = currentInstruction.items[0].progress
+                    val radius = currentInstruction.items[1].progress
+                    val threshold = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
+                        pixels,
+                        width,
+                        height,
+                        radius,
+                        percent,
+                        threshold
+                    ))
+                }
+
+                R.id.affinisImage -> {}
             }
-            R.id.affinisImage -> {}
+
+            filterIsActive = false
         }
-
-        filterIsActive = false
     }
 
     // События ползунка
@@ -249,7 +265,7 @@ class FiltersActivity: ChildActivity() {
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
-        override fun onStopTrackingTouch(seekBar: SeekBar) = startFilter()
+        override fun onStopTrackingTouch(seekBar: SeekBar) {}
     }
 
     // Получить нужную инструкцию для фильтра
