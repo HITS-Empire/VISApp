@@ -1,29 +1,47 @@
 package ru.tsu.visapp.filters
 
 import android.annotation.SuppressLint
-import android.view.MotionEvent
-import android.widget.ImageView
+import android.graphics.Color
+import androidx.core.graphics.alpha
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 
-@SuppressLint("ClickableViewAccessibility")
-class Retouching(imageView: ImageView, pixels: IntArray, width: Int, height: Int,
-                 retouchSize: Int, coefficient: Int) {
-    private fun retouch() {
+class Retouching(
+    private var width: Int,
+    private var height: Int,
+) {
+    fun retouch(
+        pixels: IntArray,
+        x: Int,
+        y: Int,
+        retouchSize: Int,
+        coefficient: Int
+    ): IntArray {
+        var result = pixels.clone()
 
-    }
+        val centerX = x.coerceIn(retouchSize, width - 1 - retouchSize)
+        val centerY = y.coerceIn(retouchSize, height - 1 - retouchSize)
 
-    init {
-        imageView.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    println("Еще чето")
-                }
+        for (i in centerX - retouchSize..centerX + retouchSize) {
+            for (j in centerY - retouchSize..centerY + retouchSize) {
+                val distance =
+                    ((i - centerX) * (i - centerX) + (j - centerY) * (j - centerY)).toDouble()
+                if (distance <= retouchSize * retouchSize) {
+                    val pixel = pixels[j * width + i]
 
-                MotionEvent.ACTION_MOVE -> {
-                    println("Движение")
+                    val resultPixel = Color.argb(
+                        pixel.alpha,
+                        (pixel.red * coefficient).coerceIn(0, 255),
+                        (pixel.green * coefficient).coerceIn(0, 255),
+                        (pixel.blue * coefficient).coerceIn(0, 255)
+                    )
+
+                    result[j * width + i] = resultPixel
                 }
             }
-
-            true
         }
+
+        return result
     }
 }

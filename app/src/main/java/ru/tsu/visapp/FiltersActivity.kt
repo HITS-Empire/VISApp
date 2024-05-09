@@ -1,11 +1,13 @@
 package ru.tsu.visapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import java.lang.Integer.min
 import java.lang.Integer.max
 import android.widget.SeekBar
 import android.graphics.Bitmap
+import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ImageView
@@ -19,6 +21,7 @@ import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+import ru.tsu.visapp.filters.Retouching
 
 /*
  * Экран для фильтров
@@ -46,6 +49,7 @@ class FiltersActivity: ChildActivity() {
     private val imageEditor = ImageEditor() // Редактор изображений
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
     private val imageRotation = ImageRotation() // Поворот изображения
+    private lateinit var retouching: Retouching // Ретушь
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
@@ -126,6 +130,9 @@ class FiltersActivity: ChildActivity() {
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
         imageView.setImageBitmap(bitmap)
         updatePixelsInfo()
+
+        // Ретуширование
+        retouching = Retouching(width, height)
 
         // Окошки фильтров
         val framesWithFilters: Array<FrameLayout> = arrayOf(
@@ -228,7 +235,9 @@ class FiltersActivity: ChildActivity() {
                 }
 
                 R.id.scalingImage -> {}
-                R.id.retouchImage -> {}
+                R.id.retouchImage -> {
+
+                }
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
@@ -280,6 +289,7 @@ class FiltersActivity: ChildActivity() {
     }
 
     // Сменить фильтр, ориентируясь на его картинку
+    @SuppressLint("ClickableViewAccessibility")
     private fun changeFilter(image: ImageView) {
         filtersIsAvailable = false
 
@@ -319,7 +329,33 @@ class FiltersActivity: ChildActivity() {
         when (image.id) {
             R.id.rotateImage -> {}
             R.id.scalingImage -> {}
-            R.id.retouchImage -> {}
+            R.id.retouchImage -> {
+                val size = currentInstruction.items[1].progress
+
+                imageView.setOnTouchListener { _, event ->
+                    when (event.action) {
+                        MotionEvent.ACTION_MOVE -> {
+                            val currentX = event.x.toInt()
+                            val currentY = event.y.toInt()
+
+                            updatePixelsInfo()
+                            val result = retouching.retouch(
+                                pixels,
+                                currentX,
+                                currentY,
+                                size,
+                                10 // Пока не реализовано
+                            )
+                            imageEditor.setPixelsToBitmap(bitmap, result)
+
+                            println("Координаты нажатия: x=$currentX, y=$currentY")
+                        }
+                    }
+
+                    true
+                }
+
+            }
             R.id.definitionImage -> {}
             R.id.affinisImage -> {}
         }

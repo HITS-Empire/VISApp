@@ -20,6 +20,11 @@ class PixelsEditor(initPixels: IntArray, initWidth: Int, initHeight: Int) {
         return null
     }
 
+    // Никогда не возвращает null
+    fun unsafeGetPixel(row: Int, column: Int): Int {
+        return pixels[column * width + row]
+    }
+
     fun setPixel(row: Int, column: Int, color: Int?) {
         if (isExists(row, column) && color != null) {
             pixels[column * width + row] = color
