@@ -9,15 +9,16 @@ import android.graphics.Bitmap
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ImageView
+import kotlinx.coroutines.launch
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
+import androidx.lifecycle.lifecycleScope
+import ru.tsu.visapp.filters.UnsharpMask
+import ru.tsu.visapp.filters.ImageRotation
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
-import ru.tsu.visapp.utils.ImageEditor.Pixel
-import ru.tsu.visapp.filters.UnsharpMask
-import ru.tsu.visapp.filters.ImageRotation
 
 /*
  * Экран для фильтров
@@ -26,15 +27,12 @@ import ru.tsu.visapp.filters.ImageRotation
 class FiltersActivity: ChildActivity() {
     private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
-    private lateinit var imageEditor: ImageEditor // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
-    private lateinit var pixels2d: Array<Array<Pixel>> // Двумерный массив пикселей
+    private var width = 0 // Ширина картинки
+    private var height = 0 // Высота картинки
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
-
-    private lateinit var unsharpMask: UnsharpMask // Нерезкое маскирование
-    private lateinit var imageRotation: ImageRotation // Поворот изображения
 
     private lateinit var seekBarLayouts: Array<ConstraintLayout> // Контейнеры для ползунков
     private lateinit var seekBarTitles: Array<TextView> // Названия ползунков
@@ -45,7 +43,12 @@ class FiltersActivity: ChildActivity() {
     private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
     private lateinit var currentInstruction: Instruction // Текущая инструкция
 
+    private val imageEditor = ImageEditor() // Редактор изображений
+    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
+    private val imageRotation = ImageRotation() // Поворот изображения
+
     private var filtersIsAvailable = false // Можно ли запускать фильтры
+    private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,10 +57,7 @@ class FiltersActivity: ChildActivity() {
         imageView = findViewById(R.id.filtersImageView)
 
         title = System.currentTimeMillis().toString()
-        imageEditor = ImageEditor(contentResolver)
-
-        unsharpMask = UnsharpMask()
-        imageRotation = ImageRotation()
+        imageEditor.contentResolver = contentResolver
 
         seekBarLayouts = arrayOf(
             findViewById(R.id.firstSeekBarLayout),
@@ -125,18 +125,7 @@ class FiltersActivity: ChildActivity() {
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
         imageView.setImageBitmap(bitmap)
-
-        // Получить пиксели изображения
-        pixels = imageEditor.getPixelsFromBitmap(bitmap)
-
-        // Получить двумерный массив пикселей
-        pixels2d = imageEditor.bitmapToPixels(bitmap)
-
-        // Example: Редактирование пикселей
-        // pixels.forEachIndexed { index, _ ->
-        //     pixels[index] = Color.BLUE
-        // }
-        // editor.setPixelsToBitmap(bitmap, pixels)
+        updatePixelsInfo()
 
         // Окошки фильтров
         val framesWithFilters: Array<FrameLayout> = arrayOf(
@@ -211,30 +200,54 @@ class FiltersActivity: ChildActivity() {
         }
     }
 
+    // Получить пиксели изображения
+    private fun updatePixelsInfo() {
+        pixels = imageEditor.getPixelsFromBitmap(bitmap)
+        width = bitmap.width
+        height = bitmap.height
+    }
+
     // Запустить функцию фильтра
-    fun startFilter() {
-        if (!filtersIsAvailable) return
+    private fun startFilter() {
+        if (!filtersIsAvailable || filterIsActive) return
 
-        when (currentImage.id) {
-            R.id.rotateImage -> {
-                val angle = currentInstruction.items[1].progress
+        filterIsActive = true
 
-                val result: Array<Array<Pixel>> = imageRotation.rotate(pixels2d, angle)
-                val newBitmap = imageEditor.pixelsToBitmap(result)
-                imageView.setImageBitmap(newBitmap)
+        lifecycleScope.launch {
+            when (currentImage.id) {
+                R.id.rotateImage -> {
+                    val angle = currentInstruction.items[1].progress
+
+                    bitmap = imageRotation.rotate(
+                        pixels,
+                        width,
+                        height,
+                        angle
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
+
+                R.id.scalingImage -> {}
+                R.id.retouchImage -> {}
+                R.id.definitionImage -> {
+                    val percent = currentInstruction.items[0].progress
+                    val radius = currentInstruction.items[1].progress
+                    val threshold = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
+                        pixels,
+                        width,
+                        height,
+                        radius,
+                        percent,
+                        threshold
+                    ))
+                }
+
+                R.id.affinisImage -> {}
             }
-            R.id.scalingImage -> {}
-            R.id.retouchImage -> {}
-            R.id.definitionImage -> {
-                val percent = currentInstruction.items[0].progress
-                val radius = currentInstruction.items[1].progress
-                val threshold = currentInstruction.items[2].progress
 
-                val result = unsharpMask.usm(pixels2d, radius, percent, threshold)
-                val newBitmap = imageEditor.pixelsToBitmap(result)
-                imageView.setImageBitmap(newBitmap)
-            }
-            R.id.affinisImage -> {}
+            filterIsActive = false
         }
     }
 
@@ -252,7 +265,7 @@ class FiltersActivity: ChildActivity() {
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
-        override fun onStopTrackingTouch(seekBar: SeekBar) = startFilter()
+        override fun onStopTrackingTouch(seekBar: SeekBar) {}
     }
 
     // Получить нужную инструкцию для фильтра
@@ -311,6 +324,7 @@ class FiltersActivity: ChildActivity() {
             R.id.affinisImage -> {}
         }
         currentImage = image
+        updatePixelsInfo()
 
         filtersIsAvailable = true
     }

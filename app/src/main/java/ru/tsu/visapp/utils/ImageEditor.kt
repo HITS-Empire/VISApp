@@ -1,31 +1,28 @@
 package ru.tsu.visapp.utils
 
-import android.content.ContentResolver
-import android.content.ContentValues
-import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
+import java.io.File
 import android.net.Uri
 import android.os.Environment
+import android.graphics.Bitmap
+import android.content.Context
 import android.provider.MediaStore
-import androidx.appcompat.app.AppCompatActivity
+import android.content.ContentValues
+import android.graphics.BitmapFactory
 import androidx.fragment.app.Fragment
-import java.io.File
-
+import android.content.ContentResolver
+import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatActivity
 
 /*
  * Вспомогательные методы для работы с изображениями
  */
 
-class ImageEditor(initContentResolver: ContentResolver) {
-    private val contentResolver = initContentResolver
+class ImageEditor {
+    lateinit var contentResolver: ContentResolver
 
     private val albumName = "VISApp"
     private val albumRelativePath = "${Environment.DIRECTORY_PICTURES}/$albumName"
     private val albumFile = File(albumRelativePath)
-
 
     // Очистить bitmap
     fun clearBitmap(bitmap: Bitmap) {
@@ -39,6 +36,7 @@ class ImageEditor(initContentResolver: ContentResolver) {
 
         setPixelsToBitmap(bitmap, pixels)
     }
+
     // Получить URI сохранённой картинки
     fun getSavedImageUri(activity: AppCompatActivity?, fragment: Fragment?): Uri {
         var sharedPreferences: SharedPreferences? = null
@@ -84,75 +82,6 @@ class ImageEditor(initContentResolver: ContentResolver) {
         )
 
         return pixels
-    }
-    data class Pixel(val red: Int, val green: Int, val blue: Int) {
-        operator fun minus(other: Pixel) : Pixel {
-            return Pixel(
-                this.red - other.red,
-                this.green - other.green,
-                this.blue - other.blue
-            )
-        }
-
-        operator fun plus(other: Pixel) : Pixel {
-            return Pixel(
-                this.red + other.red,
-                this.green + other.green,
-                this.blue + other.blue
-            )
-        }
-
-        operator fun times(percent: Double) : Pixel {
-            return Pixel(
-                (red * percent).toInt(),
-                (green * percent).toInt(),
-                (blue * percent).toInt()
-            )
-        }
-
-        fun equals(digit: Int): Boolean {
-            return (red == digit && blue == digit && green == digit)
-        }
-
-        fun notEquals(digit: Int): Boolean {
-            return (red != digit && blue != digit && green != digit)
-        }
-    }
-
-    fun bitmapToPixels(bitmap: Bitmap) : Array<Array<Pixel>> {
-        val width: Int = bitmap.getWidth()
-        val height: Int = bitmap.getHeight()
-
-        var pixels = Array(bitmap.width) { Array(bitmap.height) { Pixel(0, 0, 0) } }
-
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                val pixelColor = bitmap.getPixel(x, y)
-                val red = Color.red(pixelColor)
-                val green = Color.green(pixelColor)
-                val blue = Color.blue(pixelColor)
-
-                pixels[x][y] = Pixel(red, green, blue)
-            }
-        }
-
-        return pixels
-    }
-
-    fun pixelsToBitmap(pixels: Array<Array<Pixel>>): Bitmap {
-        val width = pixels.size
-        val height = pixels[0].size
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                val pixel = pixels[x][y]
-                val color = Color.rgb(pixel.red, pixel.green, pixel.blue)
-                bitmap.setPixel(x, y, color)
-            }
-        }
-
-        return bitmap
     }
 
     // Установить пиксели в изображение
