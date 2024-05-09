@@ -3,10 +3,12 @@ package ru.tsu.visapp.filters
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.cos
-import kotlin.math.max
 import android.graphics.Bitmap
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.PixelsEditor
+import kotlinx.coroutines.coroutineScope
 
 /*
  * Реализация фильтра поворота изображения на любой градус
@@ -67,75 +69,47 @@ class ImageRotation {
         return arrayOf(maxRow, maxCol, minRow, minCol)
     }
 
-    fun rotate(
-        initPixels: IntArray,
-        initWidth: Int,
-        initHeight: Int,
-        angle: Int
-    ): Bitmap {
-        val radians = toRadians(angle)
+    data class ProcessPixel(
+        private val angle: Int,
+        private val radians: Float,
+        private val minWidth: Float,
+        private val minHeight: Float,
+        private val newWidth: Int,
+        private val newHeight: Int,
+        private val halfWidth: Int,
+        private val halfHeight: Int,
+        private val initPixelsEditor: PixelsEditor,
+        private val newPixelsEditor: PixelsEditor,
+    ) {
+        suspend fun start(i: Int, j: Int) {
+            // Вычисление координат для пикселя в новом изображении
+            val newI = (halfWidth + (i - halfWidth) * cos(radians) -
+                (j - halfHeight) * sin(radians) - minWidth).toInt()
+            var newJ = (halfHeight + (j - halfHeight) * cos(radians) +
+                (i - halfWidth) * sin(radians) - minHeight).toInt()
 
-        // Получение вершин нового изображения
-        val (
-            maxWidth,
-            maxHeight,
-            minWidth,
-            minHeight
-        ) = getEdges(initWidth, initHeight, angle)
+            newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
 
-        // Получение размера нового изображения
-        var (newWidth, newHeight) = getRotatedImageSize(
-            maxWidth,
-            maxHeight,
-            minWidth,
-            minHeight
-        )
-        newWidth = max(initWidth, newWidth)
-        newHeight = max(initHeight, newHeight)
+            // Заполнение пропущенных пикселей
+            if (angle in 0 .. 180) {
+                // Если предыдущее значение пустой пиксель
+                if (newJ > 0 && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
+                    if (i > 0 && j > 0) {
+                        while (newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
+                            newJ--
 
-        val bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
-        val newPixels = imageEditor.getPixelsFromBitmap(bitmap)
-
-        val initPixelsEditor = PixelsEditor(initPixels, initWidth, initHeight)
-        val newPixelsEditor = PixelsEditor(newPixels, newWidth, newHeight)
-
-        val halfWidth = initWidth / 2
-        val halfHeight = initHeight / 2
-
-        for (i in 0 until newWidth) {
-            for (j in 0 until newHeight) {
-                if (i >= initWidth || j >= initHeight) continue
-
-                // Вычисление координат для пикселя в новом изображении
-                var newI = (halfWidth + (i - halfWidth) * cos(radians) -
-                    (j - halfHeight) * sin(radians) - minWidth).toInt()
-                var newJ = (halfHeight + (j - halfHeight) * cos(radians) +
-                    (i - halfWidth) * sin(radians) - minHeight).toInt()
-
-                newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
-
-                // Заполнение пропущенных пикселей
-                if (angle in 0 .. 180) {
-                    // Если предыдущее значение пустой пиксель
-                    if (newJ > 0 && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
-                        if (i > 0 && j > 0) {
-                            while (newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
-                                newJ--
-
-                                if ((
-                                    newPixelsEditor.getPixel(newI + 1, newJ + 1) != 0
-                                ) || (
-                                    newJ < 1
-                                )) {
-                                    break
-                                }
+                            if ((
+                                newPixelsEditor.getPixel(newI + 1, newJ + 1) != 0
+                            ) || (
+                                newJ < 1
+                            )) {
+                                break
                             }
                         }
-                        newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
                     }
-                    continue
+                    newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
                 }
-
+            } else {
                 // Если следующее значение - пустой пиксель
                 if (newJ + 1 < newHeight && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
                     if (i > 0 && j > 0) {
@@ -155,9 +129,73 @@ class ImageRotation {
                 }
             }
         }
+    }
+
+    suspend fun rotate(
+        initPixels: IntArray,
+        initWidth: Int,
+        initHeight: Int,
+        angle: Int
+    ): Bitmap = coroutineScope {
+        val radians = toRadians(angle)
+
+        // Получение вершин нового изображения
+        val (
+            maxWidth,
+            maxHeight,
+            minWidth,
+            minHeight
+        ) = getEdges(initWidth, initHeight, angle)
+
+        // Получение размера нового изображения
+        val (newWidth, newHeight) = getRotatedImageSize(
+            maxWidth,
+            maxHeight,
+            minWidth,
+            minHeight
+        )
+
+        val bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val newPixels = imageEditor.getPixelsFromBitmap(bitmap)
+
+        val initPixelsEditor = PixelsEditor(initPixels, initWidth, initHeight)
+        val newPixelsEditor = PixelsEditor(newPixels, newWidth, newHeight)
+
+        val halfWidth = initWidth / 2
+        val halfHeight = initHeight / 2
+
+        val processPixel = ProcessPixel(
+            angle,
+            radians,
+            minWidth,
+            minHeight,
+            newWidth,
+            newHeight,
+            halfWidth,
+            halfHeight,
+            initPixelsEditor,
+            newPixelsEditor
+        )
+
+        val jobs = arrayOf(
+            arrayOf(0, halfWidth, 0, halfHeight),
+            arrayOf(halfWidth, initWidth, 0, halfHeight),
+            arrayOf(0, halfWidth, halfHeight, initHeight),
+            arrayOf(halfWidth, initWidth, halfHeight, initHeight)
+        ).map { a ->
+            async {
+                for (i in a[0] until a[1]) {
+                    for (j in a[2] until a[3]) {
+                        processPixel.start(i, j)
+                    }
+                }
+            }
+        }
+
+        jobs.awaitAll()
 
         imageEditor.setPixelsToBitmap(bitmap, newPixels)
 
-        return bitmap
+        return@coroutineScope bitmap
     }
 }
