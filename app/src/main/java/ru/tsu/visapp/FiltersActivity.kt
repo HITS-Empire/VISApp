@@ -204,32 +204,35 @@ class FiltersActivity: ChildActivity() {
 
         // События нажатия на картинку
         imageView.setOnTouchListener { _, event ->
-            if (currentImage.id == R.id.retouchImage) {
-                val size = currentInstruction.items[1].progress
-                val coefficient = currentInstruction.items[2].progress
+            if (!filterIsActive && currentImage.id == R.id.retouchImage) {
+                filterIsActive = true
 
-                when (event.action) {
-                    MotionEvent.ACTION_MOVE -> {
-                        val x = event.x.toInt()
-                        val y = event.y.toInt()
+                val point = imageEditor.getPointFromImageView(
+                    imageView,
+                    event.x,
+                    event.y,
+                    width,
+                    height
+                )
 
-                        /*
-                         * Сделать здесь скейл координат!!!
-                         * Иначе не работает
-                         */
+                if (point != null) {
+                    val size = currentInstruction.items[1].progress
+                    val coefficient = currentInstruction.items[2].progress
 
-                        retouching.retouch(
-                            pixels,
-                            width,
-                            height,
-                            x,
-                            y,
-                            size,
-                            coefficient
-                        )
-                        imageEditor.setPixelsToBitmap(bitmap, pixels)
-                    }
+                    retouching.retouch(
+                        pixels,
+                        width,
+                        height,
+                        point[0],
+                        point[1],
+                        size,
+                        coefficient
+                    )
+                    imageEditor.setPixelsToBitmap(bitmap, pixels)
+                    imageView.setImageBitmap(bitmap)
                 }
+
+                filterIsActive = false
             }
             true
         }
@@ -275,6 +278,7 @@ class FiltersActivity: ChildActivity() {
                         percent,
                         threshold
                     ))
+                    imageView.setImageBitmap(bitmap)
                 }
                 R.id.affinisImage -> {}
             }

@@ -2,6 +2,7 @@ package ru.tsu.visapp.utils
 
 import java.io.File
 import android.net.Uri
+import android.view.View
 import android.os.Environment
 import android.graphics.Bitmap
 import android.content.Context
@@ -23,6 +24,58 @@ class ImageEditor {
     private val albumName = "VISApp"
     private val albumRelativePath = "${Environment.DIRECTORY_PICTURES}/$albumName"
     private val albumFile = File(albumRelativePath)
+
+    // Получить координаты картинки по нажатию на View
+    fun getPointFromImageView(
+        view: View,
+        eventX: Float,
+        eventY: Float,
+        width: Int,
+        height: Int
+    ): IntArray? {
+        val viewWidth = view.width.toFloat()
+        val viewHeight = view.height.toFloat()
+        val imageWidth = width.toFloat()
+        val imageHeight = height.toFloat()
+
+        val viewScale = viewWidth / viewHeight
+        val imageScale = imageWidth / imageHeight
+
+        val x: Float
+        val y: Float
+
+        if (viewScale < imageScale) {
+            // Тёмные поля будут сверху и снизу
+            val pixelScale = imageWidth / viewWidth
+
+            val scaledImageHeight = imageHeight / pixelScale
+            val indentY = (viewHeight - scaledImageHeight) / 2
+            val scaledEventY = eventY - indentY
+
+            if (scaledEventY < 0 || viewHeight < eventY + indentY) {
+                return null
+            }
+
+            x = eventX * pixelScale
+            y = scaledEventY * pixelScale
+        } else {
+            // Тёмные поля будут слева и справа
+            val pixelScale = imageHeight / viewHeight
+
+            val scaledImageWidth = imageWidth / pixelScale
+            val indentX = (viewWidth - scaledImageWidth) / 2
+            val scaledEventX = eventX - indentX
+
+            if (scaledEventX < 0 || viewWidth < eventX + indentX) {
+                return null
+            }
+
+            x = scaledEventX * pixelScale
+            y = eventY * pixelScale
+        }
+
+        return intArrayOf(x.toInt(), y.toInt())
+    }
 
     // Очистить bitmap
     fun clearBitmap(bitmap: Bitmap) {
