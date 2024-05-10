@@ -202,6 +202,7 @@ class FiltersActivity: ChildActivity() {
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
         }
 
+        // События нажатия на картинку
         imageView.setOnTouchListener { _, event ->
             if (currentImage.id == R.id.retouchImage) {
                 val size = currentInstruction.items[1].progress
