@@ -33,6 +33,7 @@ class CubeActivity: ChildActivity() {
     private val imageEditor = ImageEditor()
 
     private var previousAngle = Pair(0.0f, 0.0f)
+    private lateinit var previousCamera : Pair<Float, Float>
 
     private val colors = intArrayOf(
         0x000000FF.toInt(),
@@ -57,14 +58,16 @@ class CubeActivity: ChildActivity() {
                 val camera = Vec3(-currentProgress / 10.0f,0.0f,0.0f)
                 val direction = Vec3(1.0f, xy.x, xy.y).normalize()
 
-                camera.rotateY(dy / 3000)
-                direction.rotateY(dy / 3000)
+                camera.rotateY(dy / 5000)
+                direction.rotateY(dy / 5000)
 
-                camera.rotateZ(dx / 3000)
-                direction.rotateZ(dx / 3000)
+                camera.rotateZ(dx / 5000)
+                direction.rotateZ(dx / 5000)
 
                 val box = Vec3(0.0f, 0.0f, 0.0f)
                 val color = cube(camera, direction, Vec3(1.0f), box)
+
+                previousCamera = Pair(camera.y, camera.z)
 
                 pixels[i + j * width] = color
             }
@@ -106,13 +109,22 @@ class CubeActivity: ChildActivity() {
             .changeSign()
         )
 
+        //println("${camera.y - previousCamera.first}")
         return when {
-            t1.x > t1.y && t1.x > t1.z -> Color.RED // Передняя грань
-            t1.y > t1.x && t1.y > t1.z -> Color.BLUE // Правая грань
-            t1.z > t1.x && t1.z > t1.y -> Color.WHITE // Верхняя грань
-            t1.x < t1.y && t1.x < t1.z -> Color.GREEN // Нижняя грань
-            t1.y < t1.x && t1.y < t1.z -> Color.YELLOW // Левая грань
-            else -> Color.CYAN // Нижняя грань
+            t1.x > t1.y && t1.x > t1.z -> if (camera.y - previousCamera.first > 0) {
+                Color.RED
+            } else {
+                Color.GREEN
+            } // Передняя грань
+            t1.y > t1.x && t1.y > t1.z -> if (camera.y > 0) {
+                Color.BLUE
+            } else {
+                Color.YELLOW
+            } // Правая грань
+            else -> Color.WHITE // Верхняя грань
+//                t1.x < t1.y && t1.x < t1.z -> Color.GREEN // Нижняя грань
+//                t1.y < t1.x && t1.y < t1.z -> Color.YELLOW // Левая грань
+//                else -> Color.CYAN // Нижняя грань
         }
     }
 
@@ -212,11 +224,14 @@ class CubeActivity: ChildActivity() {
                         val x2 = event.getX(1)
                         val currentDistance = Math.abs(x1 - x2)
 
-                        if (currentDistance > startDistance && currentProgress < 100) {
+                        if (currentDistance < startDistance && currentProgress < 100) {
                             currentProgress += 1
-                        } else if (currentDistance < startDistance && currentProgress > 15) {
+                            startRender()
+                        } else if (currentDistance > startDistance && currentProgress > 15) {
                             currentProgress -= 1
+                            startRender()
                         }
+                        startDistance = currentDistance
                     }
                 }
             }
