@@ -9,7 +9,6 @@ import ru.tsu.visapp.filters.*
 import android.graphics.Bitmap
 import android.widget.EditText
 import android.widget.TextView
-import android.view.MotionEvent
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
@@ -228,16 +227,7 @@ class FiltersActivity: ChildActivity() {
                         size,
                         coefficient
                     )
-
-                    val resultBitmap = Bitmap.createBitmap(
-                        width,
-                        height,
-                        Bitmap.Config.ARGB_8888
-                    );
-                    imageEditor.setPixelsToBitmap(resultBitmap, pixels)
-
-                    // Наложение полученного изображения на исходное
-                    bitmap = imageEditor.overlayBitmaps(resultBitmap, bitmap)
+                    imageEditor.setPixelsToBitmap(bitmap, pixels)
                     imageView.setImageBitmap(bitmap)
                 }
 
