@@ -111,7 +111,7 @@ class FiltersActivity: ChildActivity() {
                 arrayOf(
                     Item(),
                     Item(10, 20, "Размер"),
-                    Item()
+                    Item(1, 10, "Эффект")
                 )
             ),
             Instruction(
@@ -331,24 +331,24 @@ class FiltersActivity: ChildActivity() {
             R.id.scalingImage -> {}
             R.id.retouchImage -> {
                 val size = currentInstruction.items[1].progress
+                val coefficient = currentInstruction.items[2].progress
 
                 imageView.setOnTouchListener { _, event ->
                     when (event.action) {
                         MotionEvent.ACTION_MOVE -> {
-                            val currentX = event.x.toInt()
-                            val currentY = event.y.toInt()
+                            val x = event.x.toInt()
+                            val y = event.y.toInt()
 
-                            updatePixelsInfo()
                             val result = retouching.retouch(
                                 pixels,
-                                currentX,
-                                currentY,
+                                x,
+                                y,
                                 size,
-                                10 // Пока не реализовано
+                                coefficient
                             )
                             imageEditor.setPixelsToBitmap(bitmap, result)
 
-                            println("Координаты нажатия: x=$currentX, y=$currentY")
+                            println("Координаты: x=$x, y=$y")
                         }
                     }
 
