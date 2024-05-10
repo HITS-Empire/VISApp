@@ -1,6 +1,5 @@
 package ru.tsu.visapp.filters
 
-import java.lang.Integer.min
 import android.graphics.Color
 import androidx.core.graphics.red
 import androidx.core.graphics.blue
@@ -90,9 +89,9 @@ class UnsharpMask {
         pixels.forEachIndexed { index, pixel ->
             val resultPixel = Color.argb(
                 pixel.alpha,
-                min(255, (pixel.red + coefficient * result[index].red).toInt()),
-                min(255, (pixel.green + coefficient * result[index].green).toInt()),
-                min(255, (pixel.blue + coefficient * result[index].blue).toInt())
+                (pixel.red + coefficient * result[index].red).toInt().coerceIn(0, 255),
+                (pixel.green + coefficient * result[index].green).toInt().coerceIn(0, 255),
+                (pixel.blue + coefficient * result[index].blue).toInt().coerceIn(0, 255)
             )
 
             result[index] = if (
