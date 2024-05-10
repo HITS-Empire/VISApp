@@ -57,7 +57,8 @@ class Retouching {
 
                 if (distance <= retouchSize.toDouble().pow(2)) {
                     val alpha = (
-                        coefficient * 255 * (1 - distance / retouchSize.toDouble().pow(2))
+                         255 * (1 - distance * (coefficient / 10) /
+                                    retouchSize.toDouble().pow(2))
                     ).toInt()
 
                     pixelsEditor.setPixel(
