@@ -109,7 +109,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.retouchImage,
                 arrayOf(
                     Item(),
-                    Item(10, 100, "Размер"),
+                    Item(5, 50, "Размер"),
                     Item(10, 10, "Эффект")
                 )
             ),
@@ -228,7 +228,16 @@ class FiltersActivity: ChildActivity() {
                         size,
                         coefficient
                     )
-                    imageEditor.setPixelsToBitmap(bitmap, pixels)
+
+                    val resultBitmap = Bitmap.createBitmap(
+                        width,
+                        height,
+                        Bitmap.Config.ARGB_8888
+                    );
+                    imageEditor.setPixelsToBitmap(resultBitmap, pixels)
+
+                    // Наложение полученного изображения на исходное
+                    bitmap = imageEditor.overlayBitmaps(resultBitmap, bitmap)
                     imageView.setImageBitmap(bitmap)
                 }
 

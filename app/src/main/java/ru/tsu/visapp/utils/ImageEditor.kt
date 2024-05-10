@@ -12,7 +12,15 @@ import android.graphics.BitmapFactory
 import androidx.fragment.app.Fragment
 import android.content.ContentResolver
 import android.content.SharedPreferences
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 
 /*
  * Вспомогательные методы для работы с изображениями
@@ -24,6 +32,23 @@ class ImageEditor {
     private val albumName = "VISApp"
     private val albumRelativePath = "${Environment.DIRECTORY_PICTURES}/$albumName"
     private val albumFile = File(albumRelativePath)
+
+    // Наложение одного bitmap на другой
+    fun overlayBitmaps(bitmap1: Bitmap, bitmap2: Bitmap): Bitmap {
+        val resultBitmap = Bitmap.createBitmap(bitmap1.width, bitmap1.height, bitmap1.config)
+        val canvas = Canvas(resultBitmap)
+
+        val paint = Paint()
+
+        // Наложение первого изображения
+        canvas.drawBitmap(bitmap1, 0f, 0f, paint)
+
+        // Наложение второго изображения с учетом прозрачности
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER)
+        canvas.drawBitmap(bitmap2, 0f, 0f, paint)
+
+        return resultBitmap
+    }
 
     // Получить координаты картинки по нажатию на View
     fun getPointFromImageView(
