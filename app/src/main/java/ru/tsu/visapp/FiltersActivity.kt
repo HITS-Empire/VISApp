@@ -5,16 +5,17 @@ import android.widget.Toast
 import java.lang.Integer.min
 import java.lang.Integer.max
 import android.widget.SeekBar
+import ru.tsu.visapp.filters.*
 import android.graphics.Bitmap
 import android.widget.EditText
 import android.widget.TextView
+import android.view.MotionEvent
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
+import android.annotation.SuppressLint
 import ru.tsu.visapp.utils.ImageEditor
 import androidx.lifecycle.lifecycleScope
-import ru.tsu.visapp.filters.UnsharpMask
-import ru.tsu.visapp.filters.ImageRotation
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
@@ -44,12 +45,14 @@ class FiltersActivity: ChildActivity() {
     private lateinit var currentInstruction: Instruction // Текущая инструкция
 
     private val imageEditor = ImageEditor() // Редактор изображений
-    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
     private val imageRotation = ImageRotation() // Поворот изображения
+    private val retouching = Retouching() // Ретушь
+    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
@@ -90,7 +93,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage,
                 arrayOf(
                     Item(),
-                    Item(0, 360, "Угол", "°"),
+                    Item(0, 359, "Угол", "°"),
                     Item()
                 )
             ),
@@ -106,8 +109,8 @@ class FiltersActivity: ChildActivity() {
                 R.id.retouchImage,
                 arrayOf(
                     Item(),
-                    Item(10, 20, "Размер"),
-                    Item()
+                    Item(10, 100, "Размер"),
+                    Item(10, 10, "Эффект")
                 )
             ),
             Instruction(
@@ -198,6 +201,37 @@ class FiltersActivity: ChildActivity() {
 
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
         }
+
+        imageView.setOnTouchListener { _, event ->
+            if (currentImage.id == R.id.retouchImage) {
+                val size = currentInstruction.items[1].progress
+                val coefficient = currentInstruction.items[2].progress
+
+                when (event.action) {
+                    MotionEvent.ACTION_MOVE -> {
+                        val x = event.x.toInt()
+                        val y = event.y.toInt()
+
+                        /*
+                         * Сделать здесь скейл координат!!!
+                         * Иначе не работает
+                         */
+
+                        retouching.retouch(
+                            pixels,
+                            width,
+                            height,
+                            x,
+                            y,
+                            size,
+                            coefficient
+                        )
+                        imageEditor.setPixelsToBitmap(bitmap, pixels)
+                    }
+                }
+            }
+            true
+        }
     }
 
     // Получить пиксели изображения
@@ -226,9 +260,7 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
-
                 R.id.scalingImage -> {}
-                R.id.retouchImage -> {}
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
@@ -243,7 +275,6 @@ class FiltersActivity: ChildActivity() {
                         threshold
                     ))
                 }
-
                 R.id.affinisImage -> {}
             }
 
