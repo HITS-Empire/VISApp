@@ -9,7 +9,6 @@ import ru.tsu.visapp.filters.*
 import android.graphics.Bitmap
 import android.widget.EditText
 import android.widget.TextView
-import android.view.MotionEvent
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
@@ -109,7 +108,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.retouchImage,
                 arrayOf(
                     Item(),
-                    Item(10, 100, "Размер"),
+                    Item(5, 50, "Размер"),
                     Item(10, 10, "Эффект")
                 )
             ),

@@ -2,10 +2,10 @@ package ru.tsu.visapp.filters
 
 import kotlin.math.pow
 import android.graphics.Color
-import androidx.core.graphics.alpha
 import androidx.core.graphics.red
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
+import androidx.core.graphics.alpha
 import ru.tsu.visapp.utils.PixelsEditor
 
 class Retouching {
@@ -56,18 +56,25 @@ class Retouching {
                 val distance = a + b
 
                 if (distance <= retouchSize.toDouble().pow(2)) {
+                    val color = pixelsEditor.getPixel(i, j) ?: 0
                     val alpha = (
-                        coefficient * 255 * (1 - distance / retouchSize.toDouble().pow(2))
-                    ).toInt()
+                        1 - coefficient / 11
+                    ) * (
+                        1 - distance / retouchSize.toDouble().pow(2)
+                    )
+
+                    val red = color.red * (1 - alpha) + totalRed * alpha
+                    val green = color.green * (1 - alpha) + totalGreen * alpha
+                    val blue = color.blue * (1 - alpha) + totalBlue * alpha
 
                     pixelsEditor.setPixel(
                         i,
                         j,
                         Color.argb(
-                            alpha.coerceIn(0, 255),
-                            totalRed.coerceIn(0, 255),
-                            totalGreen.coerceIn(0, 255),
-                            totalBlue.coerceIn(0, 255)
+                            color.alpha,
+                            red.toInt(),
+                            green.toInt(),
+                            blue.toInt()
                         )
                     )
                 }
