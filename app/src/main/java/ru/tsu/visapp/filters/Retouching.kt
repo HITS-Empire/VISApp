@@ -7,18 +7,29 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.alpha
 import ru.tsu.visapp.utils.PixelsEditor
+import kotlin.math.min
 
 class Retouching {
+    private fun retouchScale(
+        retouchSize: Int,
+        width: Int,
+        height: Int
+    ): Int {
+        return ((retouchSize.toDouble() / 101) * min(width, height) / 2).toInt()
+    }
+
     fun retouch(
         pixels: IntArray,
         width: Int,
         height: Int,
         x: Int,
         y: Int,
-        retouchSize: Int,
+        initRetouchSize: Int,
         coefficient: Int
     ) {
         val pixelsEditor = PixelsEditor(pixels, width, height)
+
+        val retouchSize = retouchScale(initRetouchSize, width, height)
 
         val centerX = x.coerceIn(retouchSize, width - 1 - retouchSize)
         val centerY = y.coerceIn(retouchSize, height - 1 - retouchSize)
@@ -58,10 +69,8 @@ class Retouching {
                 if (distance <= retouchSize.toDouble().pow(2)) {
                     val color = pixelsEditor.getPixel(i, j) ?: 0
                     val alpha = (
-                        1 - coefficient / 11
-                    ) * (
                         1 - distance / retouchSize.toDouble().pow(2)
-                    )
+                    ) * ((coefficient + 5).toDouble() / 16)
 
                     val red = color.red * (1 - alpha) + totalRed * alpha
                     val green = color.green * (1 - alpha) + totalGreen * alpha
