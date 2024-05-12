@@ -109,7 +109,7 @@ class FiltersActivity: ChildActivity() {
                 arrayOf(
                     Item(),
                     Item(5, 100, "Размер"),
-                    Item(10, 10, "Эффект")
+                    Item(5, 10, "Эффект")
                 )
             ),
             Instruction(
