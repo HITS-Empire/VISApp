@@ -59,7 +59,7 @@ class FiltersActivity: ChildActivity() {
         imageView = findViewById(R.id.filtersImageView)
 
         title = System.currentTimeMillis().toString()
-        imageEditor.setContentResolverToEditor(contentResolver)
+        imageEditor.contentResolver = contentResolver
 
         seekBarLayouts = arrayOf(
             findViewById(R.id.firstSeekBarLayout),

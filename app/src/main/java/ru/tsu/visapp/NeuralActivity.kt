@@ -18,7 +18,7 @@ class NeuralActivity: ChildActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_neural)
-        imageEditor.setContentResolverToEditor(contentResolver)
+        imageEditor.contentResolver = contentResolver
 
         ImageGetter(this, null, findFaces)
 

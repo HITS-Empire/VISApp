@@ -25,10 +25,6 @@ class ImageEditor {
     private val albumRelativePath = "${Environment.DIRECTORY_PICTURES}/$albumName"
     private val albumFile = File(albumRelativePath)
 
-    fun setContentResolverToEditor(initResolver: ContentResolver) {
-        contentResolver = initResolver
-    }
-
     // Получить координаты картинки по нажатию на View
     fun getPointFromImageView(
         view: View,
