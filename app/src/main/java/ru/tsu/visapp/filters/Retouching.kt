@@ -57,9 +57,7 @@ class Retouching {
 
                 if (distance <= retouchSize.toDouble().pow(2)) {
                     val color = pixelsEditor.getPixel(i, j) ?: 0
-                    val alpha = (
-                        1 - coefficient / 11
-                    ) * (
+                    val alpha =  (
                         1 - distance / retouchSize.toDouble().pow(2)
                     )
 

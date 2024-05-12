@@ -108,7 +108,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.retouchImage,
                 arrayOf(
                     Item(),
-                    Item(5, 50, "Размер"),
+                    Item(5, 100, "Размер"),
                     Item(10, 10, "Эффект")
                 )
             ),
