@@ -33,13 +33,10 @@ class NeuralActivity: ChildActivity() {
 
         ImageGetter(this, null, findFaces)
 
-        assets.open("deploy.prototxt")
-        assets.open("ssd.caffemodel")
+        val pathProto = getPath("deploy.prototxt")
+        val pathCaffe = getPath("ssd.caffemodel")
 
-        val path_proto = getPath("deploy.prototxt")
-        val path_caffe = getPath("ssd.caffemodel")
-
-        net = Dnn.readNetFromCaffe(path_proto, path_caffe)
+        net = Dnn.readNetFromCaffe(pathProto, pathCaffe)
     }
 
     private val findFaces = fun () {
