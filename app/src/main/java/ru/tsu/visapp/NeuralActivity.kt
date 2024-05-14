@@ -1,12 +1,16 @@
 package ru.tsu.visapp
 
-import android.graphics.Bitmap
+import java.io.File
 import android.os.Bundle
-import android.widget.ImageView
-import org.opencv.android.OpenCVLoader
-import org.opencv.android.Utils
+import org.opencv.dnn.Dnn
+import org.opencv.dnn.Net
 import org.opencv.core.Mat
-import org.opencv.dnn.*
+import android.graphics.Bitmap
+import android.widget.ImageView
+import org.opencv.android.Utils
+import java.io.FileOutputStream
+import java.io.BufferedInputStream
+import org.opencv.android.OpenCVLoader
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.ImageGetter
 
@@ -29,7 +33,9 @@ class NeuralActivity: ChildActivity() {
 
         ImageGetter(this, null, findFaces)
 
-        val path = "C:/Users/Legion/Documents/GitHub/VISApp/app/src/main/resources/neuralNetwork/ssd.onnx"
+        assets.open("ssd.onnx")
+
+        val path = getPath("ssd.onnx")
         net = Dnn.readNetFromONNX(path)
     }
 
@@ -47,5 +53,24 @@ class NeuralActivity: ChildActivity() {
 
         // Установить картинку
         imageView.setImageBitmap(bitmap)
+    }
+
+    // Получить путь к файлу из ресурсов
+    private fun getPath(name: String): String {
+        val inputStream = BufferedInputStream(assets.open(name))
+        val data = ByteArray(inputStream.available()) { 0 }
+        inputStream.apply {
+            read(data)
+            close()
+        }
+
+        val file = File(filesDir, name)
+        val outputStream = FileOutputStream(file)
+        outputStream.apply {
+            write(data)
+            close()
+        }
+
+        return file.absolutePath
     }
 }
