@@ -81,7 +81,7 @@ class NeuralActivity: ChildActivity() {
         val rows: Int = frame.rows()
 
         // Порог уверенности модели в предсказании
-        val threshold = 0.5
+        val threshold = 0.25
 
         // Отрисовка bounding boxes на изображении
         for (i in 0 until detections.rows()) {
