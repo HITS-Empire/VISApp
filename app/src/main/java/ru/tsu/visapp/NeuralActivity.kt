@@ -97,7 +97,7 @@ class NeuralActivity: ChildActivity() {
                     frame,
                     Point(left.toDouble(), top.toDouble()),
                     Point(right.toDouble(), bottom.toDouble()),
-                    Scalar(0.0, 255.0, 0.0)
+                    Scalar(43.0, 203.0, 17.0)
                 )
             }
         }
