@@ -47,11 +47,12 @@ class FiltersActivity: ChildActivity() {
     private val imageRotation = ImageRotation() // Поворот изображения
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
+    private val colorCorrection = ColorCorrection() // Цветокоррекция
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
@@ -120,7 +121,15 @@ class FiltersActivity: ChildActivity() {
                     Item(0, 100, "Изогелия")
                 )
             ),
-            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item()))
+            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item())),
+            Instruction(
+                R.id.colorCorrectionImage,
+                arrayOf(
+                    Item(0, 255, "Яркость"),
+                    Item(0, 255, "Насыщенность"),
+                    Item(0, 255, "Контраст")
+                )
+            )
         )
 
         // Получить картинку и установить её
@@ -135,7 +144,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
-            findViewById(R.id.affinisFrame)
+            findViewById(R.id.affinisFrame),
+            findViewById(R.id.colorCorrectionFrame)
         )
 
         // Иконки фильтров (для подсветки)
@@ -144,7 +154,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
-            findViewById(R.id.affinisImage)
+            findViewById(R.id.affinisImage),
+            findViewById(R.id.colorCorrectionImage)
         )
 
         changeFilter(imagesWithFilters[0])
@@ -280,6 +291,25 @@ class FiltersActivity: ChildActivity() {
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.affinisImage -> {}
+                R.id.colorCorrectionImage -> {
+                    val brightnessValue = currentInstruction.items[0].progress
+                    val saturationValue = currentInstruction.items[1].progress
+                    val contrastValue = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        colorCorrection.correctColor(
+                            pixels,
+                            width,
+                            height,
+                            brightnessValue,
+                            saturationValue,
+                            contrastValue
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
             }
 
             filterIsActive = false

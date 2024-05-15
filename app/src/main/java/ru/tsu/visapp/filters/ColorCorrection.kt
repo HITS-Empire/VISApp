@@ -7,21 +7,16 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.green
 import ru.tsu.visapp.utils.PixelsEditor
 
-class ColorFilters {
+class ColorCorrection {
     private lateinit var pixelsEditor: PixelsEditor
     private lateinit var pixelsEditorResult: PixelsEditor
+    private lateinit var resultPixels: IntArray
 
-    fun saturation(
-        pixels: IntArray,
+    private fun saturation(
         width: Int,
         height: Int,
         value: Int
-    ): IntArray {
-        val resultPixels = IntArray(pixels.size) { 0 }
-
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
-
+    ) {
         for (i in 0 ..< width) {
             for (j in 0 ..< height) {
                 val pixel = pixelsEditor.getPixel(i, j)
@@ -46,22 +41,14 @@ class ColorFilters {
                 pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
-
-        return resultPixels
     }
 
-    fun contrast(
-        pixels: IntArray,
+    private fun contrast(
         width: Int,
         height: Int,
         value: Int
-    ): IntArray {
-        val resultPixels = IntArray(pixels.size) { 0 }
-
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
-
-        var grayScale = 0
+    ) {
+        var meanGrayScale = 0
 
         // Высчитывание среднего значения серого для всего изображения
         for (i in 0 ..< width) {
@@ -72,7 +59,7 @@ class ColorFilters {
                 var green = pixel?.green ?: 0
                 var blue = pixel?.blue ?: 0
 
-                grayScale += (
+                meanGrayScale += (
                         red * 0.2126 +
                         green * 0.7152 +
                         blue * 0.0722
@@ -80,7 +67,7 @@ class ColorFilters {
             }
         }
 
-        grayScale /= (width * height)
+        meanGrayScale /= (width * height)
 
         for (i in 0 ..< width) {
             for (j in 0 ..< height) {
@@ -93,9 +80,9 @@ class ColorFilters {
 
                 val max = if (value < 0) 255 else 128
 
-                red += (red - grayScale) * value / max;
-                green += (green - grayScale) * value / max;
-                blue += (blue - grayScale) * value / max;
+                red += (red - meanGrayScale) * value / max;
+                green += (green - meanGrayScale) * value / max;
+                blue += (blue - meanGrayScale) * value / max;
 
                 red = red.coerceIn(0, 255)
                 green = green.coerceIn(0, 255)
@@ -104,21 +91,13 @@ class ColorFilters {
                 pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
-
-        return resultPixels
     }
 
-    fun brightness(
-        pixels: IntArray,
+    private fun brightness(
         width: Int,
         height: Int,
         value: Int
-    ): IntArray {
-        val resultPixels = IntArray(pixels.size) { 0 }
-
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
-
+    ) {
         for (i in 0 ..< width) {
             for (j in 0 ..< height) {
                 val pixel = pixelsEditor.getPixel(i, j)
@@ -139,6 +118,41 @@ class ColorFilters {
                 pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
+    }
+
+    fun correctColor(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        brightnessValue: Int,
+        saturationValue: Int,
+        contrastValue: Int
+    ): IntArray {
+        resultPixels = IntArray(pixels.size) { 0 }
+
+        pixelsEditor = PixelsEditor(pixels, width, height)
+        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
+
+        // Яркость
+        brightness(
+            width,
+            height,
+            brightnessValue
+        )
+
+        // Насыщенность
+        saturation(
+            width,
+            height,
+            saturationValue
+        )
+
+        // Контраст
+        contrast(
+            width,
+            height,
+            contrastValue
+        )
 
         return resultPixels
     }

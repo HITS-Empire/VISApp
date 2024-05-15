@@ -20,4 +20,5 @@
     <string name="title_cube">3D-куб</string>
     <string name="title_cube_seekbar">Отдаление</string>
     <string name="percent">%</string>
+    <string name="filters_color_correction">Коррекция</string>
 </resources>
