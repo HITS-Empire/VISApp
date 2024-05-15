@@ -7,6 +7,7 @@ import org.opencv.dnn.Net
 import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.core.Scalar
+import org.opencv.imgproc.Imgproc
 import android.graphics.Bitmap
 import android.widget.ImageView
 import org.opencv.android.Utils
@@ -53,9 +54,15 @@ class NeuralActivity: ChildActivity() {
         val mat = Mat()
         Utils.bitmapToMat(bitmap, mat)
 
+        // Приведение изображения к верному размеру и формату
+        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGBA2RGB)
+
+        val resizedMat = Mat()
+        Imgproc.resize(mat, resizedMat, Size(300.0, 300.0))
+
         // Получение blob нового размера и с вычитанием среднего
         val blob = Dnn.blobFromImage(
-            mat,
+            resizedMat,
             1.0,
             Size(300.0, 300.0),
             Scalar(104.0, 177.0, 123.0)
