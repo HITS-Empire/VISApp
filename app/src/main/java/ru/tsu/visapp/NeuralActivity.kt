@@ -111,7 +111,7 @@ class NeuralActivity: ChildActivity() {
         Utils.matToBitmap(frame, result)
 
         // Установить картинку
-        imageView.setImageBitmap(bitmap)
+        imageView.setImageBitmap(result)
     }
 
     // Получить путь к файлу из ресурсов
