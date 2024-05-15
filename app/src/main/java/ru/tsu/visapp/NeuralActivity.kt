@@ -1,20 +1,19 @@
 package ru.tsu.visapp
 
-import android.graphics.Bitmap
-import android.graphics.Point
+import java.io.File
 import android.os.Bundle
-import android.widget.ImageView
-import org.opencv.android.OpenCVLoader
-import org.opencv.android.Utils
 import org.opencv.core.*
 import org.opencv.dnn.Dnn
 import org.opencv.dnn.Net
+import android.graphics.Bitmap
+import android.widget.ImageView
+import org.opencv.android.Utils
+import java.io.FileOutputStream
 import org.opencv.imgproc.Imgproc
+import java.io.BufferedInputStream
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.ImageGetter
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileOutputStream
+import org.opencv.android.OpenCVLoader
 
 /*
  * Экран для нейронной сети
@@ -23,8 +22,8 @@ import java.io.FileOutputStream
 class NeuralActivity: ChildActivity() {
     private val imageEditor = ImageEditor() // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
-    private lateinit var result: Bitmap // Результирующее изображение
     private lateinit var net: Net // Нейронная сеть
+    private val color = Scalar(43.0, 203.0, 17.0) // Цвет прямоугольника
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +41,22 @@ class NeuralActivity: ChildActivity() {
         net = Dnn.readNetFromCaffe(pathProto, pathCaffe)
     }
 
+    private fun scaleBoundingBox(
+        width: Int,
+        height: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
+    ): Array<Int> {
+        return arrayOf(
+            left * width / 300,
+            top * height / 300,
+            right * width / 300,
+            bottom * height / 300
+        )
+    }
+
     private val findFaces = fun () {
         // Получить imageView
         val imageView: ImageView = findViewById(R.id.neuralImageView)
@@ -55,9 +70,10 @@ class NeuralActivity: ChildActivity() {
         Utils.bitmapToMat(bitmap, mat)
 
         // Приведение изображения к верному размеру и формату
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGBA2RGB)
         val frame = Mat()
-        Imgproc.resize(mat, frame, Size(300.0, 300.0))
+        Imgproc.cvtColor(mat, frame, Imgproc.COLOR_RGBA2RGB)
+
+        Imgproc.resize(frame, frame, Size(300.0, 300.0))
 
         // Получение blob нового размера и с вычитанием среднего
         val blob = Dnn.blobFromImage(
@@ -81,37 +97,42 @@ class NeuralActivity: ChildActivity() {
         val rows: Int = frame.rows()
 
         // Порог уверенности модели в предсказании
-        val threshold = 0.25
+        val threshold = 0.4
 
         // Отрисовка bounding boxes на изображении
         for (i in 0 until detections.rows()) {
             val confidence = detections.get(i, 2)[0]
             if (confidence > threshold) {
-                val left = (detections.get(i, 3)[0] * cols).toInt()
-                val top = (detections.get(i, 4)[0] * rows).toInt()
-                val right = (detections.get(i, 5)[0] * cols).toInt()
-                val bottom = (detections.get(i, 6)[0] * rows).toInt()
+                val (left, top, right, bottom) = scaleBoundingBox(
+                    bitmap.width,
+                    bitmap.height,
+                    (detections.get(i, 3)[0] * cols).toInt(),
+                    (detections.get(i, 4)[0] * rows).toInt(),
+                    (detections.get(i, 5)[0] * cols).toInt(),
+                    (detections.get(i, 6)[0] * rows).toInt()
+                )
 
                 // Отрисовка прямоугольника вокруг обнаруженного объекта
                 Imgproc.rectangle(
-                    frame,
+                    mat,
                     Point(left.toDouble(), top.toDouble()),
                     Point(right.toDouble(), bottom.toDouble()),
-                    Scalar(43.0, 203.0, 17.0)
+                    color,
+                    3
                 )
             }
         }
 
-        // Перевести frame в bitmap
-        result = Bitmap.createBitmap(
-            frame.cols(),
-            frame.rows(),
+        // Перевести mat в bitmap
+        bitmap = Bitmap.createBitmap(
+            mat.cols(),
+            mat.rows(),
             Bitmap.Config.ARGB_8888
         )
-        Utils.matToBitmap(frame, result)
+        Utils.matToBitmap(mat, bitmap)
 
         // Установить картинку
-        imageView.setImageBitmap(result)
+        imageView.setImageBitmap(bitmap)
     }
 
     // Получить путь к файлу из ресурсов
