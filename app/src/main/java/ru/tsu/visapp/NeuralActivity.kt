@@ -5,6 +5,8 @@ import android.os.Bundle
 import org.opencv.dnn.Dnn
 import org.opencv.dnn.Net
 import org.opencv.core.Mat
+import org.opencv.core.Size
+import org.opencv.core.Scalar
 import android.graphics.Bitmap
 import android.widget.ImageView
 import org.opencv.android.Utils
@@ -47,9 +49,23 @@ class NeuralActivity: ChildActivity() {
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
 
-        // Логика работы нейросети
+        // Преобразование изображения в формат mat
         val mat = Mat()
         Utils.bitmapToMat(bitmap, mat)
+
+        // Получение blob нового размера и с вычитанием среднего
+        val blob = Dnn.blobFromImage(
+            mat,
+            1.0,
+            Size(300.0, 300.0),
+            Scalar(104.0, 177.0, 123.0)
+        )
+
+        net.setInput(blob)
+
+        val outputs = net.forward()
+
+        println(outputs.size())
 
         // Установить картинку
         imageView.setImageBitmap(bitmap)
