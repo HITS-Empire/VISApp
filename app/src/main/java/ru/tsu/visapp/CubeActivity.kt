@@ -109,22 +109,15 @@ class CubeActivity: ChildActivity() {
             .changeSign()
         )
 
-        //println("${camera.y - previousCamera.first}")
         return when {
-            t1.x > t1.y && t1.x > t1.z -> if (camera.y - previousCamera.first > 0) {
-                Color.RED
-            } else {
-                Color.GREEN
-            } // Передняя грань
-            t1.y > t1.x && t1.y > t1.z -> if (camera.y > 0) {
-                Color.BLUE
-            } else {
-                Color.YELLOW
-            } // Правая грань
-            else -> Color.WHITE // Верхняя грань
-//                t1.x < t1.y && t1.x < t1.z -> Color.GREEN // Нижняя грань
-//                t1.y < t1.x && t1.y < t1.z -> Color.YELLOW // Левая грань
-//                else -> Color.CYAN // Нижняя грань
+            t1.x > t1.y && t1.x > t1.z -> {
+                if (camera.x < 0) Color.RED else Color.GREEN
+            }
+            t1.y > t1.x && t1.y > t1.z -> {
+                if (camera.y < 0) Color.BLUE else Color.YELLOW
+            }
+            camera.z < 0 -> Color.WHITE
+            else -> Color.CYAN
         }
     }
 
