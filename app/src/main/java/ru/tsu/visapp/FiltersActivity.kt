@@ -5,14 +5,16 @@ import android.widget.Toast
 import java.lang.Integer.min
 import java.lang.Integer.max
 import android.widget.SeekBar
+import ru.tsu.visapp.filters.*
 import android.graphics.Bitmap
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ImageView
+import kotlinx.coroutines.launch
 import android.widget.FrameLayout
+import android.annotation.SuppressLint
 import ru.tsu.visapp.utils.ImageEditor
-import ru.tsu.visapp.filters.UnsharpMask
-import ru.tsu.visapp.filters.ImageRotation
+import androidx.lifecycle.lifecycleScope
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
@@ -42,12 +44,14 @@ class FiltersActivity: ChildActivity() {
     private lateinit var currentInstruction: Instruction // Текущая инструкция
 
     private val imageEditor = ImageEditor() // Редактор изображений
-    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
     private val imageRotation = ImageRotation() // Поворот изображения
+    private val retouching = Retouching() // Ретушь
+    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
@@ -88,7 +92,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage,
                 arrayOf(
                     Item(),
-                    Item(0, 360, "Угол", "°"),
+                    Item(0, 359, "Угол", "°"),
                     Item()
                 )
             ),
@@ -104,8 +108,8 @@ class FiltersActivity: ChildActivity() {
                 R.id.retouchImage,
                 arrayOf(
                     Item(),
-                    Item(10, 20, "Размер"),
-                    Item()
+                    Item(5, 100, "Размер"),
+                    Item(5, 10, "Эффект")
                 )
             ),
             Instruction(
@@ -196,43 +200,90 @@ class FiltersActivity: ChildActivity() {
 
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
         }
+
+        // События нажатия на картинку
+        imageView.setOnTouchListener { _, event ->
+            if (!filterIsActive && currentImage.id == R.id.retouchImage) {
+                filterIsActive = true
+
+                val point = imageEditor.getPointFromImageView(
+                    imageView,
+                    event.x,
+                    event.y,
+                    width,
+                    height
+                )
+
+                if (point != null) {
+                    val size = currentInstruction.items[1].progress
+                    val coefficient = currentInstruction.items[2].progress
+
+                    retouching.retouch(
+                        pixels,
+                        width,
+                        height,
+                        point[0],
+                        point[1],
+                        size,
+                        coefficient
+                    )
+                    imageEditor.setPixelsToBitmap(bitmap, pixels)
+                    imageView.setImageBitmap(bitmap)
+                }
+
+                filterIsActive = false
+            }
+            true
+        }
     }
 
     // Получить пиксели изображения
-    fun updatePixelsInfo() {
+    private fun updatePixelsInfo() {
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
         width = bitmap.width
         height = bitmap.height
     }
 
     // Запустить функцию фильтра
-    fun startFilter() {
+    private fun startFilter() {
         if (!filtersIsAvailable || filterIsActive) return
 
         filterIsActive = true
 
-        when (currentImage.id) {
-            R.id.rotateImage -> {
-                val angle = currentInstruction.items[1].progress
+        lifecycleScope.launch {
+            when (currentImage.id) {
+                R.id.rotateImage -> {
+                    val angle = currentInstruction.items[1].progress
 
-                bitmap = imageRotation.rotate(pixels, width, height, angle)
-                imageView.setImageBitmap(bitmap)
-            }
-            R.id.scalingImage -> {}
-            R.id.retouchImage -> {}
-            R.id.definitionImage -> {
-                val percent = currentInstruction.items[0].progress
-                val radius = currentInstruction.items[1].progress
-                val threshold = currentInstruction.items[2].progress
+                    bitmap = imageRotation.rotate(
+                        pixels,
+                        width,
+                        height,
+                        angle
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.scalingImage -> {}
+                R.id.definitionImage -> {
+                    val percent = currentInstruction.items[0].progress
+                    val radius = currentInstruction.items[1].progress
+                    val threshold = currentInstruction.items[2].progress
 
-                // val result = unsharpMask.usm(pixels2d, radius, percent, threshold)
-                // val newBitmap = imageEditor.pixelsToBitmap(result)
-                // imageView.setImageBitmap(newBitmap)
+                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
+                        pixels,
+                        width,
+                        height,
+                        radius,
+                        percent,
+                        threshold
+                    ))
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.affinisImage -> {}
             }
-            R.id.affinisImage -> {}
+
+            filterIsActive = false
         }
-
-        filterIsActive = false
     }
 
     // События ползунка
@@ -249,7 +300,7 @@ class FiltersActivity: ChildActivity() {
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
-        override fun onStopTrackingTouch(seekBar: SeekBar) = startFilter()
+        override fun onStopTrackingTouch(seekBar: SeekBar) {}
     }
 
     // Получить нужную инструкцию для фильтра

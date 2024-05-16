@@ -1,10 +1,9 @@
 package ru.tsu.visapp
 
-import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.view.View
+import android.graphics.Bitmap
 import android.widget.ImageView
+import org.opencv.android.OpenCVLoader
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.ImageGetter
 
@@ -19,8 +18,11 @@ class NeuralActivity: ChildActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_neural)
+        imageEditor.contentResolver = contentResolver
 
         ImageGetter(this, null, findFaces)
+
+        OpenCVLoader.initDebug()
     }
 
     private val findFaces = fun () {
