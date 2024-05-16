@@ -141,7 +141,12 @@ class FiltersActivity: ChildActivity() {
                 )
             ),
             Instruction(
-                R.id.inversionImage, arrayOf(Item(), Item(), Item())
+                R.id.inversionImage,
+                arrayOf(
+                    Item(0, 1, "Красный"),
+                    Item(0, 1, "Зеленый"),
+                    Item(0, 1, "Синий")
+                )
             )
         )
 
@@ -346,7 +351,28 @@ class FiltersActivity: ChildActivity() {
 
                     imageView.setImageBitmap(bitmap)
                 }
-                R.id.inversionImage -> {}
+                R.id.inversionImage -> {
+                    val isRedInverting =
+                        currentInstruction.items[0].progress == 1
+                    val isGreenInverting =
+                        currentInstruction.items[1].progress == 1
+                    val isBlueInverting =
+                        currentInstruction.items[2].progress == 1
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        inversion.inverse(
+                            pixels,
+                            width,
+                            height,
+                            isRedInverting,
+                            isGreenInverting,
+                            isBlueInverting
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
             }
 
             filterIsActive = false

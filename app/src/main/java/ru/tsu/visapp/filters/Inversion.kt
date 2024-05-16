@@ -17,9 +17,9 @@ class Inversion {
         pixels: IntArray,
         width: Int,
         height: Int,
-        isRed: Boolean,
-        isGreen: Boolean,
-        isBlue: Boolean
+        isRedInverting: Boolean,
+        isGreenInverting: Boolean,
+        isBlueInverting: Boolean
     ): IntArray {
         resultPixels = IntArray(pixels.size) { 0 }
 
@@ -35,9 +35,9 @@ class Inversion {
                 var green = pixel?.green ?: 0
                 var blue = pixel?.blue ?: 0
 
-                if (isRed) red = (255 - red).coerceIn(0, 255)
-                if (isGreen) green = (255 - green).coerceIn(0, 255)
-                if (isBlue) blue = (255 - blue).coerceIn(0, 255)
+                if (isRedInverting) red = (255 - red).coerceIn(0, 255)
+                if (isGreenInverting) green = (255 - green).coerceIn(0, 255)
+                if (isBlueInverting) blue = (255 - blue).coerceIn(0, 255)
 
                 pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
