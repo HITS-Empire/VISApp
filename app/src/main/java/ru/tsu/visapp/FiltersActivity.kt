@@ -48,6 +48,7 @@ class FiltersActivity: ChildActivity() {
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
     private val colorCorrection = ColorCorrection() // Цветокоррекция
+    private val coloring = Coloring() // Цвета
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
@@ -129,6 +130,14 @@ class FiltersActivity: ChildActivity() {
                     Item(0, 255, "Насыщенность"),
                     Item(0, 255, "Контраст")
                 )
+            ),
+            Instruction(
+                R.id.coloringImage,
+                arrayOf(
+                    Item(0, 255, "Красный"),
+                    Item(0, 255, "Зеленый"),
+                    Item(0, 255, "Синий")
+                )
             )
         )
 
@@ -145,7 +154,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
             findViewById(R.id.affinisFrame),
-            findViewById(R.id.colorCorrectionFrame)
+            findViewById(R.id.colorCorrectionFrame),
+            findViewById(R.id.coloringFrame)
         )
 
         // Иконки фильтров (для подсветки)
@@ -155,7 +165,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
             findViewById(R.id.affinisImage),
-            findViewById(R.id.colorCorrectionImage)
+            findViewById(R.id.colorCorrectionImage),
+            findViewById(R.id.coloringImage)
         )
 
         changeFilter(imagesWithFilters[0])
@@ -305,6 +316,26 @@ class FiltersActivity: ChildActivity() {
                             brightnessValue,
                             saturationValue,
                             contrastValue
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
+
+                R.id.coloringImage -> {
+                    val redValue = currentInstruction.items[0].progress
+                    val greenValue = currentInstruction.items[1].progress
+                    val blueValue = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        coloring.coloring(
+                            pixels,
+                            width,
+                            height,
+                            redValue,
+                            greenValue,
+                            blueValue
                         )
                     )
 
