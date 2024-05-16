@@ -49,6 +49,7 @@ class FiltersActivity: ChildActivity() {
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
     private val colorCorrection = ColorCorrection() // Цветокоррекция
     private val coloring = Coloring() // Цвета
+    private val inversion = Inversion() // Инверсия
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
@@ -138,6 +139,9 @@ class FiltersActivity: ChildActivity() {
                     Item(0, 255, "Зеленый"),
                     Item(0, 255, "Синий")
                 )
+            ),
+            Instruction(
+                R.id.inversionImage, arrayOf(Item(), Item(), Item())
             )
         )
 
@@ -155,7 +159,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.definitionFrame),
             findViewById(R.id.affinisFrame),
             findViewById(R.id.colorCorrectionFrame),
-            findViewById(R.id.coloringFrame)
+            findViewById(R.id.coloringFrame),
+            findViewById(R.id.inversionFrame),
         )
 
         // Иконки фильтров (для подсветки)
@@ -166,7 +171,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.definitionImage),
             findViewById(R.id.affinisImage),
             findViewById(R.id.colorCorrectionImage),
-            findViewById(R.id.coloringImage)
+            findViewById(R.id.coloringImage),
+            findViewById(R.id.inversionImage)
         )
 
         changeFilter(imagesWithFilters[0])
@@ -321,7 +327,6 @@ class FiltersActivity: ChildActivity() {
 
                     imageView.setImageBitmap(bitmap)
                 }
-
                 R.id.coloringImage -> {
                     val redValue = currentInstruction.items[0].progress
                     val greenValue = currentInstruction.items[1].progress
@@ -341,6 +346,7 @@ class FiltersActivity: ChildActivity() {
 
                     imageView.setImageBitmap(bitmap)
                 }
+                R.id.inversionImage -> {}
             }
 
             filterIsActive = false
@@ -390,6 +396,9 @@ class FiltersActivity: ChildActivity() {
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
                 R.id.affinisImage -> {}
+                R.id.colorCorrectionImage -> {}
+                R.id.coloringImage -> {}
+                R.id.inversionImage -> {}
             }
         }
         image.background = AppCompatResources.getDrawable(
@@ -418,6 +427,8 @@ class FiltersActivity: ChildActivity() {
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}
             R.id.affinisImage -> {}
+            R.id.coloringImage -> {}
+            R.id.inversionImage -> {}
         }
         currentImage = image
         updatePixelsInfo()

@@ -401,6 +401,27 @@
                     android:textColor="@color/white" />
             </FrameLayout>
 
+            <FrameLayout
+                android:id="@+id/inversionFrame"
+                android:layout_width="192dp"
+                android:layout_height="96dp">
+
+                <ImageView
+                    android:id="@+id/inversionImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/inversionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_inversion"
+                    android:textColor="@color/white" />
+            </FrameLayout>
+
         </LinearLayout>
     </ScrollView>
 
