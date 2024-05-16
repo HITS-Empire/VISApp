@@ -10,6 +10,7 @@
     <string name="filters_retouch">Ретушь</string>
     <string name="filters_definition">Чёткость</string>
     <string name="filters_affinis">Аффинис</string>
+    <string name="filters_color_correction">Коррекция</string>
     <string name="interesting_stenography">Стенография</string>
     <string name="interesting_neural">Нейросеть</string>
     <string name="interesting_vector">Вектор</string>
@@ -20,5 +21,4 @@
     <string name="title_cube">3D-куб</string>
     <string name="title_cube_seekbar">Отдаление</string>
     <string name="percent">%</string>
-    <string name="filters_color_correction">Коррекция</string>
 </resources>
