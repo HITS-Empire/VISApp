@@ -10,6 +10,7 @@ import ru.tsu.visapp.utils.PixelsEditor
 class ColorCorrection {
     private lateinit var pixelsEditor: PixelsEditor
     private lateinit var pixelsEditorResult: PixelsEditor
+
     private lateinit var resultPixels: IntArray
 
     private fun brightness(
@@ -85,7 +86,7 @@ class ColorCorrection {
         meanGrayScale /= (width * height)
 
         for (i in 0 ..< width) {
-            for (j in 0..<height) {
+            for (j in 0..< height) {
                 val pixel = pixelsEditor.getPixel(i, j)
 
                 val alpha = pixel?.alpha ?: 0
