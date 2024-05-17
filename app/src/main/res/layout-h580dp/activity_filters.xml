@@ -368,6 +368,50 @@
 
             </FrameLayout>
 
+            <FrameLayout
+                android:id="@+id/colorCorrectionFrame"
+                android:layout_width="96dp"
+                android:layout_height="128dp">
+
+                <ImageView
+                    android:id="@+id/colorCorrectionImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/colorCorrectionTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_color_correction"
+                    android:textColor="@color/white" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/coloringFrame"
+                android:layout_width="96dp"
+                android:layout_height="128dp">
+
+                <ImageView
+                    android:id="@+id/coloringImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/coloringTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_coloring"
+                    android:textColor="@color/white" />
+
+            </FrameLayout>
+
         </LinearLayout>
     </HorizontalScrollView>
 

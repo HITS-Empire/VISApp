@@ -1,5 +1,6 @@
 package ru.tsu.visapp.filters
 
+import kotlin.math.min
 import kotlin.math.pow
 import android.graphics.Color
 import androidx.core.graphics.red
@@ -7,7 +8,6 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.alpha
 import ru.tsu.visapp.utils.PixelsEditor
-import kotlin.math.min
 
 class Retouching {
     private fun retouchScale(
