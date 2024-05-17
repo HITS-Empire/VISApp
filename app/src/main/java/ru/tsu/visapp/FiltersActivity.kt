@@ -50,6 +50,7 @@ class FiltersActivity: ChildActivity() {
     private val colorCorrection = ColorCorrection() // Цветокоррекция
     private val coloring = Coloring() // Цвета
     private val inversion = Inversion() // Инверсия
+    private val popArt = PopArt() // Поп арт
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
@@ -147,6 +148,14 @@ class FiltersActivity: ChildActivity() {
                     Item(0, 1, "Зеленый"),
                     Item(0, 1, "Синий")
                 )
+            ),
+            Instruction(
+                R.id.popArtImage,
+                arrayOf(
+                    Item(),
+                    Item(0, 255, "Порог 1"),
+                    Item(0, 255, "Порог 2")
+                )
             )
         )
 
@@ -166,6 +175,7 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.colorCorrectionFrame),
             findViewById(R.id.coloringFrame),
             findViewById(R.id.inversionFrame),
+            findViewById(R.id.popArtFrame)
         )
 
         // Иконки фильтров (для подсветки)
@@ -177,7 +187,8 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.affinisImage),
             findViewById(R.id.colorCorrectionImage),
             findViewById(R.id.coloringImage),
-            findViewById(R.id.inversionImage)
+            findViewById(R.id.inversionImage),
+            findViewById(R.id.popArtImage)
         )
 
         changeFilter(imagesWithFilters[0])
@@ -368,6 +379,23 @@ class FiltersActivity: ChildActivity() {
                             isRedInverting,
                             isGreenInverting,
                             isBlueInverting
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.popArtImage -> {
+                    val threshold1 = currentInstruction.items[1].progress
+                    val threshold2 = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        popArt.popArtFiltering(
+                            pixels,
+                            width,
+                            height,
+                            threshold1,
+                            threshold2
                         )
                     )
 

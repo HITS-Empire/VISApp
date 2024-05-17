@@ -422,6 +422,27 @@
                     android:textColor="@color/white" />
             </FrameLayout>
 
+            <FrameLayout
+                android:id="@+id/popArtFrame"
+                android:layout_width="192dp"
+                android:layout_height="96dp">
+
+                <ImageView
+                    android:id="@+id/popArtImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/popArtTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_pop_art"
+                    android:textColor="@color/white" />
+            </FrameLayout>
+
         </LinearLayout>
     </ScrollView>
 

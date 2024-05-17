@@ -13,6 +13,7 @@
     <string name="filters_color_correction">Коррекция</string>
     <string name="filters_coloring">Цвета</string>
     <string name="filters_inversion">Инверсия</string>
+    <string name="filters_pop_art">Поп арт</string>
     <string name="interesting_neural">Нейросеть</string>
     <string name="interesting_vector">Вектор</string>
     <string name="interesting_cube">3D-куб</string>
