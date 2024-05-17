@@ -2,15 +2,13 @@ package ru.tsu.visapp
 
 import kotlin.math.*
 import android.os.Bundle
-import android.widget.SeekBar
 import android.graphics.Color
 import android.graphics.Bitmap
-import android.widget.EditText
 import android.view.MotionEvent
 import android.widget.ImageView
 import ru.tsu.visapp.utils.cube.*
 import ru.tsu.visapp.utils.ImageEditor
-import androidx.core.widget.addTextChangedListener
+import android.annotation.SuppressLint
 
 /*
  * Экран для 3D-куба
@@ -21,8 +19,6 @@ class CubeActivity: ChildActivity() {
     private val height = 100
     private val ratioOfScreen = (width / height).toFloat()
 
-    private lateinit var seekBar: SeekBar // Ползунок
-    private lateinit var seekBarEditor: EditText // Отображение текущего значения
     private var currentProgress = 25 // Текущий прогресс в процентах
 
     private lateinit var bitmap: Bitmap
@@ -121,53 +117,13 @@ class CubeActivity: ChildActivity() {
         renderCube(previousAngle.first, previousAngle.second)
     }
 
-    private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            if (!fromUser) return
-
-            seekBarEditor.setText(progress.toString())
-            startRender()
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar) {}
-        override fun onStopTrackingTouch(seekBar: SeekBar) {}
-    }
-
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         initializeView(R.layout.activity_cube)
 
         imageView = findViewById(R.id.cubeImageView)
-
-        seekBar = findViewById(R.id.cubeSeekBar)
-        seekBarEditor = findViewById(R.id.cubeSeekBarEditor)
-
-        seekBar.progress = currentProgress
-        seekBarEditor.setText(currentProgress.toString())
-
-        seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
-
-        seekBarEditor.addTextChangedListener { editable ->
-            val text = editable.toString()
-            val progress = Integer.min(
-                100,
-                Integer.max(
-                    0,
-                    if (text == "") 0 else text.toInt()
-                )
-            )
-            val trim = progress.toString()
-
-            if (text == trim) {
-                currentProgress = progress
-                seekBar.progress = progress
-
-                startRender()
-            } else {
-                seekBarEditor.setText(trim)
-            }
-        }
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
