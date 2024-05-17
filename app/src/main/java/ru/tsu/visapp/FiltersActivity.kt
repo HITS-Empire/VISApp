@@ -12,8 +12,8 @@ import android.widget.TextView
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
-import android.annotation.SuppressLint
 import ru.tsu.visapp.utils.ImageEditor
+import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
@@ -45,12 +45,13 @@ class FiltersActivity: ChildActivity() {
 
     private val imageEditor = ImageEditor() // Редактор изображений
     private val imageRotation = ImageRotation() // Поворот изображения
-    private val retouching = Retouching() // Ретушь
-    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
     private val colorCorrection = ColorCorrection() // Цветокоррекция
     private val coloring = Coloring() // Цвета
     private val inversion = Inversion() // Инверсия
     private val popArt = PopArt() // Поп арт
+    private val retouching = Retouching() // Ретушь
+    private val unsharpMask = UnsharpMask() // Нерезкое маскирование
+
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
@@ -96,8 +97,40 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage,
                 arrayOf(
                     Item(),
-                    Item(0, 359, "Угол", "°"),
+                    Item(0, 360, "Угол", "°"),
                     Item()
+                )
+            ),
+            Instruction(
+                R.id.correctionImage,
+                arrayOf(
+                    Item(0, 255, "Яркость"),
+                    Item(0, 255, "Насыщ."),
+                    Item(0, 255, "Контраст")
+                )
+            ),
+            Instruction(
+                R.id.coloringImage,
+                arrayOf(
+                    Item(0, 255, "Красный"),
+                    Item(0, 255, "Зеленый"),
+                    Item(0, 255, "Синий")
+                )
+            ),
+            Instruction(
+                R.id.inversionImage,
+                arrayOf(
+                    Item(0, 1, "Красный"),
+                    Item(0, 1, "Зеленый"),
+                    Item(0, 1, "Синий")
+                )
+            ),
+            Instruction(
+                R.id.popArtImage,
+                arrayOf(
+                    Item(),
+                    Item(0, 255, "Порог 1"),
+                    Item(0, 255, "Порог 2")
                 )
             ),
             Instruction(
@@ -125,38 +158,6 @@ class FiltersActivity: ChildActivity() {
                 )
             ),
             Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item())),
-            Instruction(
-                R.id.colorCorrectionImage,
-                arrayOf(
-                    Item(0, 255, "Яркость"),
-                    Item(0, 255, "Насыщенность"),
-                    Item(0, 255, "Контраст")
-                )
-            ),
-            Instruction(
-                R.id.coloringImage,
-                arrayOf(
-                    Item(0, 255, "Красный"),
-                    Item(0, 255, "Зеленый"),
-                    Item(0, 255, "Синий")
-                )
-            ),
-            Instruction(
-                R.id.inversionImage,
-                arrayOf(
-                    Item(0, 1, "Красный"),
-                    Item(0, 1, "Зеленый"),
-                    Item(0, 1, "Синий")
-                )
-            ),
-            Instruction(
-                R.id.popArtImage,
-                arrayOf(
-                    Item(),
-                    Item(0, 255, "Порог 1"),
-                    Item(0, 255, "Порог 2")
-                )
-            )
         )
 
         // Получить картинку и установить её
@@ -168,27 +169,27 @@ class FiltersActivity: ChildActivity() {
         // Окошки фильтров
         val framesWithFilters: Array<FrameLayout> = arrayOf(
             findViewById(R.id.rotateFrame),
+            findViewById(R.id.correctionFrame),
+            findViewById(R.id.coloringFrame),
+            findViewById(R.id.inversionFrame),
+            findViewById(R.id.popArtFrame),
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
-            findViewById(R.id.affinisFrame),
-            findViewById(R.id.colorCorrectionFrame),
-            findViewById(R.id.coloringFrame),
-            findViewById(R.id.inversionFrame),
-            findViewById(R.id.popArtFrame)
+            findViewById(R.id.affinisFrame)
         )
 
         // Иконки фильтров (для подсветки)
         val imagesWithFilters: Array<ImageView> = arrayOf(
             findViewById(R.id.rotateImage),
+            findViewById(R.id.correctionImage),
+            findViewById(R.id.coloringImage),
+            findViewById(R.id.inversionImage),
+            findViewById(R.id.popArtImage),
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
-            findViewById(R.id.affinisImage),
-            findViewById(R.id.colorCorrectionImage),
-            findViewById(R.id.coloringImage),
-            findViewById(R.id.inversionImage),
-            findViewById(R.id.popArtImage)
+            findViewById(R.id.affinisImage)
         )
 
         changeFilter(imagesWithFilters[0])
@@ -307,24 +308,7 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
-                R.id.scalingImage -> {}
-                R.id.definitionImage -> {
-                    val percent = currentInstruction.items[0].progress
-                    val radius = currentInstruction.items[1].progress
-                    val threshold = currentInstruction.items[2].progress
-
-                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
-                        pixels,
-                        width,
-                        height,
-                        radius,
-                        percent,
-                        threshold
-                    ))
-                    imageView.setImageBitmap(bitmap)
-                }
-                R.id.affinisImage -> {}
-                R.id.colorCorrectionImage -> {
+                R.id.correctionImage -> {
                     val brightnessValue = currentInstruction.items[0].progress
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
@@ -343,6 +327,7 @@ class FiltersActivity: ChildActivity() {
 
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.coloringImage -> {
                     val redValue = currentInstruction.items[0].progress
                     val greenValue = currentInstruction.items[1].progress
@@ -401,6 +386,23 @@ class FiltersActivity: ChildActivity() {
 
                     imageView.setImageBitmap(bitmap)
                 }
+                R.id.scalingImage -> {}
+                R.id.definitionImage -> {
+                    val percent = currentInstruction.items[0].progress
+                    val radius = currentInstruction.items[1].progress
+                    val threshold = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
+                        pixels,
+                        width,
+                        height,
+                        radius,
+                        percent,
+                        threshold
+                    ))
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.affinisImage -> {}
             }
 
             filterIsActive = false
@@ -446,13 +448,14 @@ class FiltersActivity: ChildActivity() {
 
             when (currentImage.id) {
                 R.id.rotateImage -> {}
+                R.id.correctionImage -> {}
+                R.id.coloringImage -> {}
+                R.id.inversionImage -> {}
+                R.id.popArtImage -> {}
                 R.id.scalingImage -> {}
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
                 R.id.affinisImage -> {}
-                R.id.colorCorrectionImage -> {}
-                R.id.coloringImage -> {}
-                R.id.inversionImage -> {}
             }
         }
         image.background = AppCompatResources.getDrawable(
@@ -477,12 +480,14 @@ class FiltersActivity: ChildActivity() {
 
         when (image.id) {
             R.id.rotateImage -> {}
+            R.id.correctionImage -> {}
+            R.id.coloringImage -> {}
+            R.id.inversionImage -> {}
+            R.id.popArtImage -> {}
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}
             R.id.affinisImage -> {}
-            R.id.coloringImage -> {}
-            R.id.inversionImage -> {}
         }
         currentImage = image
         updatePixelsInfo()
