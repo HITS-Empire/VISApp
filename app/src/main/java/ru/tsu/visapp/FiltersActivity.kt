@@ -51,7 +51,7 @@ class FiltersActivity: ChildActivity() {
     private val popArt = PopArt() // Поп арт
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
-
+    private val glitch = Glitch() // Глитч
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
@@ -134,6 +134,14 @@ class FiltersActivity: ChildActivity() {
                 )
             ),
             Instruction(
+                R.id.glitchImage,
+                arrayOf(
+                    Item(),
+                    Item(0, 100, "Эффект", "%"),
+                    Item()
+                )
+            ),
+            Instruction(
                 R.id.scalingImage,
                 arrayOf(
                     Item(),
@@ -173,6 +181,7 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.coloringFrame),
             findViewById(R.id.inversionFrame),
             findViewById(R.id.popArtFrame),
+            findViewById(R.id.glitchFrame),
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
@@ -186,6 +195,7 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.coloringImage),
             findViewById(R.id.inversionImage),
             findViewById(R.id.popArtImage),
+            findViewById(R.id.glitchImage),
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
@@ -393,6 +403,21 @@ class FiltersActivity: ChildActivity() {
 
                     imageView.setImageBitmap(bitmap)
                 }
+                R.id.glitchImage -> {
+                    val effect = currentInstruction.items[1].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        glitch.rgbGlitch(
+                            pixels,
+                            width,
+                            height,
+                            effect
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
                 R.id.scalingImage -> {}
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
@@ -459,6 +484,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.coloringImage -> {}
                 R.id.inversionImage -> {}
                 R.id.popArtImage -> {}
+                R.id.glitchImage -> {}
                 R.id.scalingImage -> {}
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
@@ -491,6 +517,7 @@ class FiltersActivity: ChildActivity() {
             R.id.coloringImage -> {}
             R.id.inversionImage -> {}
             R.id.popArtImage -> {}
+            R.id.glitchImage -> {}
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}
