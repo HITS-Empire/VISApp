@@ -34,10 +34,10 @@ class UnsharpMask {
                         val newY = j + y
 
                         if (newX in 0 ..< width && newY in 0 ..< height) {
-                            val neighbor = pixelsEditor.getPixel(newX, newY)
-                            totalRed += neighbor?.red ?: 0
-                            totalGreen += neighbor?.green ?: 0
-                            totalBlue += neighbor?.blue ?: 0
+                            val neighbor = pixelsEditor.getPixel(newX, newY) ?: 0
+                            totalRed += neighbor.red
+                            totalGreen += neighbor.green
+                            totalBlue += neighbor.blue
                             count++
                         }
                     }
@@ -89,9 +89,9 @@ class UnsharpMask {
         pixels.forEachIndexed { index, pixel ->
             val resultPixel = Color.argb(
                 pixel.alpha,
-                (pixel.red + coefficient * result[index].red).toInt().coerceIn(0, 255),
-                (pixel.green + coefficient * result[index].green).toInt().coerceIn(0, 255),
-                (pixel.blue + coefficient * result[index].blue).toInt().coerceIn(0, 255)
+                (pixel.red + (coefficient * result[index].red).toInt()).coerceIn(0, 255),
+                (pixel.green + (coefficient * result[index].green).toInt()).coerceIn(0, 255),
+                (pixel.blue + (coefficient * result[index].blue).toInt()).coerceIn(0, 255)
             )
 
             result[index] = if (
