@@ -15,28 +15,29 @@ class PopArt {
 
     private lateinit var resultPixels: IntArray
 
-    private val inversion = Inversion()
+    private val inversion = Inversion() // Инверсия
+    private val coloring = Coloring() // Изменение цвета
 
-    fun doubleColoring(
+    private fun tripleColoring(
         pixels: IntArray,
         width: Int,
         height: Int,
         threshold1: Int,
         threshold2: Int
     ): IntArray {
-        resultPixels = IntArray(pixels.size) { 0 }
+        val tripledPixels = IntArray(pixels.size) { 0 }
 
         pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
+        val pixelsEditorTripled = PixelsEditor(tripledPixels, width, height)
 
         for (i in 0 ..< width) {
             for (j in 0..< height) {
-                val pixel = pixelsEditor.getPixel(i, j)
+                val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                val alpha = pixel?.alpha ?: 0
-                var red = pixel?.red ?: 0
-                var green = pixel?.green ?: 0
-                var blue = pixel?.blue ?: 0
+                val alpha = pixel.alpha
+                var red = pixel.red
+                var green = pixel.green
+                var blue = pixel.blue
 
                 if (red + green + blue in 0..< 3 * min(threshold1, threshold2)) {
                     red = 0
@@ -55,11 +56,11 @@ class PopArt {
                     blue = 255
                 }
 
-                pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
+                pixelsEditorTripled.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
 
-        return resultPixels
+        return tripledPixels
     }
 
     fun popArtFiltering(
@@ -72,10 +73,14 @@ class PopArt {
         resultPixels = IntArray(pixels.size * 4) { 0 }
 
         pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, 4 * width, 4 * height)
+        pixelsEditorResult = PixelsEditor(
+            resultPixels,
+            2 * width,
+            2 * height
+        )
 
         // Получение изображения в 3-х оттенках
-        val thresholdedImage = doubleColoring(
+        val thresholdedImage = tripleColoring(
             pixels,
             width,
             height,
@@ -83,14 +88,16 @@ class PopArt {
             threshold2
         )
 
-        val firstImage = inversion.inverse(
-            thresholdedImage,
-            width,
-            height,
-            isRedInverting = true,
-            isGreenInverting = true,
-            isBlueInverting = false
-        )
+        // Первое изображение
+        val firstImage = coloring.coloring(
+            inversion.inverse(
+                thresholdedImage,
+                width,
+                height,
+                isRedInverting = true,
+                isGreenInverting = false,
+                isBlueInverting = false
+            ), width, height, 0, 100, 0)
 
         val firstImageEditor = PixelsEditor(firstImage, width, height)
 
@@ -103,14 +110,16 @@ class PopArt {
             }
         }
 
-        val secondImage = inversion.inverse(
-            thresholdedImage,
-            width,
-            height,
-            isRedInverting = true,
-            isGreenInverting = false,
-            isBlueInverting = true
-        )
+        // Второе изображение
+        val secondImage = coloring.coloring(
+            inversion.inverse(
+                thresholdedImage,
+                width,
+                height,
+                isRedInverting = false,
+                isGreenInverting = false,
+                isBlueInverting = true
+            ), width, height, 200, 0, 0)
 
         val secondImageEditor = PixelsEditor(secondImage, width, height)
 
@@ -123,14 +132,16 @@ class PopArt {
             }
         }
 
-        val thirdImage = inversion.inverse(
-            thresholdedImage,
-            width,
-            height,
-            isRedInverting = false,
-            isGreenInverting = true,
-            isBlueInverting = true
-        )
+        // Третье изображение
+        val thirdImage = coloring.coloring(
+            inversion.inverse(
+                thresholdedImage,
+                width,
+                height,
+                isRedInverting = false,
+                isGreenInverting = true,
+                isBlueInverting = false
+            ), width, height, 0, 0, 100)
 
         val thirdImageEditor = PixelsEditor(thirdImage, width, height)
 
@@ -143,14 +154,16 @@ class PopArt {
             }
         }
 
-        val fourthImage = inversion.inverse(
-            thresholdedImage,
-            width,
-            height,
-            isRedInverting = false,
-            isGreenInverting = true,
-            isBlueInverting = false
-        )
+        // Четвертое изображение
+        val fourthImage = coloring.coloring(
+            inversion.inverse(
+                thresholdedImage,
+                width,
+                height,
+                isRedInverting = true,
+                isGreenInverting = false,
+                isBlueInverting = true
+            ), width, height, 200, 0, 0)
 
         val fourthImageEditor = PixelsEditor(fourthImage, width, height)
 

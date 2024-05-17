@@ -129,8 +129,8 @@ class FiltersActivity: ChildActivity() {
                 R.id.popArtImage,
                 arrayOf(
                     Item(),
-                    Item(0, 255, "Порог 1"),
-                    Item(0, 255, "Порог 2")
+                    Item(85, 255, "Порог 1"),
+                    Item(170, 255, "Порог 2")
                 )
             ),
             Instruction(
@@ -372,6 +372,13 @@ class FiltersActivity: ChildActivity() {
                 R.id.popArtImage -> {
                     val threshold1 = currentInstruction.items[1].progress
                     val threshold2 = currentInstruction.items[2].progress
+
+                    // Обновление размера bitmapa
+                    bitmap = Bitmap.createBitmap(
+                        2 * width,
+                        2 * height,
+                        Bitmap.Config.ARGB_8888
+                    )
 
                     imageEditor.setPixelsToBitmap(
                         bitmap,
