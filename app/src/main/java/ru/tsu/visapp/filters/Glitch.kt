@@ -9,9 +9,9 @@ import ru.tsu.visapp.utils.PixelsEditor
 
 class Glitch {
     private lateinit var pixelsEditor: PixelsEditor
-    // private lateinit var pixelsEditorResult: PixelsEditor
+    private lateinit var pixelsEditorResult: PixelsEditor
 
-    // private lateinit var resultPixels: IntArray
+    private lateinit var resultPixels: IntArray
 
     private fun scaleDelta(delta: Int, width: Int): Int {
         return (delta.toDouble() * width.toDouble() / 1500.0).toInt()
@@ -58,17 +58,85 @@ class Glitch {
         return glitchedPixels
     }
 
+    private fun getRandomRectangles(
+        width: Int,
+        height: Int,
+        delta: Int
+    ): ArrayList<ArrayList<Int>> {
+        val numberOfRectangles = (1..5).random()
+
+        val result = ArrayList<ArrayList<Int>>()
+
+        for (i in 0 ..< numberOfRectangles) {
+            val leftX = (delta until  width - delta).random()
+            val leftY = (delta until  height - delta).random()
+
+            val rightX =
+                (leftX + delta until  width).random().coerceIn(0, width)
+            val rightY =
+                (leftY - delta until leftY - delta / 4).random().coerceIn(0, height)
+
+            val rectangleCoordinates = arrayListOf(
+                leftX,
+                leftY,
+                rightX,
+                rightY
+            )
+
+            result.add(rectangleCoordinates)
+        }
+
+        return result
+    }
+
+    private fun offsetRectangles(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        delta: Int,
+        rectangles: ArrayList<ArrayList<Int>>
+    ): IntArray {
+        resultPixels = pixels
+
+        pixelsEditor = PixelsEditor(pixels, width, height)
+        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
+
+        for (rectangle in rectangles) {
+            for (i in rectangle[0] ..< rectangle[2]) {
+                for (j in rectangle[1]..< rectangle[3]) {
+                    pixelsEditorResult.setPixel(
+                        i - delta,
+                        j,
+                        pixelsEditor.getPixel(i, j)
+                    )
+                }
+            }
+        }
+
+        return  resultPixels
+    }
+
     fun rgbGlitch(
         pixels: IntArray,
         width: Int,
         height: Int,
         delta: Int
     ): IntArray {
-        return anaglyph(
-            pixels,
+        return offsetRectangles(
+            anaglyph(
+                pixels,
+                width,
+                height,
+                scaleDelta(delta, width)
+            ),
             width,
             height,
-            scaleDelta(delta, width)
+            scaleDelta(delta, width),
+            getRandomRectangles(
+                width,
+                height,
+                scaleDelta(delta, width)
+            )
         )
     }
 }
