@@ -14,7 +14,7 @@ class Glitch {
     // private lateinit var resultPixels: IntArray
 
     private fun scaleDelta(delta: Int, width: Int): Int {
-        return (delta.toDouble() * width.toDouble() / 1000.0).toInt()
+        return (delta.toDouble() * width.toDouble() / 1500.0).toInt()
     }
 
     private fun anaglyph(
@@ -32,8 +32,17 @@ class Glitch {
             for (j in 0..< height) {
                 val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                if (i - delta < 0 || i + delta >= height) {
-                    pixelsEditorGlitched.setPixel(i, j, pixel)
+                if (i - delta < 0 || i + delta >= width) {
+                    pixelsEditorGlitched.setPixel(
+                        i,
+                        j,
+                        Color.argb(
+                            pixel.alpha,
+                            pixel.red,
+                            pixel.green,
+                            pixel.blue
+                        )
+                    )
                     continue
                 }
 
