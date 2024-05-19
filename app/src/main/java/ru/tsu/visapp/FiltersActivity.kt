@@ -136,9 +136,9 @@ class FiltersActivity: ChildActivity() {
             Instruction(
                 R.id.glitchImage,
                 arrayOf(
-                    Item(),
+                    Item(0, 100, "Частота", "%"),
                     Item(0, 100, "Эффект", "%"),
-                    Item()
+                    Item(0, 100, "Сдвиг", "%")
                 )
             ),
             Instruction(
@@ -404,7 +404,9 @@ class FiltersActivity: ChildActivity() {
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.glitchImage -> {
+                    val frequency = currentInstruction.items[0].progress
                     val effect = currentInstruction.items[1].progress
+                    val offset = currentInstruction.items[2].progress
 
                     imageEditor.setPixelsToBitmap(
                         bitmap,
@@ -412,7 +414,9 @@ class FiltersActivity: ChildActivity() {
                             pixels,
                             width,
                             height,
-                            effect
+                            frequency,
+                            effect,
+                            offset
                         )
                     )
 

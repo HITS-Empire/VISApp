@@ -1,5 +1,6 @@
 package ru.tsu.visapp.filters
 
+import kotlin.math.max
 import android.graphics.Color
 import androidx.core.graphics.red
 import androidx.core.graphics.blue
@@ -13,8 +14,16 @@ class Glitch {
 
     private lateinit var resultPixels: IntArray
 
+    private fun scaleFrequency(number: Int, width: Int): Int {
+        return max(1, (number.toDouble() * width.toDouble() / 2000.0).toInt())
+    }
+
     private fun scaleDelta(delta: Int, width: Int): Int {
-        return (delta.toDouble() * width.toDouble() / 1500.0).toInt()
+        return max(1, (delta.toDouble() * width.toDouble() / 1500.0).toInt())
+    }
+
+    private fun scaleOffset(delta: Int, width: Int): Int {
+        return max(1, (delta.toDouble() * width.toDouble() / 1000.0).toInt())
     }
 
     private fun anaglyph(
@@ -46,6 +55,7 @@ class Glitch {
                     continue
                 }
 
+                // Формула стандартного анаглифа
                 val alpha = pixel.alpha
                 val red = pixelsEditor.getPixel(i - delta, j)?.red ?: 0
                 val green = pixelsEditor.getPixel(i + delta, j)?.green ?: 0
@@ -58,58 +68,54 @@ class Glitch {
         return glitchedPixels
     }
 
-    private fun getRandomRectangles(
-        width: Int,
-        height: Int,
-        delta: Int
-    ): ArrayList<ArrayList<Int>> {
-        val numberOfRectangles = (1..5).random()
-
-        val result = ArrayList<ArrayList<Int>>()
-
-        for (i in 0 ..< numberOfRectangles) {
-            val leftX = (delta until  width - delta).random()
-            val leftY = (delta until  height - delta).random()
-
-            val rightX =
-                (leftX + delta until  width).random().coerceIn(0, width)
-            val rightY =
-                (leftY - delta until leftY - delta / 4).random().coerceIn(0, height)
-
-            val rectangleCoordinates = arrayListOf(
-                leftX,
-                leftY,
-                rightX,
-                rightY
-            )
-
-            result.add(rectangleCoordinates)
-        }
-
-        return result
-    }
-
-    private fun offsetRectangles(
+    private fun offset(
         pixels: IntArray,
         width: Int,
         height: Int,
-        delta: Int,
-        rectangles: ArrayList<ArrayList<Int>>
+        offsetFrequency: Int,
+        offsetSize: Int
     ): IntArray {
         resultPixels = pixels
 
         pixelsEditor = PixelsEditor(pixels, width, height)
         pixelsEditorResult = PixelsEditor(resultPixels, width, height)
 
-        for (rectangle in rectangles) {
-            for (i in rectangle[0] ..< rectangle[2]) {
-                for (j in rectangle[1]..< rectangle[3]) {
+        var offset = false // Сдвигается ли текущая строка
+        var offsetProbability = offsetFrequency // Вероятность смены переменной offset
+
+        for (j in 0..< height) {
+            /* Перестаем или начинаем сдвигать с
+               вероятностью offsetProbability и обновляем эту вероятность */
+            if ((0..100).random() < offsetProbability) {
+                offset = !offset
+                offsetProbability =
+                    if (offsetProbability == offsetFrequency)
+                        // Чем меньше, тем шире в среднем сдвинутые прямоугольники
+                        5 * width / 100
+                    else
+                        offsetFrequency
+            }
+            for (i in 0 ..< width) {
+                // Случайное значение текущего сдвига в пределах offsetSize
+                val currentOffset =
+                    (offsetSize - offsetSize / 10 ..
+                            offsetSize + offsetSize / 10).random()
+                // Сдвиг
+                if (offset)
                     pixelsEditorResult.setPixel(
-                        i - delta,
+                        i,
                         j,
-                        pixelsEditor.getPixel(i, j)
+                        if (i + currentOffset in 0..<width)
+                            pixelsEditor.getPixel(i + currentOffset, j) ?: 0
+                        else
+                            pixelsEditor.getPixel(i, j) ?: 0
                     )
-                }
+                else
+                    pixelsEditorResult.setPixel(
+                        i,
+                        j,
+                        pixelsEditor.getPixel(i, j) ?: 0
+                    )
             }
         }
 
@@ -120,9 +126,11 @@ class Glitch {
         pixels: IntArray,
         width: Int,
         height: Int,
-        delta: Int
+        frequency: Int,
+        delta: Int,
+        offset: Int
     ): IntArray {
-        return offsetRectangles(
+        return offset(
             anaglyph(
                 pixels,
                 width,
@@ -131,12 +139,8 @@ class Glitch {
             ),
             width,
             height,
-            scaleDelta(delta, width),
-            getRandomRectangles(
-                width,
-                height,
-                scaleDelta(delta, width)
-            )
+            scaleFrequency(frequency, width),
+            scaleOffset(offset, width)
         )
     }
 }
