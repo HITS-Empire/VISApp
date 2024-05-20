@@ -12,8 +12,8 @@ import android.widget.TextView
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
-import android.annotation.SuppressLint
 import ru.tsu.visapp.utils.ImageEditor
+import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
@@ -45,6 +45,8 @@ class FiltersActivity: ChildActivity() {
 
     private val imageEditor = ImageEditor() // Редактор изображений
     private val imageRotation = ImageRotation() // Поворот изображения
+    private val colorCorrection = ColorCorrection() // Цветокоррекция
+    private val coloring = Coloring() // Цвета
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
@@ -92,8 +94,24 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage,
                 arrayOf(
                     Item(),
-                    Item(0, 359, "Угол", "°"),
+                    Item(0, 360, "Угол", "°"),
                     Item()
+                )
+            ),
+            Instruction(
+                R.id.correctionImage,
+                arrayOf(
+                    Item(0, 255, "Яркость"),
+                    Item(0, 255, "Насыщ."),
+                    Item(0, 255, "Контраст")
+                )
+            ),
+            Instruction(
+                R.id.coloringImage,
+                arrayOf(
+                    Item(0, 255, "Красный"),
+                    Item(0, 255, "Зеленый"),
+                    Item(0, 255, "Синий")
                 )
             ),
             Instruction(
@@ -132,6 +150,8 @@ class FiltersActivity: ChildActivity() {
         // Окошки фильтров
         val framesWithFilters: Array<FrameLayout> = arrayOf(
             findViewById(R.id.rotateFrame),
+            findViewById(R.id.correctionFrame),
+            findViewById(R.id.coloringFrame),
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
@@ -141,6 +161,8 @@ class FiltersActivity: ChildActivity() {
         // Иконки фильтров (для подсветки)
         val imagesWithFilters: Array<ImageView> = arrayOf(
             findViewById(R.id.rotateImage),
+            findViewById(R.id.correctionImage),
+            findViewById(R.id.coloringImage),
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
@@ -263,6 +285,42 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
+                R.id.correctionImage -> {
+                    val brightnessValue = currentInstruction.items[0].progress
+                    val saturationValue = currentInstruction.items[1].progress
+                    val contrastValue = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        colorCorrection.correctColor(
+                            pixels,
+                            width,
+                            height,
+                            brightnessValue,
+                            saturationValue,
+                            contrastValue
+                        )
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.coloringImage -> {
+                    val redValue = currentInstruction.items[0].progress
+                    val greenValue = currentInstruction.items[1].progress
+                    val blueValue = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        coloring.coloring(
+                            pixels,
+                            width,
+                            height,
+                            redValue,
+                            greenValue,
+                            blueValue
+                        )
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
                 R.id.scalingImage -> {}
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
@@ -325,6 +383,8 @@ class FiltersActivity: ChildActivity() {
 
             when (currentImage.id) {
                 R.id.rotateImage -> {}
+                R.id.correctionImage -> {}
+                R.id.coloringImage -> {}
                 R.id.scalingImage -> {}
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
@@ -353,6 +413,8 @@ class FiltersActivity: ChildActivity() {
 
         when (image.id) {
             R.id.rotateImage -> {}
+            R.id.correctionImage -> {}
+            R.id.coloringImage -> {}
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}

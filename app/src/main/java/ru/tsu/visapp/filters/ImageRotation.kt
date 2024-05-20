@@ -111,7 +111,7 @@ class ImageRotation {
                 }
             } else {
                 // Если следующее значение - пустой пиксель
-                if (newJ + 1 < newHeight && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
+                if (newJ + 1 < newHeight && newPixelsEditor.getPixel(newI, newJ + 1) == 0) {
                     if (i > 0 && j > 0) {
                         while (newPixelsEditor.getPixel(newI, newJ + 1) == 0) {
                             newJ++

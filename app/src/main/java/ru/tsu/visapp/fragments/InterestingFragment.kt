@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import ru.tsu.visapp.NeuralActivity
 import ru.tsu.visapp.VectorActivity
 import androidx.fragment.app.Fragment
-import ru.tsu.visapp.StenographyActivity
 
 /*
  * Фрагмент "Интересное"
@@ -29,7 +28,6 @@ class InterestingFragment: Fragment() {
 
         // Окошки алгоритмов
         val framesWithInteresting: Array<FrameLayout> = arrayOf(
-            view.findViewById(R.id.stenographyFrame),
             view.findViewById(R.id.neuralFrame),
             view.findViewById(R.id.vectorFrame),
             view.findViewById(R.id.cubeFrame)
@@ -42,9 +40,6 @@ class InterestingFragment: Fragment() {
                 var intent: Intent? = null
 
                 when (frame.id) {
-                    R.id.stenographyFrame -> {
-                        intent = Intent(context, StenographyActivity::class.java)
-                    }
                     R.id.neuralFrame -> {
                         intent = Intent(context, NeuralActivity::class.java)
                     }
