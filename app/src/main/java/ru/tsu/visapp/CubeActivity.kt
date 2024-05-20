@@ -1,17 +1,15 @@
 package ru.tsu.visapp
 
-import android.annotation.SuppressLint
 import kotlin.math.*
 import android.os.Bundle
-import android.widget.SeekBar
 import android.graphics.Color
 import android.graphics.Bitmap
-import android.widget.EditText
 import android.view.MotionEvent
 import android.widget.ImageView
 import ru.tsu.visapp.utils.cube.*
+import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
-import androidx.core.widget.addTextChangedListener
+import android.annotation.SuppressLint
 
 /*
  * Экран для 3D-куба
@@ -22,8 +20,6 @@ class CubeActivity: ChildActivity() {
     private val height = 100
     private val ratioOfScreen = (width / height).toFloat()
 
-    private lateinit var seekBar: SeekBar // Ползунок
-    private lateinit var seekBarEditor: EditText // Отображение текущего значения
     private var currentProgress = 25 // Текущий прогресс в процентах
 
     private lateinit var bitmap: Bitmap
@@ -35,13 +31,10 @@ class CubeActivity: ChildActivity() {
     private var previousAngle = Pair(0.0f, 0.0f)
     private lateinit var previousCamera : Pair<Float, Float>
 
-    private val colors = intArrayOf(
-        0x000000FF.toInt(),
-        0x333333FF.toInt(),
-        0x808080FF.toInt(),
-        0xDCDCDCFF.toInt(),
-        0xFFFFFFFF.toInt()
-    )
+    private lateinit var imagePixels : Array<IntArray>
+
+    private var currentI = 0
+    private var currentJ = 0
 
     private fun renderCube(dx: Float, dy: Float) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
@@ -65,7 +58,7 @@ class CubeActivity: ChildActivity() {
                 direction.rotateZ(dx / 5000)
 
                 val box = Vec3(0.0f, 0.0f, 0.0f)
-                val color = cube(camera, direction, Vec3(1.0f), box)
+                val color = cube(camera, direction, Vec3(1.0f), box, i, j, dx, dy)
 
                 previousCamera = Pair(camera.y, camera.z)
 
@@ -82,7 +75,11 @@ class CubeActivity: ChildActivity() {
         camera: Vec3,
         direction: Vec3,
         size: Vec3,
-        normal: Vec3
+        normal: Vec3,
+        i: Int,
+        j: Int,
+        dx: Float,
+        dy: Float
     ): Int {
         val m = Vec3(1.0f).division(direction)
         val n = m.multiplication(camera)
@@ -111,13 +108,16 @@ class CubeActivity: ChildActivity() {
 
         return when {
             t1.x > t1.y && t1.x > t1.z -> {
-                if (camera.x < 0) Color.RED else Color.GREEN
+//                val newX = x * cos(angle) - y * sin(angle)
+//                val newY = x * sin(angle) + y * cos(angle)
+                //if (camera.x < 0) imagePixels[0][abs(i * cos(previousAngle.second / 5000) + j * sin(previousAngle.first / 5000)).toInt() % width + abs(i * sin(previousAngle.first / 5000) + j * cos(previousAngle.second / 5000)).toInt() % width * width] else imagePixels[1][i + j * width]
+                if (camera.x < 0) imagePixels[0][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[1][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
             }
             t1.y > t1.x && t1.y > t1.z -> {
-                if (camera.y < 0) Color.BLUE else Color.YELLOW
+                if (camera.y < 0) imagePixels[2][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[3][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
             }
-            camera.z < 0 -> Color.WHITE
-            else -> Color.CYAN
+            camera.z < 0 -> imagePixels[4][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+            else -> imagePixels[5][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
         }
     }
 
@@ -125,16 +125,12 @@ class CubeActivity: ChildActivity() {
         renderCube(previousAngle.first, previousAngle.second)
     }
 
-    private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            if (!fromUser) return
-
-            seekBarEditor.setText(progress.toString())
-            startRender()
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar) {}
-        override fun onStopTrackingTouch(seekBar: SeekBar) {}
+    fun getPixelsFromDrawable(id: Int) : IntArray {
+        val options = BitmapFactory.Options()
+        options.inScaled = false
+        val imageBitmap = BitmapFactory.decodeResource(resources, id, options)
+        val currentPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
+        return currentPixels
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -145,34 +141,14 @@ class CubeActivity: ChildActivity() {
 
         imageView = findViewById(R.id.cubeImageView)
 
-        seekBar = findViewById(R.id.cubeSeekBar)
-        seekBarEditor = findViewById(R.id.cubeSeekBarEditor)
-
-        seekBar.progress = currentProgress
-        seekBarEditor.setText(currentProgress.toString())
-
-        seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
-
-        seekBarEditor.addTextChangedListener { editable ->
-            val text = editable.toString()
-            val progress = Integer.min(
-                100,
-                Integer.max(
-                    15,
-                    if (text == "") 0 else text.toInt()
-                )
-            )
-            val trim = progress.toString()
-
-            if (text == trim) {
-                currentProgress = progress
-                seekBar.progress = progress
-
-                startRender()
-            } else {
-                seekBarEditor.setText(trim)
-            }
-        }
+        imagePixels = arrayOf(
+            getPixelsFromDrawable(R.drawable.digit_1),
+            getPixelsFromDrawable(R.drawable.digit_2),
+            getPixelsFromDrawable(R.drawable.digit_3),
+            getPixelsFromDrawable(R.drawable.digit_4),
+            getPixelsFromDrawable(R.drawable.digit_5),
+            getPixelsFromDrawable(R.drawable.digit_6)
+        )
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
