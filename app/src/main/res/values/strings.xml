@@ -6,7 +6,7 @@
     <string name="save_button">СОХРАНИТЬ</string>
     <string name="select_filters">Выберите фильтры</string>
     <string name="filters_rotate">Поворот</string>
-    <string name="filters_color_correction">Коррекция</string>
+    <string name="filters_correction">Коррекция</string>
     <string name="filters_coloring">Цвета</string>
     <string name="filters_inversion">Инверсия</string>
     <string name="filters_pop_art">Поп арт</string>
@@ -22,6 +22,5 @@
     <string name="title_neural">Распознавание лиц</string>
     <string name="title_vector">Векторный редактор</string>
     <string name="title_cube">3D-куб</string>
-    <string name="title_cube_seekbar">Отдаление</string>
     <string name="percent">%</string>
 </resources>
