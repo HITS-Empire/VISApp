@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/filtersActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/black"
+    tools:context=".FiltersActivity">
 
     <ImageView
         android:id="@+id/filtersImageView"
@@ -289,7 +290,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="96dp"
                     android:gravity="center"
-                    android:text="@string/filters_correction"
+                    android:text="@string/filters_color_correction"
                     android:textColor="@color/white" />
             </FrameLayout>
 
@@ -311,6 +312,69 @@
                     android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_coloring"
+                    android:textColor="@color/white" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/inversionFrame"
+                android:layout_width="192dp"
+                android:layout_height="96dp">
+
+                <ImageView
+                    android:id="@+id/inversionImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/inversionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_inversion"
+                    android:textColor="@color/white" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/popArtFrame"
+                android:layout_width="192dp"
+                android:layout_height="96dp">
+
+                <ImageView
+                    android:id="@+id/popArtImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/popArtTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_pop_art"
+                    android:textColor="@color/white" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/glitchFrame"
+                android:layout_width="192dp"
+                android:layout_height="96dp">
+
+                <ImageView
+                    android:id="@+id/glitchImage"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:srcCompat="@mipmap/ic_filters" />
+
+                <TextView
+                    android:id="@+id/glitchTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
+                    android:gravity="center"
+                    android:text="@string/filters_glitch"
                     android:textColor="@color/white" />
             </FrameLayout>
 

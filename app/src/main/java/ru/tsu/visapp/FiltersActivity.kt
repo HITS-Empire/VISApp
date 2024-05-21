@@ -47,13 +47,16 @@ class FiltersActivity: ChildActivity() {
     private val imageRotation = ImageRotation() // Поворот изображения
     private val colorCorrection = ColorCorrection() // Цветокоррекция
     private val coloring = Coloring() // Цвета
+    private val inversion = Inversion() // Инверсия
+    private val popArt = PopArt() // Поп арт
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
+    private val glitch = Glitch() // Глитч
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
@@ -115,6 +118,30 @@ class FiltersActivity: ChildActivity() {
                 )
             ),
             Instruction(
+                R.id.inversionImage,
+                arrayOf(
+                    Item(0, 1, "Красный"),
+                    Item(0, 1, "Зеленый"),
+                    Item(0, 1, "Синий")
+                )
+            ),
+            Instruction(
+                R.id.popArtImage,
+                arrayOf(
+                    Item(),
+                    Item(85, 255, "Порог 1"),
+                    Item(170, 255, "Порог 2")
+                )
+            ),
+            Instruction(
+                R.id.glitchImage,
+                arrayOf(
+                    Item(0, 100, "Частота", "%"),
+                    Item(0, 100, "Эффект", "%"),
+                    Item(0, 100, "Сдвиг", "%")
+                )
+            ),
+            Instruction(
                 R.id.scalingImage,
                 arrayOf(
                     Item(),
@@ -138,7 +165,7 @@ class FiltersActivity: ChildActivity() {
                     Item(0, 100, "Изогелия")
                 )
             ),
-            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item()))
+            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item())),
         )
 
         // Получить картинку и установить её
@@ -152,6 +179,9 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.rotateFrame),
             findViewById(R.id.correctionFrame),
             findViewById(R.id.coloringFrame),
+            findViewById(R.id.inversionFrame),
+            findViewById(R.id.popArtFrame),
+            findViewById(R.id.glitchFrame),
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
@@ -163,6 +193,9 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.rotateImage),
             findViewById(R.id.correctionImage),
             findViewById(R.id.coloringImage),
+            findViewById(R.id.inversionImage),
+            findViewById(R.id.popArtImage),
+            findViewById(R.id.glitchImage),
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
@@ -301,8 +334,10 @@ class FiltersActivity: ChildActivity() {
                             contrastValue
                         )
                     )
+
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.coloringImage -> {
                     val redValue = currentInstruction.items[0].progress
                     val greenValue = currentInstruction.items[1].progress
@@ -319,6 +354,72 @@ class FiltersActivity: ChildActivity() {
                             blueValue
                         )
                     )
+
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.inversionImage -> {
+                    val isRedInverting =
+                        currentInstruction.items[0].progress == 1
+                    val isGreenInverting =
+                        currentInstruction.items[1].progress == 1
+                    val isBlueInverting =
+                        currentInstruction.items[2].progress == 1
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        inversion.inverse(
+                            pixels,
+                            width,
+                            height,
+                            isRedInverting,
+                            isGreenInverting,
+                            isBlueInverting
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.popArtImage -> {
+                    val threshold1 = currentInstruction.items[1].progress
+                    val threshold2 = currentInstruction.items[2].progress
+
+                    // Обновление размера bitmapa
+                    bitmap = Bitmap.createBitmap(
+                        2 * width,
+                        2 * height,
+                        Bitmap.Config.ARGB_8888
+                    )
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        popArt.popArtFiltering(
+                            pixels,
+                            width,
+                            height,
+                            threshold1,
+                            threshold2
+                        )
+                    )
+
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.glitchImage -> {
+                    val frequency = currentInstruction.items[0].progress
+                    val effect = currentInstruction.items[1].progress
+                    val offset = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        glitch.rgbGlitch(
+                            pixels,
+                            width,
+                            height,
+                            frequency,
+                            effect,
+                            offset
+                        )
+                    )
+
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.scalingImage -> {}
@@ -385,6 +486,9 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage -> {}
                 R.id.correctionImage -> {}
                 R.id.coloringImage -> {}
+                R.id.inversionImage -> {}
+                R.id.popArtImage -> {}
+                R.id.glitchImage -> {}
                 R.id.scalingImage -> {}
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
@@ -415,6 +519,9 @@ class FiltersActivity: ChildActivity() {
             R.id.rotateImage -> {}
             R.id.correctionImage -> {}
             R.id.coloringImage -> {}
+            R.id.inversionImage -> {}
+            R.id.popArtImage -> {}
+            R.id.glitchImage -> {}
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}
