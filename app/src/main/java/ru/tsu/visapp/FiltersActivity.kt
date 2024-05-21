@@ -49,14 +49,14 @@ class FiltersActivity: ChildActivity() {
     private val coloring = Coloring() // Цвета
     private val inversion = Inversion() // Инверсия
     private val popArt = PopArt() // Поп арт
+    private val glitch = Glitch() // Глитч
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
-    private val glitch = Glitch() // Глитч
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
-    @SuppressLint("ClickableViewAccessibility", "CutPasteId")
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
@@ -165,7 +165,7 @@ class FiltersActivity: ChildActivity() {
                     Item(0, 100, "Изогелия")
                 )
             ),
-            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item())),
+            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item()))
         )
 
         // Получить картинку и установить её
@@ -334,7 +334,6 @@ class FiltersActivity: ChildActivity() {
                             contrastValue
                         )
                     )
-
                     imageView.setImageBitmap(bitmap)
                 }
 
@@ -354,7 +353,6 @@ class FiltersActivity: ChildActivity() {
                             blueValue
                         )
                     )
-
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.inversionImage -> {
@@ -376,7 +374,6 @@ class FiltersActivity: ChildActivity() {
                             isBlueInverting
                         )
                     )
-
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.popArtImage -> {
@@ -400,7 +397,6 @@ class FiltersActivity: ChildActivity() {
                             threshold2
                         )
                     )
-
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.glitchImage -> {
@@ -419,7 +415,6 @@ class FiltersActivity: ChildActivity() {
                             offset
                         )
                     )
-
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.scalingImage -> {}
