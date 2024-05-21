@@ -57,13 +57,8 @@ class NeuralActivity: ChildActivity() {
         )
     }
 
-    private val findFaces = fun () {
-        // Получить imageView
-        val imageView: ImageView = findViewById(R.id.neuralImageView)
-
-        // Получить картинку
-        val savedImageUri = imageEditor.getSavedImageUri(this, null)
-        bitmap = imageEditor.createBitmapByUri(savedImageUri)
+    fun getBoundingBoxes(bitmap: Bitmap): ArrayList<ArrayList<Int>> {
+        val result = ArrayList<ArrayList<Int>>()
 
         // Преобразование изображения в формат mat
         val mat = Mat()
@@ -112,15 +107,47 @@ class NeuralActivity: ChildActivity() {
                     (detections.get(i, 6)[0] * rows).toInt()
                 )
 
-                // Отрисовка прямоугольника вокруг обнаруженного объекта
-                Imgproc.rectangle(
-                    mat,
-                    Point(left.toDouble(), top.toDouble()),
-                    Point(right.toDouble(), bottom.toDouble()),
-                    color,
-                    3
+                val rectangleCoordinates = arrayListOf(
+                    left,
+                    top,
+                    right,
+                    bottom
                 )
+
+                result.add(rectangleCoordinates)
             }
+        }
+
+        return result
+    }
+
+    private val findFaces = fun () {
+        // Получить imageView
+        val imageView: ImageView = findViewById(R.id.neuralImageView)
+
+        // Получить картинку
+        val savedImageUri = imageEditor.getSavedImageUri(this, null)
+        bitmap = imageEditor.createBitmapByUri(savedImageUri)
+
+        // Преобразование изображения в формат mat
+        val mat = Mat()
+        Utils.bitmapToMat(bitmap, mat)
+
+        val boxes = getBoundingBoxes(bitmap)
+
+        for (i in boxes.indices) {
+            val (left,
+            top,
+            right,
+            bottom) = boxes[i]
+            // Отрисовка прямоугольника вокруг обнаруженного объекта
+            Imgproc.rectangle(
+                mat,
+                Point(left.toDouble(), top.toDouble()),
+                Point(right.toDouble(), bottom.toDouble()),
+                color,
+                3
+            )
         }
 
         // Перевести mat в bitmap
