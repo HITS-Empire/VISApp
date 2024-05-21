@@ -67,14 +67,6 @@ class ColorCorrection {
         right: Int,
         bottom: Int
     ): IntArray {
-        val start = top * width + left
-        val end = bottom * width + right
-
-        println(start)
-        println(end)
-        println(width)
-        println(height)
-
         resultPixels = pixels
 
         pixelsEditor = PixelsEditor(pixels, width, height)
@@ -83,15 +75,18 @@ class ColorCorrection {
         // Высчитывание среднего значения серого для всего изображения
         var meanGrayScale = 0
 
-        for (i in start ..< width) {
-            for (j in end ..< height) {
-                val pixel = pixelsEditor.getPixel(i, j) ?:0
+        for (i in 0 ..< width) {
+            for (j in 0 ..< height) {
+                if (i in left .. right &&
+                    j in top .. bottom) {
+                    val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                var red = pixel.red
-                var green = pixel.green
-                var blue = pixel.blue
+                    var red = pixel.red
+                    var green = pixel.green
+                    var blue = pixel.blue
 
-                meanGrayScale += (red * 0.2126 + green * 0.7152 + blue * 0.0722).toInt()
+                    meanGrayScale += (red * 0.2126 + green * 0.7152 + blue * 0.0722).toInt()
+                }
             }
         }
 
@@ -106,7 +101,8 @@ class ColorCorrection {
                 var green = pixel.green
                 var blue = pixel.blue
 
-                if (j * width + i in start .. end) {
+                if (i in left .. right &&
+                    j in top .. bottom) {
                     // Яркость
                     val (
                         brightRed,
