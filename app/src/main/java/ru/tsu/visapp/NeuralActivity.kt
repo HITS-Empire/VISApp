@@ -57,7 +57,9 @@ class NeuralActivity: ChildActivity() {
         )
     }
 
-    fun getBoundingBoxes(bitmap: Bitmap): ArrayList<ArrayList<Int>> {
+    private fun getBoundingBoxes(bitmap: Bitmap): ArrayList<ArrayList<Int>> {
+        OpenCVLoader.initDebug();
+
         val result = ArrayList<ArrayList<Int>>()
 
         // Преобразование изображения в формат mat
@@ -140,6 +142,12 @@ class NeuralActivity: ChildActivity() {
             top,
             right,
             bottom) = boxes[i]
+
+            println(left)
+            println(top)
+            println(right)
+            println(bottom)
+
             // Отрисовка прямоугольника вокруг обнаруженного объекта
             Imgproc.rectangle(
                 mat,

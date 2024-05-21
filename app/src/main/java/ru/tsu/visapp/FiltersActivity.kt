@@ -13,12 +13,25 @@ import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
+import org.opencv.android.OpenCVLoader
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+
+import java.io.File
+import org.opencv.dnn.Dnn
+import org.opencv.dnn.Net
+import org.opencv.android.Utils
+import org.opencv.core.Mat
+import org.opencv.core.Scalar
+import org.opencv.core.Size
+import java.io.FileOutputStream
+import org.opencv.imgproc.Imgproc
+import java.io.BufferedInputStream
+import ru.tsu.visapp.utils.ImageGetter
 
 /*
  * Экран для фильтров
@@ -56,10 +69,20 @@ class FiltersActivity: ChildActivity() {
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
 
+    private lateinit var net: Net // Нейронная сеть
+    private val color = Scalar(43.0, 203.0, 17.0) // Цвет прямоугольника
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
+
+        OpenCVLoader.initDebug();
+
+        val pathProto = getPath("deploy.prototxt")
+        val pathCaffe = getPath("ssd.caffemodel")
+
+        net = Dnn.readNetFromCaffe(pathProto, pathCaffe)
 
         imageView = findViewById(R.id.filtersImageView)
 
@@ -299,6 +322,86 @@ class FiltersActivity: ChildActivity() {
         height = bitmap.height
     }
 
+    private fun scaleBoundingBox(
+        width: Int,
+        height: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
+    ): Array<Int> {
+        return arrayOf(
+            left * width / 300,
+            top * height / 300,
+            right * width / 300,
+            bottom * height / 300
+        )
+    }
+
+    private fun getBoundingBoxes(bitmap: Bitmap): ArrayList<ArrayList<Int>> {
+        val result = ArrayList<ArrayList<Int>>()
+
+        // Преобразование изображения в формат mat
+        val mat = Mat()
+        Utils.bitmapToMat(bitmap, mat)
+
+        // Приведение изображения к верному размеру и формату
+        val frame = Mat()
+        Imgproc.cvtColor(mat, frame, Imgproc.COLOR_RGBA2RGB)
+
+        Imgproc.resize(frame, frame, Size(300.0, 300.0))
+
+        // Получение blob нового размера и с вычитанием среднего
+        val blob = Dnn.blobFromImage(
+            frame,
+            1.0,
+            Size(300.0, 300.0),
+            Scalar(104.0, 177.0, 123.0),
+            true,
+            false
+        )
+
+        // Установка входных данных в модель
+        net.setInput(blob)
+
+        // Получение и преобразование детектированных объектов
+        var detections = net.forward()
+        detections = detections.reshape(1, detections.total().toInt() / 7)
+
+        // Размеры изображения
+        val cols: Int = frame.cols()
+        val rows: Int = frame.rows()
+
+        // Порог уверенности модели в предсказании
+        val threshold = 0.4
+
+        // Отрисовка bounding boxes на изображении
+        for (i in 0 until detections.rows()) {
+            val confidence = detections.get(i, 2)[0]
+            if (confidence > threshold) {
+                val (left, top, right, bottom) = scaleBoundingBox(
+                    bitmap.width,
+                    bitmap.height,
+                    (detections.get(i, 3)[0] * cols).toInt(),
+                    (detections.get(i, 4)[0] * rows).toInt(),
+                    (detections.get(i, 5)[0] * cols).toInt(),
+                    (detections.get(i, 6)[0] * rows).toInt()
+                )
+
+                val rectangleCoordinates = arrayListOf(
+                    left,
+                    top,
+                    right,
+                    bottom
+                )
+
+                result.add(rectangleCoordinates)
+            }
+        }
+
+        return result
+    }
+
     // Запустить функцию фильтра
     private fun startFilter() {
         if (!filtersIsAvailable || filterIsActive) return
@@ -323,18 +426,27 @@ class FiltersActivity: ChildActivity() {
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
 
-                    imageEditor.setPixelsToBitmap(
-                        bitmap,
-                        colorCorrection.correctColor(
-                            pixels,
-                            width,
-                            height,
-                            brightnessValue,
-                            saturationValue,
-                            contrastValue
+                    val boxes = getBoundingBoxes(bitmap)
+
+                    for (box in boxes) {
+                        imageEditor.setPixelsToBitmap(
+                            bitmap,
+                            colorCorrection.correctColor(
+                                pixels,
+                                width,
+                                height,
+                                brightnessValue,
+                                saturationValue,
+                                contrastValue,
+                                box[0],
+                                box[1],
+                                box[2],
+                                box[3]
+                            )
                         )
-                    )
-                    imageView.setImageBitmap(bitmap)
+                        imageView.setImageBitmap(bitmap)
+                    }
+
                 }
 
                 R.id.coloringImage -> {
@@ -526,5 +638,24 @@ class FiltersActivity: ChildActivity() {
         updatePixelsInfo()
 
         filtersIsAvailable = true
+    }
+
+    // Получить путь к файлу из ресурсов
+    private fun getPath(name: String): String {
+        val inputStream = BufferedInputStream(assets.open(name))
+        val data = ByteArray(inputStream.available()) { 0 }
+        inputStream.apply {
+            read(data)
+            close()
+        }
+
+        val file = File(filesDir, name)
+        val outputStream = FileOutputStream(file)
+        outputStream.apply {
+            write(data)
+            close()
+        }
+
+        return file.absolutePath
     }
 }
