@@ -12,6 +12,10 @@ import kotlin.math.sqrt
 class Vec3(var x: Float, var y: Float, var z: Float) {
     constructor(value: Float): this(value, value, value)
 
+    operator fun unaryMinus(): Vec3 {
+        return Vec3(-x, -y, -z)
+    }
+
     operator fun plus(vec3: Vec3): Vec3 {
         return Vec3(x + vec3.x, y + vec3.y, z + vec3.z)
     }
@@ -34,10 +38,6 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
 
     fun normalize(): Vec3 {
         return this / Vec3(length())
-    }
-
-    fun changeSign(): Vec3 {
-        return Vec3(-x, -y, -z)
     }
 
     fun module(): Vec3 {

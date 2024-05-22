@@ -75,8 +75,8 @@ class CubeActivity: ChildActivity() {
         val k = m.module() * size
         val n = m * camera
 
-        val t1 = n.changeSign() - k
-        val t2 = n.changeSign() + k
+        val t1 = -n - k
+        val t2 = -n + k
 
         val tN = max(max(t1.x, t1.y), t1.z)
         val tF = min(min(t2.x, t2.y), t2.z)
