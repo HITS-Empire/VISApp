@@ -19,7 +19,11 @@ class Coloring {
         height: Int,
         redValue: Int,
         greenValue: Int,
-        blueValue: Int
+        blueValue: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
     ): IntArray {
         resultPixels = IntArray(pixels.size) { 0 }
 
@@ -35,13 +39,16 @@ class Coloring {
                 var green = pixel?.green ?: 0
                 var blue = pixel?.blue ?: 0
 
-                red += redValue
-                green += greenValue
-                blue += blueValue
+                if (i in left .. right &&
+                    j in top .. bottom) {
+                    red += redValue
+                    green += greenValue
+                    blue += blueValue
 
-                red = red.coerceIn(0, 255)
-                green = green.coerceIn(0, 255)
-                blue = blue.coerceIn(0, 255)
+                    red = red.coerceIn(0, 255)
+                    green = green.coerceIn(0, 255)
+                    blue = blue.coerceIn(0, 255)
+                }
 
                 pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }

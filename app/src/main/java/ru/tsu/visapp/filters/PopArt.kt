@@ -96,8 +96,22 @@ class PopArt {
                 height,
                 isRedInverting = true,
                 isGreenInverting = false,
-                isBlueInverting = false
-            ), width, height, 0, 100, 0)
+                isBlueInverting = false,
+                0,
+                0,
+                width - 1,
+                height - 1
+            ),
+            width,
+            height,
+            0,
+            100,
+            0,
+            0,
+            0,
+            width - 1,
+            height - 1
+        )
 
         val firstImageEditor = PixelsEditor(firstImage, width, height)
 
@@ -118,8 +132,22 @@ class PopArt {
                 height,
                 isRedInverting = false,
                 isGreenInverting = false,
-                isBlueInverting = true
-            ), width, height, 200, 0, 0)
+                isBlueInverting = true,
+                0,
+                0,
+                width - 1,
+                height - 1
+            ),
+            width,
+            height,
+            200,
+            0,
+            0,
+            0,
+            0,
+            width - 1,
+            height - 1
+        )
 
         val secondImageEditor = PixelsEditor(secondImage, width, height)
 
@@ -140,8 +168,22 @@ class PopArt {
                 height,
                 isRedInverting = false,
                 isGreenInverting = true,
-                isBlueInverting = false
-            ), width, height, 0, 0, 100)
+                isBlueInverting = false,
+                0,
+                0,
+                width - 1,
+                height - 1
+            ),
+            width,
+            height,
+            0,
+            0,
+            100,
+            0,
+            0,
+            width - 1,
+            height - 1
+        )
 
         val thirdImageEditor = PixelsEditor(thirdImage, width, height)
 
@@ -162,8 +204,22 @@ class PopArt {
                 height,
                 isRedInverting = true,
                 isGreenInverting = false,
-                isBlueInverting = true
-            ), width, height, 200, 0, 0)
+                isBlueInverting = true,
+                0,
+                0,
+                width - 1,
+                height - 1
+            ),
+            width,
+            height,
+            200,
+            0,
+            0,
+            0,
+            0,
+            width - 1,
+            height - 1
+        )
 
         val fourthImageEditor = PixelsEditor(fourthImage, width, height)
 

@@ -56,6 +56,9 @@ class FiltersActivity: ChildActivity() {
     private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
     private lateinit var currentInstruction: Instruction // Текущая инструкция
 
+    private lateinit var net: Net // Нейронная сеть
+    private lateinit var boxes: ArrayList<ArrayList<Int>> // bounding boxes
+
     private val imageEditor = ImageEditor() // Редактор изображений
     private val imageRotation = ImageRotation() // Поворот изображения
     private val colorCorrection = ColorCorrection() // Цветокоррекция
@@ -68,9 +71,6 @@ class FiltersActivity: ChildActivity() {
 
     private var filtersIsAvailable = false // Можно ли запускать фильтры
     private var filterIsActive = false // Запущен ли сейчас какой-то фильтр
-
-    private lateinit var net: Net // Нейронная сеть
-    private val color = Scalar(43.0, 203.0, 17.0) // Цвет прямоугольника
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -194,6 +194,7 @@ class FiltersActivity: ChildActivity() {
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
+        boxes = getBoundingBoxes(bitmap)
         imageView.setImageBitmap(bitmap)
         updatePixelsInfo()
 
@@ -454,17 +455,24 @@ class FiltersActivity: ChildActivity() {
                     val greenValue = currentInstruction.items[1].progress
                     val blueValue = currentInstruction.items[2].progress
 
-                    imageEditor.setPixelsToBitmap(
-                        bitmap,
-                        coloring.coloring(
-                            pixels,
-                            width,
-                            height,
-                            redValue,
-                            greenValue,
-                            blueValue
+                    for (box in boxes) {
+                        imageEditor.setPixelsToBitmap(
+                            bitmap,
+                            coloring.coloring(
+                                pixels,
+                                width,
+                                height,
+                                redValue,
+                                greenValue,
+                                blueValue,
+                                box[0],
+                                box[1],
+                                box[2],
+                                box[3]
+                            )
                         )
-                    )
+                    }
+
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.inversionImage -> {
@@ -475,17 +483,23 @@ class FiltersActivity: ChildActivity() {
                     val isBlueInverting =
                         currentInstruction.items[2].progress == 1
 
-                    imageEditor.setPixelsToBitmap(
-                        bitmap,
-                        inversion.inverse(
-                            pixels,
-                            width,
-                            height,
-                            isRedInverting,
-                            isGreenInverting,
-                            isBlueInverting
+                    for (box in boxes) {
+                        imageEditor.setPixelsToBitmap(
+                            bitmap,
+                            inversion.inverse(
+                                pixels,
+                                width,
+                                height,
+                                isRedInverting,
+                                isGreenInverting,
+                                isBlueInverting,
+                                box[0],
+                                box[1],
+                                box[2],
+                                box[3]
+                            )
                         )
-                    )
+                    }
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.popArtImage -> {
