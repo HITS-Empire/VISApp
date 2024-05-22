@@ -513,16 +513,18 @@ class FiltersActivity: ChildActivity() {
                         Bitmap.Config.ARGB_8888
                     )
 
-                    imageEditor.setPixelsToBitmap(
-                        bitmap,
-                        popArt.popArtFiltering(
-                            pixels,
-                            width,
-                            height,
-                            threshold1,
-                            threshold2
+                    for (box in boxes) {
+                        imageEditor.setPixelsToBitmap(
+                            bitmap,
+                            popArt.popArtFiltering(
+                                pixels,
+                                width,
+                                height,
+                                threshold1,
+                                threshold2
+                            )
                         )
-                    )
+                    }
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.glitchImage -> {
@@ -530,17 +532,23 @@ class FiltersActivity: ChildActivity() {
                     val effect = currentInstruction.items[1].progress
                     val offset = currentInstruction.items[2].progress
 
-                    imageEditor.setPixelsToBitmap(
-                        bitmap,
-                        glitch.rgbGlitch(
-                            pixels,
-                            width,
-                            height,
-                            frequency,
-                            effect,
-                            offset
+                    for (box in boxes) {
+                        imageEditor.setPixelsToBitmap(
+                            bitmap,
+                            glitch.rgbGlitch(
+                                pixels,
+                                width,
+                                height,
+                                frequency,
+                                effect,
+                                offset,
+                                box[0],
+                                box[1],
+                                box[2],
+                                box[3]
+                            )
                         )
-                    )
+                    }
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.scalingImage -> {}

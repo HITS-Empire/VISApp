@@ -30,7 +30,11 @@ class Glitch {
         pixels: IntArray,
         width: Int,
         height: Int,
-        delta: Int
+        delta: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
     ): IntArray {
         val glitchedPixels = IntArray(pixels.size) { 0 }
 
@@ -41,7 +45,11 @@ class Glitch {
             for (j in 0..< height) {
                 val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                if (i - delta < 0 || i + delta >= width) {
+                if (
+                    i - delta < 0 ||
+                    i + delta >= width ||
+                    !(i in left .. right && j in top .. bottom)
+                ) {
                     pixelsEditorGlitched.setPixel(
                         i,
                         j,
@@ -73,7 +81,11 @@ class Glitch {
         width: Int,
         height: Int,
         offsetFrequency: Int,
-        offsetSize: Int
+        offsetSize: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
     ): IntArray {
         resultPixels = pixels
 
@@ -101,7 +113,11 @@ class Glitch {
                     (offsetSize - offsetSize / 10 ..
                             offsetSize + offsetSize / 10).random()
                 // Сдвиг
-                if (offset)
+                if (
+                    offset &&
+                    i in left .. right &&
+                    j in top .. bottom
+                    )
                     pixelsEditorResult.setPixel(
                         i,
                         j,
@@ -128,19 +144,31 @@ class Glitch {
         height: Int,
         frequency: Int,
         delta: Int,
-        offset: Int
+        offset: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
     ): IntArray {
         return offset(
             anaglyph(
                 pixels,
                 width,
                 height,
-                scaleDelta(delta, width)
+                scaleDelta(delta, width),
+                left,
+                top,
+                right,
+                bottom
             ),
             width,
             height,
             scaleFrequency(frequency, width),
-            scaleOffset(offset, width)
+            scaleOffset(offset, width),
+            left,
+            top,
+            right,
+            bottom
         )
     }
 }

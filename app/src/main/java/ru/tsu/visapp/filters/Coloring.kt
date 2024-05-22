@@ -32,12 +32,12 @@ class Coloring {
 
         for (i in 0 ..< width) {
             for (j in 0..< height) {
-                val pixel = pixelsEditor.getPixel(i, j)
+                val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                val alpha = pixel?.alpha ?: 0
-                var red = pixel?.red ?: 0
-                var green = pixel?.green ?: 0
-                var blue = pixel?.blue ?: 0
+                val alpha = pixel.alpha
+                var red = pixel.red
+                var green = pixel.green
+                var blue = pixel.blue
 
                 if (i in left .. right &&
                     j in top .. bottom) {
