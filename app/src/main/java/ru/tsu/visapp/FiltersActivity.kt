@@ -400,6 +400,18 @@ class FiltersActivity: ChildActivity() {
             }
         }
 
+        // Обработка случая, когда объекты не найдены
+        if (result.size == 0) {
+            result.add(
+                arrayListOf(
+                    0,
+                    0,
+                    bitmap.width - 1,
+                    bitmap.height - 1
+                )
+            )
+        }
+
         return result
     }
 
@@ -427,9 +439,12 @@ class FiltersActivity: ChildActivity() {
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
 
-                    val boxes = getBoundingBoxes(bitmap)
-
                     for (box in boxes) {
+                        println(box[0])
+                        println(box[1])
+                        println(box[2])
+                        println(box[3])
+
                         imageEditor.setPixelsToBitmap(
                             bitmap,
                             colorCorrection.correctColor(
