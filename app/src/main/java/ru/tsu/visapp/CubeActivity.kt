@@ -33,18 +33,14 @@ class CubeActivity: ChildActivity() {
 
     private lateinit var imagePixels : Array<IntArray>
 
-    private var currentI = 0
-    private var currentJ = 0
-
     private fun renderCube(dx: Float, dy: Float) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
         for (i in 0 until width) {
             for (j in 0 until height) {
-                val xy = Vec2(i.toFloat(), j.toFloat())
-                    .division(Vec2(width.toFloat(), height.toFloat()))
-                    .multiplication(Vec2(2.0f))
-                    .minus(Vec2(1.0f))
+                val xy = Vec2(i.toFloat(), j.toFloat()) /
+                    Vec2(width.toFloat(), height.toFloat()) *
+                    Vec2(2.0f) - Vec2(1.0f)
 
                 xy.x *= ratioOfScreen
 
@@ -57,8 +53,7 @@ class CubeActivity: ChildActivity() {
                 camera.rotateZ(dx / 5000)
                 direction.rotateZ(dx / 5000)
 
-                val box = Vec3(0.0f, 0.0f, 0.0f)
-                val color = cube(camera, direction, Vec3(1.0f), box, i, j, dx, dy)
+                val color = cube(camera, direction, Vec3(1.0f))
 
                 previousCamera = Pair(camera.y, camera.z)
 
@@ -74,63 +69,44 @@ class CubeActivity: ChildActivity() {
     private fun cube(
         camera: Vec3,
         direction: Vec3,
-        size: Vec3,
-        normal: Vec3,
-        i: Int,
-        j: Int,
-        dx: Float,
-        dy: Float
+        size: Vec3
     ): Int {
-        val m = Vec3(1.0f).division(direction)
-        val n = m.multiplication(camera)
-        val k = m.module().multiplication(size)
+        val m = Vec3(1.0f) / direction
+        val k = m.module() * size
+        val n = m * camera
 
-        val t1 = n.changeSign().minus(k)
-        val t2 = n.changeSign().plus(k)
+        val t1 = n.changeSign() - k
+        val t2 = n.changeSign() + k
 
         val tN = max(max(t1.x, t1.y), t1.z)
         val tF = min(min(t2.x, t2.y), t2.z)
-        // if (tF != 0.0f && (tN > tF || tF < 0.0f)) {
 
-        if (tN > tF || tF < 0.0f) {
-            return Color.BLACK
-        }
-
-        val yzx = Vec3(t1.y, t1.z, t1.x)
-        val zxy = Vec3(t1.z, t1.x, t1.y)
-
-        normal.changeElements(direction
-            .checkSign()
-            .multiplication(t1.checkEdge(yzx))
-            .multiplication(t1.checkEdge(zxy))
-            .changeSign()
-        )
+        if (tN > tF) return Color.BLACK
 
         return when {
             t1.x > t1.y && t1.x > t1.z -> {
-//                val newX = x * cos(angle) - y * sin(angle)
-//                val newY = x * sin(angle) + y * cos(angle)
-                //if (camera.x < 0) imagePixels[0][abs(i * cos(previousAngle.second / 5000) + j * sin(previousAngle.first / 5000)).toInt() % width + abs(i * sin(previousAngle.first / 5000) + j * cos(previousAngle.second / 5000)).toInt() % width * width] else imagePixels[1][i + j * width]
-                if (camera.x < 0) imagePixels[0][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[1][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+                if (camera.x < 0) imagePixels[0][0] else imagePixels[1][0]
             }
             t1.y > t1.x && t1.y > t1.z -> {
-                if (camera.y < 0) imagePixels[2][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[3][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+                if (camera.y < 0) imagePixels[2][0] else imagePixels[3][0]
             }
-            camera.z < 0 -> imagePixels[4][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
-            else -> imagePixels[5][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+            t1.z > t1.x && t1.z > t1.y -> {
+                if (camera.z < 0) imagePixels[4][0] else imagePixels[5][0]
+            }
+            else -> 0
         }
     }
 
-    fun startRender() {
+    private fun startRender() {
         renderCube(previousAngle.first, previousAngle.second)
     }
 
-    fun getPixelsFromDrawable(id: Int) : IntArray {
+    private fun getPixelsFromDrawable(id: Int) : IntArray {
         val options = BitmapFactory.Options()
         options.inScaled = false
+
         val imageBitmap = BitmapFactory.decodeResource(resources, id, options)
-        val currentPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
-        return currentPixels
+        return imageEditor.getPixelsFromBitmap(imageBitmap)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -157,16 +133,17 @@ class CubeActivity: ChildActivity() {
         var previousX = 0.0f
         var previousY = 0.0f
 
-        var startX1 = 0.0f
-        var startX2 = 0.0f
+        var startX1: Float
+        var startX2: Float
         var startDistance = 0.0f
+
         imageView.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     if (event.pointerCount == 2) {
                         startX1 = event.getX(0)
                         startX2 = event.getX(1)
-                        startDistance = Math.abs(startX1 - startX2)
+                        startDistance = abs(startX1 - startX2)
                     }
                 }
 
@@ -180,24 +157,23 @@ class CubeActivity: ChildActivity() {
                     if (event.pointerCount == 1) {
                         val dx = event.x - previousX
                         val dy = event.y - previousY
-
                         val angle = Pair(dx, dy)
+
                         renderCube(
                             angle.first + previousAngle.first,
                             angle.second + previousAngle.second
                         )
-
                         previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
                     } else if (event.pointerCount == 2) {
                         val x1 = event.getX(0)
                         val x2 = event.getX(1)
-                        val currentDistance = Math.abs(x1 - x2)
+                        val currentDistance = abs(x1 - x2)
 
                         if (currentDistance < startDistance && currentProgress < 100) {
-                            currentProgress += 1
+                            currentProgress++
                             startRender()
                         } else if (currentDistance > startDistance && currentProgress > 15) {
-                            currentProgress -= 1
+                            currentProgress--
                             startRender()
                         }
                         startDistance = currentDistance
