@@ -10,91 +10,85 @@ import ru.tsu.visapp.utils.cube.*
 import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
+import ru.tsu.visapp.utils.PixelsEditor
 
 /*
  * Экран для 3D-куба
  */
 
 class CubeActivity: ChildActivity() {
-    private val width = 100
-    private val height = 100
+    private val width = 99
+    private val height = 99
     private val ratioOfScreen = (width / height).toFloat()
 
-    private var currentProgress = 25 // Текущий прогресс в процентах
+    private var currentProgress = 40 // Текущий прогресс в процентах
 
     private lateinit var bitmap: Bitmap
 
     private lateinit var imageView: ImageView
 
     private val imageEditor = ImageEditor()
+    private val helper = Helper()
 
     private var previousAngle = Pair(0.0f, 0.0f)
-    private lateinit var previousCamera : Pair<Float, Float>
 
-    private lateinit var imagePixels : Array<IntArray>
+    private lateinit var imagePixels: Array<IntArray>
 
     private fun renderCube(dx: Float, dy: Float) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+
+        val cameraPosition = Vec3(-currentProgress / 10.0f, 0.0f, 0.0f)
+        cameraPosition.rotateY(dy / 5000)
+        cameraPosition.rotateZ(dx / 5000)
 
         for (i in 0 until width) {
             for (j in 0 until height) {
-                val xy = Vec2(i.toFloat(), j.toFloat()) /
-                    Vec2(width.toFloat(), height.toFloat()) *
-                    Vec2(2.0f) - Vec2(1.0f)
+                val uv = Vec2(i, j) / Vec2(width, height) * 2.0f - 1.0f
 
-                xy.x *= ratioOfScreen
+                val beamDirection = Vec3(2, uv).normalize()
+                beamDirection.rotateY(dy / 5000)
+                beamDirection.rotateZ(dx / 5000)
 
-                val camera = Vec3(-currentProgress / 10.0f,0.0f,0.0f)
-                val direction = Vec3(1.0f, xy.x, xy.y).normalize()
+                val normal = Vec3(0)
+                var color: Int? = null
 
-                camera.rotateY(dy / 5000)
-                direction.rotateY(dy / 5000)
+                val intersection = helper.box(
+                    cameraPosition,
+                    beamDirection,
+                    Vec3(1),
+                    normal
+                )
+                if (intersection.x > 0.0f) {
+                    color = when {
+                        normal.x == -1.0f -> {
+                            imagePixels[0][0]
+                        }
+                        normal.y == -1.0f -> {
+                            imagePixels[1][0]
+                        }
+                        normal.x == 1.0f -> {
+                            imagePixels[2][0]
+                        }
+                        normal.y == 1.0f -> {
+                            imagePixels[3][0]
+                        }
+                        normal.z == -1.0f -> {
+                            imagePixels[4][0]
+                        }
+                        normal.z == 1.0f -> {
+                            imagePixels[5][0]
+                        }
+                        else -> null
+                    }
+                }
 
-                camera.rotateZ(dx / 5000)
-                direction.rotateZ(dx / 5000)
-
-                val color = cube(camera, direction, Vec3(1.0f))
-
-                previousCamera = Pair(camera.y, camera.z)
-
-                pixels[i + j * width] = color
+                pixelsEditor.setPixel(i, j, color)
             }
         }
 
         imageEditor.setPixelsToBitmap(bitmap, pixels)
         imageView.setImageBitmap(bitmap)
-    }
-
-    // Функция пересечения с кубом
-    private fun cube(
-        camera: Vec3,
-        direction: Vec3,
-        size: Vec3
-    ): Int {
-        val m = Vec3(1.0f) / direction
-        val k = m.module() * size
-        val n = m * camera
-
-        val t1 = -n - k
-        val t2 = -n + k
-
-        val tN = max(max(t1.x, t1.y), t1.z)
-        val tF = min(min(t2.x, t2.y), t2.z)
-
-        if (tN > tF) return Color.BLACK
-
-        return when {
-            t1.x > t1.y && t1.x > t1.z -> {
-                if (camera.x < 0) imagePixels[0][0] else imagePixels[1][0]
-            }
-            t1.y > t1.x && t1.y > t1.z -> {
-                if (camera.y < 0) imagePixels[2][0] else imagePixels[3][0]
-            }
-            t1.z > t1.x && t1.z > t1.y -> {
-                if (camera.z < 0) imagePixels[4][0] else imagePixels[5][0]
-            }
-            else -> 0
-        }
     }
 
     private fun startRender() {
