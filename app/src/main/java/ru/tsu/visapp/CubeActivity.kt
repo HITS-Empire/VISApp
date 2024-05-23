@@ -93,6 +93,13 @@ class CubeActivity: ChildActivity() {
 
         initializeView(R.layout.activity_cube)
 
+        if (savedInstanceState != null) {
+            currentProgress = savedInstanceState.getInt("currentProgress")
+            isTerrible = savedInstanceState.getBoolean("isTerrible")
+            dx = savedInstanceState.getFloat("dx")
+            dy = savedInstanceState.getFloat("dy")
+        }
+
         imageView = findViewById(R.id.cubeImageView)
         imagePixels = arrayOf(
             getPixelsFromDrawable(R.drawable.digit_1),
@@ -107,7 +114,7 @@ class CubeActivity: ChildActivity() {
 
         modeButton = findViewById(R.id.modeButton)
         modeButton.setOnClickListener { changeMode(!isTerrible) }
-        changeMode(false)
+        changeMode(isTerrible)
 
         var previousX = 0.0f
         var previousY = 0.0f
@@ -159,5 +166,14 @@ class CubeActivity: ChildActivity() {
 
             true
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt("currentProgress", currentProgress)
+        outState.putBoolean("isTerrible", isTerrible)
+        outState.putFloat("dx", dx)
+        outState.putFloat("dy", dy)
     }
 }
