@@ -29,27 +29,23 @@ class CubeActivity: ChildActivity() {
     private val imageEditor = ImageEditor()
 
     private var previousAngle = Pair(0.0f, 0.0f)
-    private lateinit var previousCamera : Pair<Float, Float>
 
     private lateinit var imagePixels : Array<IntArray>
-
-    private var currentI = 0
-    private var currentJ = 0
 
     private fun renderCube(dx: Float, dy: Float) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
 
         for (i in 0 until width) {
             for (j in 0 until height) {
-                val xy = Vec2(i.toFloat(), j.toFloat())
-                    .division(Vec2(width.toFloat(), height.toFloat()))
-                    .multiplication(Vec2(2.0f))
-                    .minus(Vec2(1.0f))
+                val xy = Vec2(i.toDouble(), j.toDouble())
+                    .division(Vec2(width.toDouble(), height.toDouble()))
+                    .multiplication(Vec2(2.0))
+                    .minus(Vec2(1.0))
 
                 xy.x *= ratioOfScreen
 
-                val camera = Vec3(-currentProgress / 10.0f,0.0f,0.0f)
-                val direction = Vec3(1.0f, xy.x, xy.y).normalize()
+                val camera = Vec3(-currentProgress / 10.0,0.0,0.0)
+                val direction = Vec3(1.0, xy.x, xy.y).normalize()
 
                 camera.rotateY(dy / 5000)
                 direction.rotateY(dy / 5000)
@@ -57,10 +53,8 @@ class CubeActivity: ChildActivity() {
                 camera.rotateZ(dx / 5000)
                 direction.rotateZ(dx / 5000)
 
-                val box = Vec3(0.0f, 0.0f, 0.0f)
-                val color = cube(camera, direction, Vec3(1.0f), box, i, j, dx, dy)
-
-                previousCamera = Pair(camera.y, camera.z)
+                val box = Vec3(0.0, 0.0, 0.0)
+                val color = cube(camera, direction, Vec3(1.0), box, i, j, dx, dy)
 
                 pixels[i + j * width] = color
             }
@@ -81,11 +75,11 @@ class CubeActivity: ChildActivity() {
         dx: Float,
         dy: Float
     ): Int {
-        val m = Vec3(1.0f).division(direction)
+        val m = Vec3(1.0).division(direction)
         val n = m.multiplication(camera)
         val k = m.module().multiplication(size)
 
-        val t1 = n.changeSign().minus(k)
+        var t1 = n.changeSign().minus(k)
         val t2 = n.changeSign().plus(k)
 
         val tN = max(max(t1.x, t1.y), t1.z)
@@ -99,25 +93,49 @@ class CubeActivity: ChildActivity() {
         val yzx = Vec3(t1.y, t1.z, t1.x)
         val zxy = Vec3(t1.z, t1.x, t1.y)
 
-        normal.changeElements(direction
-            .checkSign()
-            .multiplication(t1.checkEdge(yzx))
-            .multiplication(t1.checkEdge(zxy))
-            .changeSign()
+        normal.changeElements(
+            direction
+                .checkSign()
+                .multiplication(t1.checkEdge(yzx))
+                .multiplication(t1.checkEdge(zxy))
+                .changeSign()
         )
 
+        var u = 0.0
+        var v = 0.0
+        t1 = t1.normalize()
         return when {
             t1.x > t1.y && t1.x > t1.z -> {
-//                val newX = x * cos(angle) - y * sin(angle)
-//                val newY = x * sin(angle) + y * cos(angle)
-                //if (camera.x < 0) imagePixels[0][abs(i * cos(previousAngle.second / 5000) + j * sin(previousAngle.first / 5000)).toInt() % width + abs(i * sin(previousAngle.first / 5000) + j * cos(previousAngle.second / 5000)).toInt() % width * width] else imagePixels[1][i + j * width]
-                if (camera.x < 0) imagePixels[0][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[1][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+                if (camera.x < 0) {
+                    u = abs(t1.y)
+                    v = abs(t1.z + 1)
+                    v = 1 - v
+                    //println("$u $v ${(u * width)} ${(v * height)}")
+                    //    println("${t1.x} ${t1.y} ${t1.z} $i $j")
+                    //println(u.toInt() * height + v.toInt() * width * height)
+                    imagePixels[0][(u * width).toInt() + (v * height).toInt() * width]
+                } else {
+                    imagePixels[1][i + j * width]//imagePixels[0][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[1][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+                }
             }
+
             t1.y > t1.x && t1.y > t1.z -> {
-                if (camera.y < 0) imagePixels[2][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[3][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+                if (camera.y < 0) imagePixels[2][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(
+                    j * cos(dy / 5000) - j * sin(dy / 5000)
+                ).toInt() % width * width] else imagePixels[3][abs(
+                    i * cos(dx / 5000) - i * sin(
+                        dx / 5000
+                    )
+                ).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
             }
-            camera.z < 0 -> imagePixels[4][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
-            else -> imagePixels[5][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+
+            camera.z < 0 -> imagePixels[4][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(
+                j * cos(dy / 5000) - j * sin(dy / 5000)
+            ).toInt() % width * width]
+
+            else -> imagePixels[5][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(
+                j * cos(dy / 5000) - j * sin(dy / 5000)
+            ).toInt() % width * width]
         }
     }
 

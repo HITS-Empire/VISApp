@@ -9,8 +9,8 @@ import kotlin.math.sqrt
  * Трёхмерный вектор
  */
 
-class Vec3(var x: Float, var y: Float, var z: Float) {
-    constructor(value: Float) : this(value, value, value)
+class Vec3(var x: Double, var y: Double, var z: Double) {
+    constructor(value: Double) : this(value, value, value)
 
     fun plus(newVec3: Vec3): Vec3 {
         return Vec3(x + newVec3.x, y + newVec3.y, z + newVec3.z)
@@ -21,9 +21,9 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
     }
 
     fun division(newVec3: Vec3): Vec3 {
-        val newX = if (newVec3.x == 0.0f) 0.0f else x / newVec3.x
-        val newY = if (newVec3.y == 0.0f) 0.0f else y / newVec3.y
-        val newZ = if (newVec3.z == 0.0f) 0.0f else z / newVec3.z
+        val newX = if (newVec3.x == 0.0) 0.0 else x / newVec3.x
+        val newY = if (newVec3.y == 0.0) 0.0 else y / newVec3.y
+        val newZ = if (newVec3.z == 0.0) 0.0 else z / newVec3.z
 
         return Vec3(newX, newY, newZ)
     }
@@ -32,7 +32,7 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
         return Vec3(x * newVec3.x, y * newVec3.y, z * newVec3.z)
     }
 
-    fun length(): Float {
+    fun length(): Double {
         return sqrt(x * x + y * y + z * z)
     }
 
@@ -54,11 +54,11 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
         z = newVec3.z
     }
 
-    private fun checkSignOfCoordinate(value: Float): Float {
+    private fun checkSignOfCoordinate(value: Double): Double {
         return when {
-            value > 0.0f -> 1.0f
-            value < 0.0f -> -1.0f
-            else -> 0.0f
+            value > 0.0 -> 1.0
+            value < 0.0 -> -1.0
+            else -> 0.0
         }
     }
 
@@ -70,10 +70,10 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
         )
     }
 
-    private fun checkEdgeUtil(edge: Float, value: Float): Float {
+    private fun checkEdgeUtil(edge: Double, value: Double): Double {
         return when {
-            value > edge -> 1.0f
-            else -> 0.0f
+            value > edge -> 1.0
+            else -> 0.0
         }
     }
 
@@ -85,7 +85,7 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
         )
     }
 
-    fun dot(newVec3: Vec3): Float {
+    fun dot(newVec3: Vec3): Double {
         return x * newVec3.x + y * newVec3.y + z * newVec3.z
     }
 

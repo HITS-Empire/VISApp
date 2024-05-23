@@ -6,8 +6,8 @@ import kotlin.math.sqrt
  * Двумерный вектор
  */
 
-class Vec2(var x: Float, var y: Float) {
-    constructor(value: Float) : this(value, value)
+class Vec2(var x: Double, var y: Double) {
+    constructor(value: Double) : this(value, value)
 
     fun plus(newVec2: Vec2): Vec2 {
         return Vec2(x + newVec2.x, y + newVec2.y)
@@ -18,8 +18,8 @@ class Vec2(var x: Float, var y: Float) {
     }
 
     fun division(newVec2: Vec2): Vec2 {
-        val newX = if (newVec2.x == 0.0f) 0.0f else x / newVec2.x
-        val newY = if (newVec2.y == 0.0f) 0.0f else y / newVec2.y
+        val newX = if (newVec2.x == 0.0) 0.0 else x / newVec2.x
+        val newY = if (newVec2.y == 0.0) 0.0 else y / newVec2.y
 
         return Vec2(newX, newY)
     }
@@ -28,7 +28,7 @@ class Vec2(var x: Float, var y: Float) {
         return Vec2(x * newVec2.x, y * newVec2.y)
     }
 
-    fun length() : Float {
+    fun length() : Double {
         return sqrt(x * x + y * y)
     }
 

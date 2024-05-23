@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
+import ru.tsu.visapp.filters.Scaling
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
@@ -29,8 +30,10 @@ class FiltersActivity: ChildActivity() {
     private lateinit var title: String // Название изображения
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
+    private lateinit var startBitmap: Bitmap // Начальная картинка
     private var width = 0 // Ширина картинки
     private var height = 0 // Высота картинки
+    private var previousScaleFactor = 100 // Коэффициент предыдущего изменения изображения
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
 
@@ -46,6 +49,7 @@ class FiltersActivity: ChildActivity() {
     private val imageEditor = ImageEditor() // Редактор изображений
     private val imageRotation = ImageRotation() // Поворот изображения
     private val colorCorrection = ColorCorrection() // Цветокоррекция
+    private val scaling = Scaling() // Масштабирование
     private val coloring = Coloring() // Цвета
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
@@ -118,7 +122,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.scalingImage,
                 arrayOf(
                     Item(),
-                    Item(50, 100, "Масштаб", "%"),
+                    Item(100, 500, "Масштаб", "%"),
                     Item()
                 )
             ),
@@ -144,6 +148,7 @@ class FiltersActivity: ChildActivity() {
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
+        startBitmap = bitmap
         imageView.setImageBitmap(bitmap)
         updatePixelsInfo()
 
@@ -321,7 +326,30 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
-                R.id.scalingImage -> {}
+                R.id.scalingImage -> {
+                    val scaleFactor = currentInstruction.items[1].progress
+                    val difference = scaleFactor - previousScaleFactor
+                    println(difference)
+                    if (difference > 0) {
+                        bitmap = scaling.increaseImage(
+                            width,
+                            height,
+                            imageEditor.getPixelsFromBitmap(startBitmap),
+                            200
+                        )
+                    } else if (difference < 0) {
+                        bitmap = scaling.decreaseImage(
+                            width,
+                            height,
+                            pixels,//imageEditor.getPixelsFromBitmap(startBitmap),
+                            50
+                        )
+                    }
+
+                    imageView.setImageBitmap(bitmap)
+
+                    previousScaleFactor = scaleFactor
+                }
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
