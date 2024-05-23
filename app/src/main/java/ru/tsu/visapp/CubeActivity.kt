@@ -20,7 +20,7 @@ class CubeActivity: ChildActivity() {
     private val width = 99 // Ширина картинки
     private val height = 99 // Высота картинки
 
-    private var currentProgress = 40 // Текущий прогресс в процентах
+    private var currentProgress = 50 // Текущий прогресс в процентах
     private var isTerrible = false // Включен ли режим позорного куба
 
     private lateinit var bitmap: Bitmap

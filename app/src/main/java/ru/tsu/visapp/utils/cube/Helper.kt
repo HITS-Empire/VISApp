@@ -73,42 +73,42 @@ class Helper {
                 if (isTerrible) {
                     imagePixels[0][0] // Код для картинок
                 } else {
-                    dot(imagePixels[0][0], 2.5f / tN)
+                    dot(imagePixels[0][0], 3 / tN)
                 }
             }
             normal.y == -1.0f -> {
                 if (isTerrible) {
                     imagePixels[1][0] // Код для картинок
                 } else {
-                    dot(imagePixels[1][0], 2.5f / tN)
+                    dot(imagePixels[1][0], 3 / tN)
                 }
             }
             normal.x == 1.0f -> {
                 if (isTerrible) {
                     imagePixels[2][0] // Код для картинок
                 } else {
-                    dot(imagePixels[2][0], 2.5f / tN)
+                    dot(imagePixels[2][0], 3 / tN)
                 }
             }
             normal.y == 1.0f -> {
                 if (isTerrible) {
                     imagePixels[3][0] // Код для картинок
                 } else {
-                    dot(imagePixels[3][0], 2.5f / tN)
+                    dot(imagePixels[3][0], 3 / tN)
                 }
             }
             normal.z == -1.0f -> {
                 if (isTerrible) {
                     imagePixels[4][0] // Код для картинок
                 } else {
-                    dot(imagePixels[4][0], 2.5f / tN)
+                    dot(imagePixels[4][0], 3 / tN)
                 }
             }
             normal.z == 1.0f -> {
                 if (isTerrible) {
                     imagePixels[5][0] // Код для картинок
                 } else {
-                    dot(imagePixels[5][0], 2.5f / tN)
+                    dot(imagePixels[5][0], 3 / tN)
                 }
             }
             else -> null
