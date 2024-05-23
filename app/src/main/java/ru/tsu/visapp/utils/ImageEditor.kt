@@ -77,19 +77,6 @@ class ImageEditor {
         return intArrayOf(x.toInt(), y.toInt())
     }
 
-    // Очистить bitmap
-    fun clearBitmap(bitmap: Bitmap) {
-        val pixels = getPixelsFromBitmap(bitmap)
-
-        pixels.forEachIndexed{index, _ ->
-            run {
-                pixels[index] = 0x000000FF.toInt()
-            }
-        }
-
-        setPixelsToBitmap(bitmap, pixels)
-    }
-
     // Получить URI сохранённой картинки
     fun getSavedImageUri(activity: AppCompatActivity?, fragment: Fragment?): Uri {
         var sharedPreferences: SharedPreferences? = null

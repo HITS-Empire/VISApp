@@ -31,23 +31,24 @@ class CubeActivity: ChildActivity() {
     private val imageEditor = ImageEditor()
     private val helper = Helper()
 
-    private lateinit var previousAngle: Pair<Float, Float>
+    private var dx = 0.4f // Угол по X
+    private var dy = 0.4f // Угол по Y
 
-    private fun renderCube(dx: Float, dy: Float) {
+    private fun renderCube() {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
         val pixelsEditor = PixelsEditor(pixels, width, height)
 
         val cameraPosition = Vec3(-currentProgress / 10.0f, 0.0f, 0.0f)
-        cameraPosition.rotateY(dy / 5000)
-        cameraPosition.rotateZ(dx / 5000)
+        cameraPosition.rotateY(dy)
+        cameraPosition.rotateZ(dx)
 
         for (i in 0 until width) {
             for (j in 0 until height) {
                 val uv = Vec2(i, j) / Vec2(width, height) * 2.0f - 1.0f
 
                 val beamDirection = Vec3(2, uv).normalize()
-                beamDirection.rotateY(dy / 5000)
-                beamDirection.rotateZ(dx / 5000)
+                beamDirection.rotateY(dy)
+                beamDirection.rotateZ(dx)
 
                 val color = helper.box(
                     cameraPosition,
@@ -58,16 +59,12 @@ class CubeActivity: ChildActivity() {
                     height,
                     isTerrible
                 )
-                pixelsEditor.setPixel(i, j, color)
+                pixelsEditor.setPixel(i, j, color ?: 0)
             }
         }
 
         imageEditor.setPixelsToBitmap(bitmap, pixels)
         imageView.setImageBitmap(bitmap)
-    }
-
-    private fun startRender() {
-        renderCube(previousAngle.first, previousAngle.second)
     }
 
     private fun getPixelsFromDrawable(id: Int): IntArray {
@@ -87,7 +84,7 @@ class CubeActivity: ChildActivity() {
             "Перейти в позорный режим"
         }
 
-        renderCube(previousAngle.first, previousAngle.second)
+        renderCube()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -108,13 +105,9 @@ class CubeActivity: ChildActivity() {
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
-        previousAngle = Pair(2000.0f, 2000.0f)
-        renderCube(previousAngle.first, previousAngle.second)
-
         modeButton = findViewById(R.id.modeButton)
-        changeMode(false)
-
         modeButton.setOnClickListener { changeMode(!isTerrible) }
+        changeMode(false)
 
         var previousX = 0.0f
         var previousY = 0.0f
@@ -139,17 +132,14 @@ class CubeActivity: ChildActivity() {
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    imageEditor.clearBitmap(bitmap)
                     if (event.pointerCount == 1) {
-                        val dx = event.x - previousX
-                        val dy = event.y - previousY
-                        val angle = Pair(dx, dy)
+                        dx += (event.x - previousX) / 400
+                        dy += (event.y - previousY) / 400
 
-                        renderCube(
-                            angle.first + previousAngle.first,
-                            angle.second + previousAngle.second
-                        )
-                        previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
+                        renderCube()
+
+                        previousX = event.x
+                        previousY = event.y
                     } else if (event.pointerCount == 2) {
                         val x1 = event.getX(0)
                         val x2 = event.getX(1)
@@ -157,10 +147,10 @@ class CubeActivity: ChildActivity() {
 
                         if (currentDistance < startDistance && currentProgress < 100) {
                             currentProgress++
-                            startRender()
+                            renderCube()
                         } else if (currentDistance > startDistance && currentProgress > 15) {
                             currentProgress--
-                            startRender()
+                            renderCube()
                         }
                         startDistance = currentDistance
                     }
