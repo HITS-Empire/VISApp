@@ -2,6 +2,11 @@ package ru.tsu.visapp.utils.cube
 
 import kotlin.math.max
 import kotlin.math.min
+import android.graphics.Color
+import androidx.core.graphics.red
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.alpha
 
 class Helper {
     private fun Boolean.toFloat(): Float = if (this) 1.0f else 0.0f
@@ -25,6 +30,15 @@ class Helper {
     }
     private fun max(vec3: Vec3): Float {
         return max(max(vec3.x, vec3.y), vec3.z)
+    }
+
+    private fun dot(color: Int, value: Float): Int {
+        return Color.argb(
+            color.alpha,
+            (color.red * value).toInt().coerceIn(0, 255),
+            (color.green * value).toInt().coerceIn(0, 255),
+            (color.blue * value).toInt().coerceIn(0, 255)
+        )
     }
 
     // Пересечение с кубом
@@ -57,44 +71,44 @@ class Helper {
         return when {
             normal.x == -1.0f -> {
                 if (isTerrible) {
-                    0 // Код для картинок
+                    imagePixels[0][0] // Код для картинок
                 } else {
-                    imagePixels[0][0]
+                    dot(imagePixels[0][0], 2.5f / tN)
                 }
             }
             normal.y == -1.0f -> {
                 if (isTerrible) {
-                    0 // Код для картинок
+                    imagePixels[1][0] // Код для картинок
                 } else {
-                    imagePixels[1][0]
+                    dot(imagePixels[1][0], 2.5f / tN)
                 }
             }
             normal.x == 1.0f -> {
                 if (isTerrible) {
-                    0 // Код для картинок
+                    imagePixels[2][0] // Код для картинок
                 } else {
-                    imagePixels[2][0]
+                    dot(imagePixels[2][0], 2.5f / tN)
                 }
             }
             normal.y == 1.0f -> {
                 if (isTerrible) {
-                    0 // Код для картинок
+                    imagePixels[3][0] // Код для картинок
                 } else {
-                    imagePixels[3][0]
+                    dot(imagePixels[3][0], 2.5f / tN)
                 }
             }
             normal.z == -1.0f -> {
                 if (isTerrible) {
-                    0 // Код для картинок
+                    imagePixels[4][0] // Код для картинок
                 } else {
-                    imagePixels[4][0]
+                    dot(imagePixels[4][0], 2.5f / tN)
                 }
             }
             normal.z == 1.0f -> {
                 if (isTerrible) {
-                    0 // Код для картинок
+                    imagePixels[5][0] // Код для картинок
                 } else {
-                    imagePixels[5][0]
+                    dot(imagePixels[5][0], 2.5f / tN)
                 }
             }
             else -> null

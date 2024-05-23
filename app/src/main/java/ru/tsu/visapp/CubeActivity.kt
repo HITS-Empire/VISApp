@@ -86,6 +86,8 @@ class CubeActivity: ChildActivity() {
         } else {
             "Перейти в позорный режим"
         }
+
+        renderCube(previousAngle.first, previousAngle.second)
     }
 
     @SuppressLint("ClickableViewAccessibility")
