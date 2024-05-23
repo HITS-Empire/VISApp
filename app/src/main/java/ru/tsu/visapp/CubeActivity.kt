@@ -50,39 +50,14 @@ class CubeActivity: ChildActivity() {
                 beamDirection.rotateY(dy / 5000)
                 beamDirection.rotateZ(dx / 5000)
 
-                val normal = Vec3(0)
-                var color: Int? = null
-
-                val intersection = helper.box(
+                val color = helper.box(
                     cameraPosition,
                     beamDirection,
                     Vec3(1),
-                    normal
+                    imagePixels,
+                    width,
+                    height
                 )
-                if (intersection.x > 0.0f) {
-                    color = when {
-                        normal.x == -1.0f -> {
-                            imagePixels[0][0]
-                        }
-                        normal.y == -1.0f -> {
-                            imagePixels[1][0]
-                        }
-                        normal.x == 1.0f -> {
-                            imagePixels[2][0]
-                        }
-                        normal.y == 1.0f -> {
-                            imagePixels[3][0]
-                        }
-                        normal.z == -1.0f -> {
-                            imagePixels[4][0]
-                        }
-                        normal.z == 1.0f -> {
-                            imagePixels[5][0]
-                        }
-                        else -> null
-                    }
-                }
-
                 pixelsEditor.setPixel(i, j, color)
             }
         }

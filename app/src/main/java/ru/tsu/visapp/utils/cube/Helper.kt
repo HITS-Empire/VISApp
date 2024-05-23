@@ -1,5 +1,6 @@
 package ru.tsu.visapp.utils.cube
 
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,8 +26,10 @@ class Helper {
         cameraPosition: Vec3,
         beamDirection: Vec3,
         boxSize: Vec3,
-        normal: Vec3
-    ): Vec2 {
+        imagePixels: Array<IntArray>,
+        width: Int,
+        height: Int
+    ): Int? {
         val m = Vec3(1) / beamDirection
         val n = m * cameraPosition
         val k = m.module() * boxSize
@@ -37,15 +40,33 @@ class Helper {
         val tN = max(max(t1.x, t1.y), t1.z)
         val tF = min(min(t2.x, t2.y), t2.z)
 
-        if (tN > tF || tF < 0.0f) return Vec2(-1)
+        if (tN > tF || tF < 0.0f || tN <= 0.0f) return null
 
         val yzx = Vec3(t1.y, t1.z, t1.x)
         val zxy = Vec3(t1.z, t1.x, t1.y)
 
-        normal.set(
-            -sign(beamDirection) * step(yzx, t1) * step(zxy, t1)
-        )
+        val normal = -sign(beamDirection) * step(yzx, t1) * step(zxy, t1)
 
-        return Vec2(tN, tF)
+        return when {
+            normal.x == -1.0f -> {
+                imagePixels[0][0]
+            }
+            normal.y == -1.0f -> {
+                imagePixels[1][0]
+            }
+            normal.x == 1.0f -> {
+                imagePixels[2][0]
+            }
+            normal.y == 1.0f -> {
+                imagePixels[3][0]
+            }
+            normal.z == -1.0f -> {
+                imagePixels[4][0]
+            }
+            normal.z == 1.0f -> {
+                imagePixels[5][0]
+            }
+            else -> null
+        }
     }
 }
