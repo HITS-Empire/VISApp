@@ -2,7 +2,6 @@ package ru.tsu.visapp
 
 import kotlin.math.*
 import android.os.Bundle
-import android.graphics.Color
 import android.graphics.Bitmap
 import android.view.MotionEvent
 import android.widget.ImageView
@@ -17,22 +16,20 @@ import ru.tsu.visapp.utils.PixelsEditor
  */
 
 class CubeActivity: ChildActivity() {
-    private val width = 99
-    private val height = 99
-    private val ratioOfScreen = (width / height).toFloat()
+    private val width = 99 // Ширина картинки
+    private val height = 99 // Высота картинки
 
     private var currentProgress = 40 // Текущий прогресс в процентах
+    private var isTerrible = false // Включен ли режим позорного куба
 
     private lateinit var bitmap: Bitmap
-
     private lateinit var imageView: ImageView
+    private lateinit var imagePixels: Array<IntArray>
 
     private val imageEditor = ImageEditor()
     private val helper = Helper()
 
-    private var previousAngle = Pair(0.0f, 0.0f)
-
-    private lateinit var imagePixels: Array<IntArray>
+    private lateinit var previousAngle: Pair<Float, Float>
 
     private fun renderCube(dx: Float, dy: Float) {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
@@ -56,7 +53,8 @@ class CubeActivity: ChildActivity() {
                     Vec3(1),
                     imagePixels,
                     width,
-                    height
+                    height,
+                    isTerrible
                 )
                 pixelsEditor.setPixel(i, j, color)
             }
@@ -70,7 +68,7 @@ class CubeActivity: ChildActivity() {
         renderCube(previousAngle.first, previousAngle.second)
     }
 
-    private fun getPixelsFromDrawable(id: Int) : IntArray {
+    private fun getPixelsFromDrawable(id: Int): IntArray {
         val options = BitmapFactory.Options()
         options.inScaled = false
 
@@ -85,7 +83,6 @@ class CubeActivity: ChildActivity() {
         initializeView(R.layout.activity_cube)
 
         imageView = findViewById(R.id.cubeImageView)
-
         imagePixels = arrayOf(
             getPixelsFromDrawable(R.drawable.digit_1),
             getPixelsFromDrawable(R.drawable.digit_2),
@@ -97,7 +94,8 @@ class CubeActivity: ChildActivity() {
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
-        renderCube(1.0f, 1.0f)
+        previousAngle = Pair(2000.0f, 2000.0f)
+        renderCube(previousAngle.first, previousAngle.second)
 
         var previousX = 0.0f
         var previousY = 0.0f

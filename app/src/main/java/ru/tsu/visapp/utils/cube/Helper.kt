@@ -1,6 +1,5 @@
 package ru.tsu.visapp.utils.cube
 
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -21,6 +20,13 @@ class Helper {
         return Vec3(step(edge.x, vec3.x), step(edge.y, vec3.y), step(edge.z, vec3.z))
     }
 
+    private fun min(vec3: Vec3): Float {
+        return min(min(vec3.x, vec3.y), vec3.z)
+    }
+    private fun max(vec3: Vec3): Float {
+        return max(max(vec3.x, vec3.y), vec3.z)
+    }
+
     // Пересечение с кубом
     fun box(
         cameraPosition: Vec3,
@@ -28,7 +34,8 @@ class Helper {
         boxSize: Vec3,
         imagePixels: Array<IntArray>,
         width: Int,
-        height: Int
+        height: Int,
+        isTerrible: Boolean
     ): Int? {
         val m = Vec3(1) / beamDirection
         val n = m * cameraPosition
@@ -37,8 +44,8 @@ class Helper {
         val t1 = -n - k
         val t2 = -n + k
 
-        val tN = max(max(t1.x, t1.y), t1.z)
-        val tF = min(min(t2.x, t2.y), t2.z)
+        val tN = max(t1)
+        val tF = min(t2)
 
         if (tN > tF || tF < 0.0f || tN <= 0.0f) return null
 
@@ -49,22 +56,46 @@ class Helper {
 
         return when {
             normal.x == -1.0f -> {
-                imagePixels[0][0]
+                if (isTerrible) {
+                    0 // Код для картинок
+                } else {
+                    imagePixels[0][0]
+                }
             }
             normal.y == -1.0f -> {
-                imagePixels[1][0]
+                if (isTerrible) {
+                    0 // Код для картинок
+                } else {
+                    imagePixels[1][0]
+                }
             }
             normal.x == 1.0f -> {
-                imagePixels[2][0]
+                if (isTerrible) {
+                    0 // Код для картинок
+                } else {
+                    imagePixels[2][0]
+                }
             }
             normal.y == 1.0f -> {
-                imagePixels[3][0]
+                if (isTerrible) {
+                    0 // Код для картинок
+                } else {
+                    imagePixels[3][0]
+                }
             }
             normal.z == -1.0f -> {
-                imagePixels[4][0]
+                if (isTerrible) {
+                    0 // Код для картинок
+                } else {
+                    imagePixels[4][0]
+                }
             }
             normal.z == 1.0f -> {
-                imagePixels[5][0]
+                if (isTerrible) {
+                    0 // Код для картинок
+                } else {
+                    imagePixels[5][0]
+                }
             }
             else -> null
         }
