@@ -143,11 +143,6 @@ class NeuralActivity: ChildActivity() {
             right,
             bottom) = boxes[i]
 
-            println(left)
-            println(top)
-            println(right)
-            println(bottom)
-
             // Отрисовка прямоугольника вокруг обнаруженного объекта
             Imgproc.rectangle(
                 mat,
