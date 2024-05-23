@@ -9,6 +9,7 @@ import ru.tsu.visapp.utils.cube.*
 import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
+import android.widget.Button
 import ru.tsu.visapp.utils.PixelsEditor
 
 /*
@@ -25,6 +26,7 @@ class CubeActivity: ChildActivity() {
     private lateinit var bitmap: Bitmap
     private lateinit var imageView: ImageView
     private lateinit var imagePixels: Array<IntArray>
+    private lateinit var modeButton: Button
 
     private val imageEditor = ImageEditor()
     private val helper = Helper()
@@ -76,6 +78,16 @@ class CubeActivity: ChildActivity() {
         return imageEditor.getPixelsFromBitmap(imageBitmap)
     }
 
+    private fun changeMode(mode: Boolean) {
+        isTerrible = mode
+
+        modeButton.text = if (isTerrible) {
+            "Перейти в красивый режим"
+        } else {
+            "Перейти в позорный режим"
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +108,11 @@ class CubeActivity: ChildActivity() {
 
         previousAngle = Pair(2000.0f, 2000.0f)
         renderCube(previousAngle.first, previousAngle.second)
+
+        modeButton = findViewById(R.id.modeButton)
+        changeMode(false)
+
+        modeButton.setOnClickListener { changeMode(!isTerrible) }
 
         var previousX = 0.0f
         var previousY = 0.0f
