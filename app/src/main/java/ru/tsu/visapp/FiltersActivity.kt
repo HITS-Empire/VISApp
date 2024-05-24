@@ -13,24 +13,13 @@ import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
-import org.opencv.android.OpenCVLoader
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
+import ru.tsu.visapp.utils.NeuralNetwork
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
-
-import java.io.File
-import org.opencv.dnn.Dnn
-import org.opencv.dnn.Net
-import org.opencv.android.Utils
-import org.opencv.core.Mat
-import org.opencv.core.Scalar
-import org.opencv.core.Size
-import java.io.FileOutputStream
-import org.opencv.imgproc.Imgproc
-import java.io.BufferedInputStream
 
 /*
  * Экран для фильтров
@@ -55,8 +44,8 @@ class FiltersActivity : ChildActivity() {
     private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
     private lateinit var currentInstruction: Instruction // Текущая инструкция
 
-    private lateinit var net: Net // Нейронная сеть
-    private lateinit var boxes: ArrayList<ArrayList<Int>> // bounding boxes
+    private lateinit var neuralNetwork: NeuralNetwork // Нейронная сеть
+    private lateinit var boxes: ArrayList<ArrayList<Int>> // Найденные лица
 
     private val imageEditor = ImageEditor() // Редактор изображений
     private val imageRotation = ImageRotation() // Поворот изображения
@@ -76,17 +65,11 @@ class FiltersActivity : ChildActivity() {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
 
-        OpenCVLoader.initDebug()
-
-        val pathProto = getPath("deploy.prototxt")
-        val pathCaffe = getPath("ssd.caffemodel")
-
-        net = Dnn.readNetFromCaffe(pathProto, pathCaffe)
-
         imageView = findViewById(R.id.filtersImageView)
 
         title = System.currentTimeMillis().toString()
         imageEditor.contentResolver = contentResolver
+        neuralNetwork = NeuralNetwork(this)
 
         seekBarLayouts = arrayOf(
             findViewById(R.id.firstSeekBarLayout),
@@ -135,7 +118,7 @@ class FiltersActivity : ChildActivity() {
                 R.id.coloringImage,
                 arrayOf(
                     Item(0, 255, "Красный"),
-                    Item(0, 255, "Зеленый"),
+                    Item(0, 255, "Зелёный"),
                     Item(0, 255, "Синий")
                 )
             ),
@@ -143,7 +126,7 @@ class FiltersActivity : ChildActivity() {
                 R.id.inversionImage,
                 arrayOf(
                     Item(0, 1, "Красный"),
-                    Item(0, 1, "Зеленый"),
+                    Item(0, 1, "Зелёный"),
                     Item(0, 1, "Синий")
                 )
             ),
@@ -192,9 +175,9 @@ class FiltersActivity : ChildActivity() {
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
-        boxes = getBoundingBoxes(bitmap)
-        imageView.setImageBitmap(bitmap)
         updateImageInfo()
+
+        imageView.setImageBitmap(bitmap)
 
         // Окошки фильтров
         val framesWithFilters: Array<FrameLayout> = arrayOf(
@@ -314,107 +297,10 @@ class FiltersActivity : ChildActivity() {
 
     // Получить пиксели изображения и обновить данные
     private fun updateImageInfo() {
-        // Размер
         width = bitmap.width
         height = bitmap.height
-
-        // Предсказания нейросети
-        boxes = getBoundingBoxes(bitmap)
-
-        // Массив пикселей
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
-    }
-
-    private fun scaleBoundingBox(
-        width: Int,
-        height: Int,
-        left: Int,
-        top: Int,
-        right: Int,
-        bottom: Int
-    ): Array<Int> {
-        return arrayOf(
-            left * width / 300,
-            top * height / 300,
-            right * width / 300,
-            bottom * height / 300
-        )
-    }
-
-    private fun getBoundingBoxes(bitmap: Bitmap): ArrayList<ArrayList<Int>> {
-        val result = ArrayList<ArrayList<Int>>()
-
-        // Преобразование изображения в формат mat
-        val mat = Mat()
-        Utils.bitmapToMat(bitmap, mat)
-
-        // Приведение изображения к верному размеру и формату
-        val frame = Mat()
-        Imgproc.cvtColor(mat, frame, Imgproc.COLOR_RGBA2RGB)
-
-        Imgproc.resize(frame, frame, Size(300.0, 300.0))
-
-        // Получение blob нового размера и с вычитанием среднего
-        val blob = Dnn.blobFromImage(
-            frame,
-            1.0,
-            Size(300.0, 300.0),
-            Scalar(104.0, 177.0, 123.0),
-            true,
-            false
-        )
-
-        // Установка входных данных в модель
-        net.setInput(blob)
-
-        // Получение и преобразование детектированных объектов
-        var detections = net.forward()
-        detections = detections.reshape(1, detections.total().toInt() / 7)
-
-        // Размеры изображения
-        val cols: Int = frame.cols()
-        val rows: Int = frame.rows()
-
-        // Порог уверенности модели в предсказании
-        val threshold = 0.4
-
-        // Отрисовка bounding boxes на изображении
-        for (i in 0 until detections.rows()) {
-            val confidence = detections.get(i, 2)[0]
-            if (confidence > threshold) {
-                val (left, top, right, bottom) = scaleBoundingBox(
-                    bitmap.width,
-                    bitmap.height,
-                    (detections.get(i, 3)[0] * cols).toInt(),
-                    (detections.get(i, 4)[0] * rows).toInt(),
-                    (detections.get(i, 5)[0] * cols).toInt(),
-                    (detections.get(i, 6)[0] * rows).toInt()
-                )
-
-                val rectangleCoordinates = arrayListOf(
-                    left,
-                    top,
-                    right,
-                    bottom
-                )
-
-                result.add(rectangleCoordinates)
-            }
-        }
-
-        // Обработка случая, когда объекты не найдены
-        if (result.size == 0) {
-            result.add(
-                arrayListOf(
-                    0,
-                    0,
-                    bitmap.width - 1,
-                    bitmap.height - 1
-                )
-            )
-        }
-
-        return result
+        boxes = neuralNetwork.getBoundingBoxes(bitmap, true)
     }
 
     // Запустить функцию фильтра
@@ -649,24 +535,5 @@ class FiltersActivity : ChildActivity() {
         updateImageInfo()
 
         filtersIsAvailable = true
-    }
-
-    // Получить путь к файлу из ресурсов
-    private fun getPath(name: String): String {
-        val inputStream = BufferedInputStream(assets.open(name))
-        val data = ByteArray(inputStream.available()) { 0 }
-        inputStream.apply {
-            read(data)
-            close()
-        }
-
-        val file = File(filesDir, name)
-        val outputStream = FileOutputStream(file)
-        outputStream.apply {
-            write(data)
-            close()
-        }
-
-        return file.absolutePath
     }
 }
