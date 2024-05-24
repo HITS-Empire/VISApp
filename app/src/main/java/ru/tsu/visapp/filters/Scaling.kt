@@ -12,6 +12,7 @@ class Scaling : UnsharpMask() {
         scaleFactor: Int,
     ) : Bitmap {
         val floatScaleFactor = scaleFactor.toFloat() / 100
+        println(floatScaleFactor)
         val newWidth = (width * floatScaleFactor).toInt()
         val newHeight = (height * floatScaleFactor).toInt()
         val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
@@ -61,7 +62,8 @@ class Scaling : UnsharpMask() {
         pixels: IntArray,
         scaleFactor: Int,
     ) : Bitmap {
-        var floatScaleFactor = scaleFactor.toFloat() / 100
+        val floatScaleFactor = scaleFactor.toFloat() / 100
+        println(floatScaleFactor)
         val scaledWidth = (width * floatScaleFactor).toInt()
         val scaledHeight = (height * floatScaleFactor).toInt()
         val scaledBitmap = Bitmap.createBitmap(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888)
@@ -75,7 +77,7 @@ class Scaling : UnsharpMask() {
             else -> 1
         }
 
-        val blurredPixels = gaussianBlur(pixels, gaussianRadius, width, height)
+        val blurredPixels = pixels//gaussianBlur(pixels, gaussianRadius, width, height)
 
         val newPixels = IntArray(scaledWidth * scaledHeight)
 

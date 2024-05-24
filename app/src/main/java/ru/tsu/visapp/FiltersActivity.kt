@@ -31,6 +31,7 @@ class FiltersActivity: ChildActivity() {
     private lateinit var pixels: IntArray // Массив пикселей
     private var width = 0 // Ширина картинки
     private var height = 0 // Высота картинки
+    private var previousScaleFactor = 100 // Предыдущий масшатб изображения
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
 
@@ -50,6 +51,7 @@ class FiltersActivity: ChildActivity() {
     private val inversion = Inversion() // Инверсия
     private val popArt = PopArt() // Поп арт
     private val glitch = Glitch() // Глитч
+    private val scaling = Scaling() // Масштабирование
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
@@ -145,7 +147,7 @@ class FiltersActivity: ChildActivity() {
                 R.id.scalingImage,
                 arrayOf(
                     Item(),
-                    Item(50, 100, "Масштаб", "%"),
+                    Item(100, 300, "Масштаб", "%"),
                     Item()
                 )
             ),
@@ -417,7 +419,27 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
-                R.id.scalingImage -> {}
+                R.id.scalingImage -> {
+                    val scaleFactor = currentInstruction.items[1].progress
+                    if (previousScaleFactor < scaleFactor) {
+                        bitmap = scaling.increaseImage(
+                            width,
+                            height,
+                            pixels,
+                            scaleFactor
+                        )
+                    } else if (previousScaleFactor > scaleFactor) {
+                        bitmap = scaling.decreaseImage(
+                            width,
+                            height,
+                            pixels,
+                            scaleFactor
+                        )
+                    }
+
+                    previousScaleFactor = scaleFactor
+                    imageView.setImageBitmap(bitmap)
+                }
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
