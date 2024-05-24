@@ -123,7 +123,7 @@ class HomeFragment : Fragment() {
         y2: Float
     ) {
         val animation = TranslateAnimation(x1, x2, y1, y2)
-        animation.duration = 400
+        animation.duration = 200
 
         view.startAnimation(animation)
     }
