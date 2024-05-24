@@ -84,7 +84,6 @@ class CubeActivity: ChildActivity() {
 
         val tN = max(max(t1.x, t1.y), t1.z)
         val tF = min(min(t2.x, t2.y), t2.z)
-        // if (tF != 0.0f && (tN > tF || tF < 0.0f)) {
 
         if (tN > tF || tF < 0.0f) {
             return Color.BLACK
@@ -101,24 +100,14 @@ class CubeActivity: ChildActivity() {
                 .changeSign()
         )
 
-        var u = 0.0
-        var v = 0.0
-        t1 = t1.normalize()
         return when {
             t1.x > t1.y && t1.x > t1.z -> {
                 if (camera.x < 0) {
-                    u = abs(t1.y)
-                    v = abs(t1.z + 1)
-                    v = 1 - v
-                    //println("$u $v ${(u * width)} ${(v * height)}")
-                    //    println("${t1.x} ${t1.y} ${t1.z} $i $j")
-                    //println(u.toInt() * height + v.toInt() * width * height)
-                    imagePixels[0][(u * width).toInt() + (v * height).toInt() * width]
+                    imagePixels[0][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
                 } else {
-                    imagePixels[1][i + j * width]//imagePixels[0][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width] else imagePixels[1][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
+                   imagePixels[1][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
                 }
             }
-
             t1.y > t1.x && t1.y > t1.z -> {
                 if (camera.y < 0) imagePixels[2][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(
                     j * cos(dy / 5000) - j * sin(dy / 5000)
@@ -128,11 +117,9 @@ class CubeActivity: ChildActivity() {
                     )
                 ).toInt() % width + abs(j * cos(dy / 5000) - j * sin(dy / 5000)).toInt() % width * width]
             }
-
             camera.z < 0 -> imagePixels[4][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(
                 j * cos(dy / 5000) - j * sin(dy / 5000)
             ).toInt() % width * width]
-
             else -> imagePixels[5][abs(i * cos(dx / 5000) - i * sin(dx / 5000)).toInt() % width + abs(
                 j * cos(dy / 5000) - j * sin(dy / 5000)
             ).toInt() % width * width]
