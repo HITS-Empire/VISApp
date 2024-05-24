@@ -421,23 +421,23 @@ class FiltersActivity: ChildActivity() {
                 }
                 R.id.scalingImage -> {
                     val scaleFactor = currentInstruction.items[1].progress
-                    if (previousScaleFactor < scaleFactor) {
-                        bitmap = scaling.increaseImage(
-                            width,
-                            height,
-                            pixels,
-                            scaleFactor
-                        )
-                    } else if (previousScaleFactor > scaleFactor) {
-                        bitmap = scaling.decreaseImage(
-                            width,
-                            height,
-                            pixels,
-                            scaleFactor
-                        )
+                    if (scaleFactor > 9 && bitmap.height > 20 && bitmap.width > 20) {
+                        if (previousScaleFactor < scaleFactor) {
+                            bitmap = scaling.increaseImage(
+                                width,
+                                height,
+                                pixels,
+                                scaleFactor
+                            )
+                        } else if (previousScaleFactor > scaleFactor) {
+                            bitmap = scaling.decreaseImage(
+                                width,
+                                height,
+                                pixels,
+                                scaleFactor
+                            )
+                        }
                     }
-
-                    previousScaleFactor = scaleFactor
                     imageView.setImageBitmap(bitmap)
                 }
                 R.id.definitionImage -> {
