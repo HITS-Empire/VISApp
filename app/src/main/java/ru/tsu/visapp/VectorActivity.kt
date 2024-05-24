@@ -93,6 +93,64 @@ class VectorActivity : ChildActivity() {
         imageView.background = BitmapDrawable(getResources(), bitmap)
     }
 
+    // Антиалиасинг кривых
+    private fun antiAliasing(
+        path: ArrayList<ArrayList<Double>>
+    ): ArrayList<ArrayList<Double>> {
+        val newPath = ArrayList<ArrayList<Double>>()
+
+        for (i in 0 until path.size - 1) {
+            if (path[i].size == 2) {
+                val x1 = path[i][0]
+                val y1 = path[i][1]
+                val x2 = path[i + 1][0]
+                val y2 = path[i + 1][1]
+
+                val dx = abs(x2 - x1)
+                val dy = abs(y2 - y1)
+
+                if (dx >= dy) {
+                    val xStep = if (x1 < x2) 1 else -1
+                    val yStep = dy / dx * xStep
+                    var y = y1
+
+                    if (x1 < x2) {
+                        for (x in x1.toInt() until x2.toInt()) {
+                            newPath.add(arrayListOf(x.toDouble(), y))
+                            y += yStep
+                        }
+                    } else {
+                        for (x in x1.toInt() downTo x2.toInt()) {
+                            newPath.add(arrayListOf(x.toDouble(), y))
+                            y += yStep
+                        }
+                    }
+                } else {
+                    val yStep = if (y1 < y2) 1 else -1
+                    val xStep = dx / dy * yStep
+                    var x = x1
+
+                    if (y1 < y2) {
+                        for (y in y1.toInt() until y2.toInt()) {
+                            newPath.add(arrayListOf(x, y.toDouble()))
+                            x += xStep
+                        }
+                    } else {
+                        for (y in y1.toInt() downTo y2.toInt()) {
+                            newPath.add(arrayListOf(x, y.toDouble()))
+                            x += xStep
+                        }
+                    }
+                }
+            }
+        }
+
+        // Добавление последней точки
+        newPath.add(path.last())
+
+        return newPath
+    }
+
     private fun getCoefficient(
         index: Int,
         arrs: MutableList<MutableList<Double>>
@@ -185,7 +243,9 @@ class VectorActivity : ChildActivity() {
                 path.add(ArrayList(splinePoint))
             }
 
-            for (point in path) {
+            val newPath = antiAliasing(path)
+
+            for (point in newPath) {
                 if (point.size == 2) {
                     canvas.drawPoint(
                         point[0].toFloat(),
