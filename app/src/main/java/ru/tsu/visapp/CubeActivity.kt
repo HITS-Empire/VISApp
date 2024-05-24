@@ -12,9 +12,6 @@ import android.widget.ImageButton
 import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
-import ru.tsu.visapp.filters.Scaling
 import ru.tsu.visapp.utils.ImageGetter
 import ru.tsu.visapp.utils.PixelsEditor
 
@@ -25,8 +22,6 @@ import ru.tsu.visapp.utils.PixelsEditor
 class CubeActivity : ChildActivity() {
     private val width = 99 // Ширина картинки
     private val height = 99 // Высота картинки
-
-    private val scaling = Scaling() // Масштабирование изображения
 
     private var currentProgress = 50 // Текущий прогресс в процентах
     private var isTerrible = false // Включен ли режим профсоюза
@@ -57,8 +52,6 @@ class CubeActivity : ChildActivity() {
         cameraPosition.rotateY(dy)
         cameraPosition.rotateZ(dx)
 
-        val light = cameraPosition
-
         for (i in 0 until width) {
             for (j in 0 until height) {
                 val uv = Vec2(i, j) / Vec2(width, height) * 2.0f - 1.0f
@@ -74,7 +67,7 @@ class CubeActivity : ChildActivity() {
                     imagePixels,
                     width,
                     height,
-                    light,
+                    cameraPosition,
                     isTerrible,
                 )
                 pixelsEditor.setPixel(i, j, color ?: 0)
@@ -117,7 +110,7 @@ class CubeActivity : ChildActivity() {
         val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
         val newPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
 
-        for (i in 0 until initImagePixels.size) {
+        for (i in initImagePixels.indices) {
             if (!initImagePixels[i].first.contentEquals(newPixels)) {
                 initImagePixels[i] = Pair(newPixels, imageBitmap.width)
                 imagePixels[i] = initImagePixels[i]
@@ -164,7 +157,7 @@ class CubeActivity : ChildActivity() {
             Pair(IntArray(1), 1)
         )
 
-        for (i in 0 until imagePixels.size) {
+        for (i in imagePixels.indices) {
             initImagePixels[i] = imagePixels[i]
         }
 
