@@ -482,6 +482,7 @@ class FiltersActivity : ChildActivity() {
 
                 R.id.scalingImage -> {
                     val scaleFactor = currentInstruction.items[1].progress
+
                     if (scaleFactor > 9 && bitmap.height > 20 && bitmap.width > 20) {
                         if (startScaleFactor < scaleFactor) {
                             bitmap = scaling.increaseImage(
@@ -490,6 +491,7 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
+                            imageView.setImageBitmap(bitmap)
                         } else if (startScaleFactor > scaleFactor) {
                             bitmap = scaling.decreaseImage(
                                 width,
@@ -497,9 +499,9 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
+                            imageView.setImageBitmap(bitmap)
                         }
                     }
-                    imageView.setImageBitmap(bitmap)
                 }
 
                 R.id.definitionImage -> {
