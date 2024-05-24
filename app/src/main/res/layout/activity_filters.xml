@@ -442,27 +442,6 @@
                     android:textColor="@color/white" />
             </FrameLayout>
 
-            <FrameLayout
-                android:id="@+id/affinisFrame"
-                android:layout_width="192dp"
-                android:layout_height="96dp">
-
-                <ImageView
-                    android:id="@+id/affinisImage"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_colors" />
-
-                <TextView
-                    android:id="@+id/affinisTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="96dp"
-                    android:gravity="center"
-                    android:text="@string/filters_affinis"
-                    android:textColor="@color/white" />
-            </FrameLayout>
-
         </LinearLayout>
     </ScrollView>
 
