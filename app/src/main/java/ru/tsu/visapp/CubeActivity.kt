@@ -1,27 +1,31 @@
 package ru.tsu.visapp
 
 import kotlin.math.*
+import android.view.View
 import android.os.Bundle
+import android.widget.Button
 import android.graphics.Bitmap
 import android.view.MotionEvent
 import android.widget.ImageView
 import ru.tsu.visapp.utils.cube.*
+import android.widget.ImageButton
 import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
-import android.widget.Button
+import ru.tsu.visapp.utils.ImageGetter
 import ru.tsu.visapp.utils.PixelsEditor
 
 /*
  * Экран для 3D-куба
  */
 
-class CubeActivity: ChildActivity() {
-    private val width = 100 // Ширина картинки
-    private val height = 100 // Высота картинки
+class CubeActivity : ChildActivity() {
+    private val width = 99 // Ширина картинки
+    private val height = 99 // Высота картинки
 
     private var currentProgress = 50 // Текущий прогресс в процентах
-    private var isTerrible = false // Включен ли режим позорного куба
+    private var isTerrible = false // Включен ли режим профсоюза
+    // Раньше был режим "позорного куба", переименовывать не стали...
 
     private lateinit var bitmap: Bitmap
     private lateinit var imageView: ImageView
@@ -34,15 +38,20 @@ class CubeActivity: ChildActivity() {
     private var dx = 0.4f // Угол по X
     private var dy = 0.4f // Угол по Y
 
+    // Кнопки галереи и камеры
+    private lateinit var galleryButton: ImageButton
+    private lateinit var cameraButton: ImageButton
+
     private fun renderCube() {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
         val pixelsEditor = PixelsEditor(pixels, width, height)
 
+        val boxSize = Vec3(1)
         val cameraPosition = Vec3(-currentProgress / 10.0f, 0.0f, 0.0f)
         cameraPosition.rotateY(dy)
         cameraPosition.rotateZ(dx)
 
-        val light = Vec3(-0.5f,dx,dy).normalize()
+        val light = Vec3(-0.5f, dx, dy).normalize()
 
         for (i in 0 until width) {
             for (j in 0 until height) {
@@ -53,18 +62,18 @@ class CubeActivity: ChildActivity() {
                 beamDirection.rotateZ(dx)
 
                 val color = helper.box(
+                    boxSize,
                     cameraPosition,
                     beamDirection,
-                    Vec3(1),
                     imagePixels,
                     width,
                     height,
-                    isTerrible,
                     i,
                     j,
-                    dy,
                     dx,
+                    dy,
                     light,
+                    isTerrible
                 )
                 pixelsEditor.setPixel(i, j, color ?: 0)
             }
@@ -85,13 +94,23 @@ class CubeActivity: ChildActivity() {
     private fun changeMode(mode: Boolean) {
         isTerrible = mode
 
-        modeButton.text = if (isTerrible) {
-            "Перейти в красивый режим"
+        if (isTerrible) {
+            modeButton.text = "Уйти из профсоюза"
+            galleryButton.visibility = View.VISIBLE
+            cameraButton.visibility = View.VISIBLE
         } else {
-            "Перейти в позорный режим"
+            modeButton.text = "Вступить в профсоюз"
+            galleryButton.visibility = View.INVISIBLE
+            cameraButton.visibility = View.INVISIBLE
         }
 
         renderCube()
+    }
+
+    // Обработать картинку, загруженную пользователем
+    private val processImage = fun() {
+        val savedImageUri = imageEditor.getSavedImageUri(this, null)
+        val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -100,6 +119,8 @@ class CubeActivity: ChildActivity() {
 
         initializeView(R.layout.activity_cube)
 
+        ImageGetter(this, null, processImage)
+
         if (savedInstanceState != null) {
             currentProgress = savedInstanceState.getInt("currentProgress")
             isTerrible = savedInstanceState.getBoolean("isTerrible")
@@ -107,6 +128,7 @@ class CubeActivity: ChildActivity() {
             dy = savedInstanceState.getFloat("dy")
         }
 
+        imageEditor.contentResolver = contentResolver
         imageView = findViewById(R.id.cubeImageView)
         imagePixels = arrayOf(
             getPixelsFromDrawable(R.drawable.digit_1),
@@ -116,6 +138,9 @@ class CubeActivity: ChildActivity() {
             getPixelsFromDrawable(R.drawable.digit_5),
             getPixelsFromDrawable(R.drawable.digit_6)
         )
+
+        galleryButton = findViewById(R.id.galleryButton)
+        cameraButton = findViewById(R.id.cameraButton)
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
