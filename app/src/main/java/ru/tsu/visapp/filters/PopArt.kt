@@ -7,6 +7,7 @@ import androidx.core.graphics.red
 import androidx.core.graphics.blue
 import androidx.core.graphics.alpha
 import androidx.core.graphics.green
+import kotlinx.coroutines.coroutineScope
 import ru.tsu.visapp.utils.PixelsEditor
 
 class PopArt {
@@ -57,16 +58,15 @@ class PopArt {
         return tripledPixels
     }
 
-    fun popArtFiltering(
+    suspend fun popArtFiltering(
         pixels: IntArray,
         width: Int,
         height: Int,
         threshold1: Int,
         threshold2: Int
-    ): IntArray {
+    ): IntArray = coroutineScope {
         val resultPixels = IntArray(pixels.size * 4) { 0 }
 
-        val pixelsEditor = PixelsEditor(pixels, width, height)
         val resultPixelsEditor = PixelsEditor(
             resultPixels,
             2 * width,
@@ -230,6 +230,6 @@ class PopArt {
             }
         }
 
-        return resultPixels
+        return@coroutineScope resultPixels
     }
 }
