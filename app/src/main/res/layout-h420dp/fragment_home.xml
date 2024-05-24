@@ -13,7 +13,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/backgroung_image" />
+        app:srcCompat="@drawable/background_shape" />
 
     <ImageButton
         android:id="@+id/galleryButton"
