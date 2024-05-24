@@ -35,8 +35,8 @@ class CubeActivity : ChildActivity() {
     private lateinit var bitmap: Bitmap
     private lateinit var modeButton: Button
     private lateinit var imageView: ImageView
-    private lateinit var imagePixels: Array<IntArray>
-    private lateinit var initImagePixels: Array<IntArray>
+    private lateinit var imagePixels: Array<Pair<IntArray, Int>>
+    private lateinit var initImagePixels: Array<Pair<IntArray, Int>>
 
     private val helper = Helper()
     private val imageEditor = ImageEditor()
@@ -48,7 +48,6 @@ class CubeActivity : ChildActivity() {
     private lateinit var cameraButton: ImageButton
     private lateinit var galleryButton: ImageButton
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun renderCube() {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
         val pixelsEditor = PixelsEditor(pixels, width, height)
@@ -73,12 +72,8 @@ class CubeActivity : ChildActivity() {
                     cameraPosition,
                     beamDirection,
                     imagePixels,
-                    sqrt(imagePixels[0].size.toFloat()).toInt(),
-                    sqrt(imagePixels[0].size.toFloat()).toInt(),
-                    i,
-                    j,
-                    dx,
-                    dy,
+                    width,
+                    height,
                     light,
                     isTerrible,
                 )
@@ -90,15 +85,16 @@ class CubeActivity : ChildActivity() {
         imageView.setImageBitmap(bitmap)
     }
 
-    private fun getPixelsFromDrawable(id: Int): IntArray {
+    private fun getPixelsFromDrawable(id: Int): Pair<IntArray, Int> {
         val options = BitmapFactory.Options()
         options.inScaled = false
 
         val imageBitmap = BitmapFactory.decodeResource(resources, id, options)
-        return imageEditor.getPixelsFromBitmap(imageBitmap)
+        val currentPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
+
+        return Pair(currentPixels, imageBitmap.width)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun changeMode(mode: Boolean) {
         isTerrible = mode
 
@@ -119,9 +115,19 @@ class CubeActivity : ChildActivity() {
     private val processImage = fun() {
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
+        val newPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
+
+        for (i in 0 until initImagePixels.size) {
+            if (!initImagePixels[i].first.contentEquals(newPixels)) {
+                initImagePixels[i] = Pair(newPixels, imageBitmap.width)
+                imagePixels[i] = initImagePixels[i]
+                break
+            }
+        }
+
+        renderCube()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,12 +156,12 @@ class CubeActivity : ChildActivity() {
         )
 
         initImagePixels = arrayOf(
-            IntArray(1),
-            IntArray(1),
-            IntArray(1),
-            IntArray(1),
-            IntArray(1),
-            IntArray(1)
+            Pair(IntArray(1), 1),
+            Pair(IntArray(1), 1),
+            Pair(IntArray(1), 1),
+            Pair(IntArray(1), 1),
+            Pair(IntArray(1), 1),
+            Pair(IntArray(1), 1)
         )
 
         for (i in 0 until imagePixels.size) {
