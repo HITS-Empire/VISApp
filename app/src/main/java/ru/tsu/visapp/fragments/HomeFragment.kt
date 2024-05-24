@@ -41,12 +41,14 @@ class HomeFragment : Fragment() {
         galleryButton = view.findViewById(R.id.galleryButton)
         cameraButton = view.findViewById(R.id.cameraButton)
 
-        plusButton.setOnClickListener { changeAvailable() }
+        plusButton.setOnClickListener { changeAvailable(!isAvailable) }
+
+        changeAvailable(false)
     }
 
     // Изменить положение анимированных кнопок
-    private fun changeAvailable() {
-        isAvailable = !isAvailable
+    private fun changeAvailable(newAvailable: Boolean) {
+        isAvailable = newAvailable
 
         val orientation = resources.configuration.orientation
         val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
