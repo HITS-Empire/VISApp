@@ -31,7 +31,6 @@ import org.opencv.core.Size
 import java.io.FileOutputStream
 import org.opencv.imgproc.Imgproc
 import java.io.BufferedInputStream
-import ru.tsu.visapp.utils.ImageGetter
 
 /*
  * Экран для фильтров
@@ -196,7 +195,7 @@ class FiltersActivity: ChildActivity() {
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
         boxes = getBoundingBoxes(bitmap)
         imageView.setImageBitmap(bitmap)
-        updatePixelsInfo()
+        updateImageInfo()
 
         // Окошки фильтров
         val framesWithFilters: Array<FrameLayout> = arrayOf(
@@ -317,10 +316,17 @@ class FiltersActivity: ChildActivity() {
     }
 
     // Получить пиксели изображения
-    private fun updatePixelsInfo() {
-        pixels = imageEditor.getPixelsFromBitmap(bitmap)
+    // Обновить данные после изменения картинки фильтром
+    private fun updateImageInfo() {
+        // Размер
         width = bitmap.width
         height = bitmap.height
+
+        // Предсказания нейросети
+        boxes = getBoundingBoxes(bitmap)
+
+        // Массив пикселей
+        pixels = imageEditor.getPixelsFromBitmap(bitmap)
     }
 
     private fun scaleBoundingBox(
@@ -439,14 +445,11 @@ class FiltersActivity: ChildActivity() {
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
 
-                    for (box in boxes) {
-                        println(box[0])
-                        println(box[1])
-                        println(box[2])
-                        println(box[3])
+                    val correctedBitmap = bitmap
 
+                    for (box in boxes) {
                         imageEditor.setPixelsToBitmap(
-                            bitmap,
+                            correctedBitmap,
                             colorCorrection.correctColor(
                                 pixels,
                                 width,
@@ -460,9 +463,8 @@ class FiltersActivity: ChildActivity() {
                                 box[3]
                             )
                         )
-                        imageView.setImageBitmap(bitmap)
                     }
-
+                    imageView.setImageBitmap(correctedBitmap)
                 }
 
                 R.id.coloringImage -> {
@@ -672,7 +674,7 @@ class FiltersActivity: ChildActivity() {
             R.id.affinisImage -> {}
         }
         currentImage = image
-        updatePixelsInfo()
+        updateImageInfo()
 
         filtersIsAvailable = true
     }
