@@ -15,22 +15,12 @@ import android.widget.FrameLayout
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
+import ru.tsu.visapp.utils.NeuralNetwork
 import ru.tsu.visapp.utils.filtersSeekBar.*
 import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 
-import java.io.File
-import org.opencv.dnn.Dnn
-import org.opencv.dnn.Net
-import org.opencv.android.Utils
-import org.opencv.core.Mat
-import org.opencv.core.Scalar
-import org.opencv.core.Size
-import java.io.FileOutputStream
-import org.opencv.imgproc.Imgproc
-import ru.tsu.visapp.utils.NeuralNetwork
-import java.io.BufferedInputStream
 
 /*
  * Экран для фильтров
@@ -546,24 +536,5 @@ class FiltersActivity : ChildActivity() {
         updateImageInfo()
 
         filtersIsAvailable = true
-    }
-
-    // Получить путь к файлу из ресурсов
-    private fun getPath(name: String): String {
-        val inputStream = BufferedInputStream(assets.open(name))
-        val data = ByteArray(inputStream.available()) { 0 }
-        inputStream.apply {
-            read(data)
-            close()
-        }
-
-        val file = File(filesDir, name)
-        val outputStream = FileOutputStream(file)
-        outputStream.apply {
-            write(data)
-            close()
-        }
-
-        return file.absolutePath
     }
 }
