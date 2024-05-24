@@ -30,8 +30,8 @@ class Coloring {
         pixelsEditor = PixelsEditor(pixels, width, height)
         pixelsEditorResult = PixelsEditor(resultPixels, width, height)
 
-        for (i in 0 ..< width) {
-            for (j in 0..< height) {
+        for (i in 0..<width) {
+            for (j in 0..<height) {
                 val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
                 val alpha = pixel.alpha
@@ -39,8 +39,9 @@ class Coloring {
                 var green = pixel.green
                 var blue = pixel.blue
 
-                if (i in left .. right &&
-                    j in top .. bottom) {
+                if (i in left..right &&
+                    j in top..bottom
+                ) {
                     red += redValue
                     green += greenValue
                     blue += blueValue

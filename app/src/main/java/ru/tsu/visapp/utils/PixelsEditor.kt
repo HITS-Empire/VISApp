@@ -10,7 +10,7 @@ class PixelsEditor(initPixels: IntArray, initWidth: Int, initHeight: Int) {
     private val height = initHeight
 
     private fun isExists(row: Int, column: Int): Boolean {
-        return row in 0 ..< width && column in 0 ..< height
+        return row in 0..<width && column in 0..<height
     }
 
     fun getPixel(row: Int, column: Int): Int? {
