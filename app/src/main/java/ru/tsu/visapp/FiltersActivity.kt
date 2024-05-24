@@ -14,6 +14,8 @@ import android.widget.TextView
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +32,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 class FiltersActivity : ChildActivity() {
     private lateinit var imageView: ImageView
+    private lateinit var loadingView: ImageView // Картинка при загрузке
     private lateinit var title: String // Название изображения
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
@@ -73,6 +76,7 @@ class FiltersActivity : ChildActivity() {
         initializeView(R.layout.activity_filters)
 
         imageView = findViewById(R.id.filtersImageView)
+        loadingView = findViewById(R.id.loadingImageView)
         switch = findViewById(R.id.filtersSwitch)
 
         title = System.currentTimeMillis().toString()
@@ -270,8 +274,6 @@ class FiltersActivity : ChildActivity() {
         // События нажатия на картинку
         imageView.setOnTouchListener { _, event ->
             if (!filterIsActive && currentImage.id == R.id.retouchImage) {
-                filterIsActive = true
-
                 val point = imageEditor.getPointFromImageView(
                     imageView,
                     event.x,
@@ -281,23 +283,28 @@ class FiltersActivity : ChildActivity() {
                 )
 
                 if (point != null) {
-                    val size = currentInstruction.items[1].progress
-                    val coefficient = currentInstruction.items[2].progress
+                    changeFilterIsActive(true)
 
-                    retouching.retouch(
-                        pixels,
-                        width,
-                        height,
-                        point[0],
-                        point[1],
-                        size,
-                        coefficient
-                    )
-                    imageEditor.setPixelsToBitmap(bitmap, pixels)
-                    imageView.setImageBitmap(bitmap)
+                    lifecycleScope.launch(Dispatchers.Default) {
+                        val size = currentInstruction.items[1].progress
+                        val coefficient = currentInstruction.items[2].progress
+
+                        retouching.retouch(
+                            pixels,
+                            width,
+                            height,
+                            point[0],
+                            point[1],
+                            size,
+                            coefficient
+                        )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, pixels)
+                            imageView.setImageBitmap(bitmap)
+                            changeFilterIsActive(false)
+                        }
+                    }
                 }
-
-                filterIsActive = false
             }
             true
         }
@@ -306,6 +313,12 @@ class FiltersActivity : ChildActivity() {
         switch.setOnCheckedChangeListener { _, _ ->
             updateBoxes()
         }
+    }
+
+    // Изменить активность фильтра
+    private fun changeFilterIsActive(status: Boolean) {
+        filterIsActive = status
+        loadingView.visibility = if (status) View.VISIBLE else View.GONE
     }
 
     // Получить пиксели изображения и обновить данные
@@ -337,9 +350,9 @@ class FiltersActivity : ChildActivity() {
     private fun startFilter() {
         if (!filtersIsAvailable || filterIsActive) return
 
-        filterIsActive = true
+        changeFilterIsActive(true)
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.Default) {
             when (currentImage.id) {
                 R.id.rotateImage -> {
                     val angle = currentInstruction.items[1].progress
@@ -350,7 +363,9 @@ class FiltersActivity : ChildActivity() {
                         height,
                         angle
                     )
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.correctionImage -> {
@@ -359,23 +374,25 @@ class FiltersActivity : ChildActivity() {
                     val contrastValue = currentInstruction.items[2].progress
 
                     for (box in boxes) {
-                        imageEditor.setPixelsToBitmap(
-                            bitmap,
-                            colorCorrection.correctColor(
-                                pixels,
-                                width,
-                                height,
-                                brightnessValue,
-                                saturationValue,
-                                contrastValue,
-                                box[0],
-                                box[1],
-                                box[2],
-                                box[3]
-                            )
+                        val newPixels = colorCorrection.correctColor(
+                            pixels,
+                            width,
+                            height,
+                            brightnessValue,
+                            saturationValue,
+                            contrastValue,
+                            box[0],
+                            box[1],
+                            box[2],
+                            box[3]
                         )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, newPixels)
+                        }
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.coloringImage -> {
@@ -384,23 +401,25 @@ class FiltersActivity : ChildActivity() {
                     val blueValue = currentInstruction.items[2].progress
 
                     for (box in boxes) {
-                        imageEditor.setPixelsToBitmap(
-                            bitmap,
-                            coloring.coloring(
-                                pixels,
-                                width,
-                                height,
-                                redValue,
-                                greenValue,
-                                blueValue,
-                                box[0],
-                                box[1],
-                                box[2],
-                                box[3]
-                            )
+                        val newPixels = coloring.coloring(
+                            pixels,
+                            width,
+                            height,
+                            redValue,
+                            greenValue,
+                            blueValue,
+                            box[0],
+                            box[1],
+                            box[2],
+                            box[3]
                         )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, newPixels)
+                        }
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.inversionImage -> {
@@ -409,23 +428,25 @@ class FiltersActivity : ChildActivity() {
                     val isBlueInverting = currentInstruction.items[2].progress == 1
 
                     for (box in boxes) {
-                        imageEditor.setPixelsToBitmap(
-                            bitmap,
-                            inversion.inverse(
-                                pixels,
-                                width,
-                                height,
-                                isRedInverting,
-                                isGreenInverting,
-                                isBlueInverting,
-                                box[0],
-                                box[1],
-                                box[2],
-                                box[3]
-                            )
+                        val newPixels = inversion.inverse(
+                            pixels,
+                            width,
+                            height,
+                            isRedInverting,
+                            isGreenInverting,
+                            isBlueInverting,
+                            box[0],
+                            box[1],
+                            box[2],
+                            box[3]
                         )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, newPixels)
+                        }
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.popArtImage -> {
@@ -440,18 +461,20 @@ class FiltersActivity : ChildActivity() {
                     )
 
                     for (box in boxes) {
-                        imageEditor.setPixelsToBitmap(
-                            bitmap,
-                            popArt.popArtFiltering(
-                                pixels,
-                                width,
-                                height,
-                                threshold1,
-                                threshold2
-                            )
+                        val newPixels = popArt.popArtFiltering(
+                            pixels,
+                            width,
+                            height,
+                            threshold1,
+                            threshold2
                         )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, newPixels)
+                        }
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.glitchImage -> {
@@ -460,23 +483,25 @@ class FiltersActivity : ChildActivity() {
                     val offset = currentInstruction.items[2].progress
 
                     for (box in boxes) {
-                        imageEditor.setPixelsToBitmap(
-                            bitmap,
-                            glitch.rgbGlitch(
-                                pixels,
-                                width,
-                                height,
-                                frequency,
-                                effect,
-                                offset,
-                                box[0],
-                                box[1],
-                                box[2],
-                                box[3]
-                            )
+                        val newPixels = glitch.rgbGlitch(
+                            pixels,
+                            width,
+                            height,
+                            frequency,
+                            effect,
+                            offset,
+                            box[0],
+                            box[1],
+                            box[2],
+                            box[3]
                         )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, newPixels)
+                        }
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.scalingImage -> {
@@ -490,7 +515,9 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
-                            imageView.setImageBitmap(bitmap)
+                            withContext(Dispatchers.Main) {
+                                imageView.setImageBitmap(bitmap)
+                            }
                         } else if (startScaleFactor > scaleFactor) {
                             bitmap = scaling.decreaseImage(
                                 width,
@@ -498,7 +525,9 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
-                            imageView.setImageBitmap(bitmap)
+                            withContext(Dispatchers.Main) {
+                                imageView.setImageBitmap(bitmap)
+                            }
                         }
                     }
                 }
@@ -508,22 +537,24 @@ class FiltersActivity : ChildActivity() {
                     val radius = currentInstruction.items[1].progress
                     val threshold = currentInstruction.items[2].progress
 
-                    imageEditor.setPixelsToBitmap(
-                        bitmap,
-                        unsharpMask.usm(
-                            pixels,
-                            width,
-                            height,
-                            radius,
-                            percent,
-                            threshold
-                        )
+                    val newPixels = unsharpMask.usm(
+                        pixels,
+                        width,
+                        height,
+                        radius,
+                        percent,
+                        threshold
                     )
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageEditor.setPixelsToBitmap(bitmap, newPixels)
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
             }
 
-            filterIsActive = false
+            withContext(Dispatchers.Main) {
+                changeFilterIsActive(false)
+            }
         }
     }
 

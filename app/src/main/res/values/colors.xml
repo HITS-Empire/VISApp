@@ -7,5 +7,6 @@
     <color name="blue">#FF25AFFC</color>
     <color name="dark_blur">#22000000</color>
     <color name="light_blur">#22FFFFFF</color>
+    <color name="app_blur">#66000000</color>
     <color name="transparent">#00000000</color>
 </resources>
