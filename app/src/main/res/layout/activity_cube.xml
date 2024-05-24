@@ -1,17 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cubeActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/black"
+    tools:context=".CubeActivity">
+
+    <ImageButton
+        android:id="@+id/cameraButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/round_soft_button"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/modeButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cubeImageView"
+        app:layout_constraintVertical_bias="0.5"
+        app:srcCompat="@drawable/camera_outline_24" />
+
+    <ImageButton
+        android:id="@+id/galleryButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/round_soft_button"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/modeButton"
+        app:layout_constraintTop_toBottomOf="@+id/cubeImageView"
+        app:layout_constraintVertical_bias="0.5"
+        app:srcCompat="@drawable/folder_outline_27" />
 
     <ImageView
         android:id="@+id/cubeImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="96dp"
+        android:layout_marginTop="80dp"
         android:layout_marginBottom="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -42,4 +69,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/modeButton"
+        android:layout_width="220dp"
+        android:layout_height="50dp"
+        android:backgroundTint="@color/gray"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cubeImageView"
+        app:layout_constraintVertical_bias="0.5" />
 </androidx.constraintlayout.widget.ConstraintLayout>

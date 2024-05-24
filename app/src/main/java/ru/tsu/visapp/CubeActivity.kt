@@ -1,67 +1,81 @@
 package ru.tsu.visapp
 
 import kotlin.math.*
+import android.view.View
 import android.os.Bundle
-import android.graphics.Color
+import android.widget.Button
 import android.graphics.Bitmap
 import android.view.MotionEvent
 import android.widget.ImageView
 import ru.tsu.visapp.utils.cube.*
+import android.widget.ImageButton
+import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
+import ru.tsu.visapp.utils.ImageGetter
+import ru.tsu.visapp.utils.PixelsEditor
 
 /*
  * Экран для 3D-куба
  */
 
-class CubeActivity: ChildActivity() {
-    private val width = 100
-    private val height = 100
-    private val ratioOfScreen = (width / height).toFloat()
+class CubeActivity : ChildActivity() {
+    private val width = 99 // Ширина картинки
+    private val height = 99 // Высота картинки
 
-    private var currentProgress = 25 // Текущий прогресс в процентах
+    private var currentProgress = 50 // Текущий прогресс в процентах
+    private var isTerrible = false // Включен ли режим профсоюза
+    // Раньше был режим "позорного куба", переименовывать не стали...
 
     private lateinit var bitmap: Bitmap
-
     private lateinit var imageView: ImageView
+    private lateinit var imagePixels: Array<IntArray>
+    private lateinit var modeButton: Button
 
     private val imageEditor = ImageEditor()
+    private val helper = Helper()
 
-    private var previousAngle = Pair(0.0f, 0.0f)
+    private var dx = 0.4f // Угол по X
+    private var dy = 0.4f // Угол по Y
 
-    private val colors = intArrayOf(
-        0x000000FF.toInt(),
-        0x333333FF.toInt(),
-        0x808080FF.toInt(),
-        0xDCDCDCFF.toInt(),
-        0xFFFFFFFF.toInt()
-    )
+    // Кнопки галереи и камеры
+    private lateinit var galleryButton: ImageButton
+    private lateinit var cameraButton: ImageButton
 
-    private fun renderCube(dx: Float, dy: Float) {
+    private fun renderCube() {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+
+        val boxSize = Vec3(1)
+        val cameraPosition = Vec3(-currentProgress / 10.0f, 0.0f, 0.0f)
+        cameraPosition.rotateY(dy)
+        cameraPosition.rotateZ(dx)
+
+        val light = Vec3(-0.5f, dx, dy).normalize()
 
         for (i in 0 until width) {
             for (j in 0 until height) {
-                val xy = Vec2(i.toFloat(), j.toFloat())
-                    .division(Vec2(width.toFloat(), height.toFloat()))
-                    .multiplication(Vec2(2.0f))
-                    .minus(Vec2(1.0f))
+                val uv = Vec2(i, j) / Vec2(width, height) * 2.0f - 1.0f
 
-                xy.x *= ratioOfScreen
+                val beamDirection = Vec3(2, uv).normalize()
+                beamDirection.rotateY(dy)
+                beamDirection.rotateZ(dx)
 
-                val camera = Vec3(-currentProgress / 10.0f,0.0f,0.0f)
-                val direction = Vec3(1.0f, xy.x, xy.y).normalize()
-
-                camera.rotateY(dy / 3000)
-                direction.rotateY(dy / 3000)
-
-                camera.rotateZ(dx / 3000)
-                direction.rotateZ(dx / 3000)
-
-                val box = Vec3(0.0f, 0.0f, 0.0f)
-                val color = cube(camera, direction, Vec3(1.0f), box)
-
-                pixels[i + j * width] = color
+                val color = helper.box(
+                    boxSize,
+                    cameraPosition,
+                    beamDirection,
+                    imagePixels,
+                    width,
+                    height,
+                    i,
+                    j,
+                    dx,
+                    dy,
+                    light,
+                    isTerrible
+                )
+                pixelsEditor.setPixel(i, j, color ?: 0)
             }
         }
 
@@ -69,52 +83,34 @@ class CubeActivity: ChildActivity() {
         imageView.setImageBitmap(bitmap)
     }
 
-    // Функция пересечения с кубом
-    private fun cube(
-        camera: Vec3,
-        direction: Vec3,
-        size: Vec3,
-        normal: Vec3
-    ): Int {
-        val m = Vec3(1.0f).division(direction)
-        val n = m.multiplication(camera)
-        val k = m.module().multiplication(size)
+    private fun getPixelsFromDrawable(id: Int): IntArray {
+        val options = BitmapFactory.Options()
+        options.inScaled = false
 
-        val t1 = n.changeSign().minus(k)
-        val t2 = n.changeSign().plus(k)
-
-        val tN = max(max(t1.x, t1.y), t1.z)
-        val tF = min(min(t2.x, t2.y), t2.z)
-        // if (tF != 0.0f && (tN > tF || tF < 0.0f)) {
-
-        if (tN > tF || tF < 0.0f) {
-            return Color.BLACK
-        }
-
-        val yzx = Vec3(t1.y, t1.z, t1.x)
-        val zxy = Vec3(t1.z, t1.x, t1.y)
-
-        normal.changeElements(direction
-            .checkSign()
-            .multiplication(t1.checkEdge(yzx))
-            .multiplication(t1.checkEdge(zxy))
-            .changeSign()
-        )
-
-        return when {
-            t1.x > t1.y && t1.x > t1.z -> {
-                if (camera.x < 0) Color.RED else Color.GREEN
-            }
-            t1.y > t1.x && t1.y > t1.z -> {
-                if (camera.y < 0) Color.BLUE else Color.YELLOW
-            }
-            camera.z < 0 -> Color.WHITE
-            else -> Color.CYAN
-        }
+        val imageBitmap = BitmapFactory.decodeResource(resources, id, options)
+        return imageEditor.getPixelsFromBitmap(imageBitmap)
     }
 
-    fun startRender() {
-        renderCube(previousAngle.first, previousAngle.second)
+    private fun changeMode(mode: Boolean) {
+        isTerrible = mode
+
+        if (isTerrible) {
+            modeButton.text = "Уйти из профсоюза"
+            galleryButton.visibility = View.VISIBLE
+            cameraButton.visibility = View.VISIBLE
+        } else {
+            modeButton.text = "Вступить в профсоюз"
+            galleryButton.visibility = View.INVISIBLE
+            cameraButton.visibility = View.INVISIBLE
+        }
+
+        renderCube()
+    }
+
+    // Обработать картинку, загруженную пользователем
+    private val processImage = fun() {
+        val savedImageUri = imageEditor.getSavedImageUri(this, null)
+        val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -123,39 +119,93 @@ class CubeActivity: ChildActivity() {
 
         initializeView(R.layout.activity_cube)
 
+        ImageGetter(this, null, processImage)
+
+        if (savedInstanceState != null) {
+            currentProgress = savedInstanceState.getInt("currentProgress")
+            isTerrible = savedInstanceState.getBoolean("isTerrible")
+            dx = savedInstanceState.getFloat("dx")
+            dy = savedInstanceState.getFloat("dy")
+        }
+
+        imageEditor.contentResolver = contentResolver
         imageView = findViewById(R.id.cubeImageView)
+        imagePixels = arrayOf(
+            getPixelsFromDrawable(R.drawable.digit_1),
+            getPixelsFromDrawable(R.drawable.digit_2),
+            getPixelsFromDrawable(R.drawable.digit_3),
+            getPixelsFromDrawable(R.drawable.digit_4),
+            getPixelsFromDrawable(R.drawable.digit_5),
+            getPixelsFromDrawable(R.drawable.digit_6)
+        )
+
+        galleryButton = findViewById(R.id.galleryButton)
+        cameraButton = findViewById(R.id.cameraButton)
 
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
-        renderCube(1.0f, 1.0f)
+        modeButton = findViewById(R.id.modeButton)
+        modeButton.setOnClickListener { changeMode(!isTerrible) }
+        changeMode(isTerrible)
 
         var previousX = 0.0f
         var previousY = 0.0f
 
+        var startX1: Float
+        var startX2: Float
+        var startDistance = 0.0f
+
         imageView.setOnTouchListener { _, event ->
-            when (event.action) {
+            when (event.actionMasked) {
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    if (event.pointerCount == 2) {
+                        startX1 = event.getX(0)
+                        startX2 = event.getX(1)
+                        startDistance = abs(startX1 - startX2)
+                    }
+                }
+
                 MotionEvent.ACTION_DOWN -> {
                     previousX = event.x
                     previousY = event.y
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    imageEditor.clearBitmap(bitmap)
+                    if (event.pointerCount == 1) {
+                        dx += (event.x - previousX) / 400
+                        dy += (event.y - previousY) / 400
 
-                    val dx = event.x - previousX
-                    val dy = event.y - previousY
+                        renderCube()
 
-                    val angle = Pair(dx, dy)
-                    renderCube(
-                        angle.first + previousAngle.first,
-                        angle.second + previousAngle.second
-                    )
+                        previousX = event.x
+                        previousY = event.y
+                    } else if (event.pointerCount == 2) {
+                        val x1 = event.getX(0)
+                        val x2 = event.getX(1)
+                        val currentDistance = abs(x1 - x2)
 
-                    previousAngle = Pair(previousAngle.first + dx, previousAngle.second + dy)
+                        if (currentDistance < startDistance && currentProgress < 100) {
+                            currentProgress++
+                            renderCube()
+                        } else if (currentDistance > startDistance && currentProgress > 15) {
+                            currentProgress--
+                            renderCube()
+                        }
+                        startDistance = currentDistance
+                    }
                 }
             }
 
             true
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt("currentProgress", currentProgress)
+        outState.putBoolean("isTerrible", isTerrible)
+        outState.putFloat("dx", dx)
+        outState.putFloat("dy", dy)
     }
 }
