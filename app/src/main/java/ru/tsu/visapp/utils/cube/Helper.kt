@@ -56,42 +56,22 @@ class Helper {
         val isZPositive = vec3.z > 0
 
         when {
-            // Проекция на грань X
             absX >= absY && absX >= absZ -> {
-                u = if (isXPositive) vec3.z else -vec3.z
-                v = if (isXPositive) -vec3.y else vec3.y
+                u = if (isXPositive) -vec3.y else vec3.y
+                v = if (isXPositive) -vec3.z else -vec3.z
             }
-            // Проекция на грань Y
             absY >= absX && absY >= absZ -> {
-                u = if (isYPositive) vec3.x else -vec3.x
-                v = if (isYPositive) vec3.z else -vec3.z
+                u = if (isYPositive) -vec3.x else -vec3.x
+                v = if (isYPositive) -vec3.z else -vec3.z
             }
-            // Проекция на грань Z
             else -> {
-                u = if (isZPositive) vec3.x else -vec3.x
-                v = if (isZPositive) -vec3.y else vec3.y
+                u = if (isZPositive) -vec3.y else -vec3.y
+                v = if (isZPositive) vec3.x else -vec3.x
             }
         }
 
-        // Нормализуем UV-координаты
         u = (u / max(absX, max(absY, absZ)) + 1) / 2 * width
         v = (v / max(absX, max(absY, absZ)) + 1) / 2 * height
-
-        // Коррекция для перевернутых изображений
-        if (absY >= absX && absY >= absZ) {
-            val temp = u
-            u = v
-            v = temp
-        }
-//        val angle = atan2(vec3.y, vec3.x)
-//
-//        if (angle < 0) {
-//            u = ((angle + 2 * PI) / (2 * PI) * width).toFloat()
-//            v = (vec3.z + sqrt(vec3.x * vec3.x + vec3.y * vec3.y)) / (2 * sqrt(vec3.x * vec3.x + vec3.y * vec3.y)) * height
-//        } else {
-//            u = (angle / (2 * PI) * width).toFloat()
-//            v = (vec3.z + sqrt(vec3.x * vec3.x + vec3.y * vec3.y)) / (2 * sqrt(vec3.x * vec3.x + vec3.y * vec3.y)) * height
-//        }
 
         return Vec2(u / width, v / height)
     }
@@ -104,7 +84,7 @@ class Helper {
         height: Int
     ): Int {
         val u = (1 - uv.x.coerceIn(0.0f, 1.0f)) * (width - 1)
-        val v = (uv.y.coerceIn(0.0f, 1.0f)) * (height - 1)
+        val v = (1 - uv.y.coerceIn(0.0f, 1.0f)) * (height - 1)
 
         val x1 = u.toInt()
         val y1 = v.toInt()
@@ -215,7 +195,7 @@ class Helper {
 
         val normal = -sign(beamDirection) * step(yzx, t1) * step(zxy, t1)
         val newColor = max(0.0f, (beamDirection - Vec3(2.0f) * Vec3(normal.dot(beamDirection)) * normal).dot(light)).pow(2)
-        //val newColor = max(0.0f, normal.dot(light)) * 3 / tN
+
         if (!isTerrible) {
             return when {
                 normal.x == -1.0f -> multiplicationColor(colors[0], 3 / tN + newColor)
