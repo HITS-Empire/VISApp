@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
  * Родительский класс для всех дочерних экранов
  */
 
-open class ChildActivity: AppCompatActivity() {
+open class ChildActivity : AppCompatActivity() {
     fun initializeView(layout: Int) {
         setContentView(layout)
 
@@ -15,8 +15,6 @@ open class ChildActivity: AppCompatActivity() {
         val backButton: ImageButton = findViewById(R.id.backButton)
 
         // События кликов по кнопке
-        backButton.setOnClickListener {
-            onBackPressed()
-        }
+        backButton.setOnClickListener { onBackPressed() }
     }
 }

@@ -20,20 +20,20 @@ open class UnsharpMask {
         val resultEditor = PixelsEditor(result, width, height)
 
         // Основной цикл по изображению
-        for (i in 0 ..< width) {
-            for (j in 0 ..< height) {
+        for (i in 0..<width) {
+            for (j in 0..<height) {
                 var totalRed = 0
                 var totalGreen = 0
                 var totalBlue = 0
                 var count = 0
 
                 // Цикл по окрестности пикселя с радиусом размытия
-                for (x in -radius .. radius) {
-                    for (y in -radius .. radius) {
+                for (x in -radius..radius) {
+                    for (y in -radius..radius) {
                         val newX = i + x
                         val newY = j + y
 
-                        if (newX in 0 ..< width && newY in 0 ..< height) {
+                        if (newX in 0..<width && newY in 0..<height) {
                             val neighbor = pixelsEditor.getPixel(newX, newY) ?: 0
                             totalRed += neighbor.red
                             totalGreen += neighbor.green

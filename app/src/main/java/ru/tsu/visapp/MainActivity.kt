@@ -11,7 +11,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
  * Главный экран приложения
  */
 
-class MainActivity: AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
     private val homeFragment = HomeFragment() // Главная
     private val interestingFragment = InterestingFragment() // Интересное
 
@@ -31,11 +31,9 @@ class MainActivity: AppCompatActivity() {
             true
         }
 
-        currentFragmentId = (
-            savedInstanceState?.getInt("currentFragmentId") // Сохранённый фрагмент
-        ) ?: (
-            R.id.navigationHome // Главная по умолчанию
-        )
+        currentFragmentId = savedInstanceState?.getInt("currentFragmentId")
+            ?: R.id.navigationHome // Главная по умолчанию
+
         updateCurrentFragment()
     }
 
@@ -47,14 +45,14 @@ class MainActivity: AppCompatActivity() {
 
     // Обновить нужный фрагмент
     private fun updateCurrentFragment() {
-        var fragment: Fragment? = null
-        when (currentFragmentId) {
-            R.id.navigationHome -> fragment = homeFragment
-            R.id.navigationInteresting -> fragment = interestingFragment
+        val fragment = when (currentFragmentId) {
+            R.id.navigationHome -> homeFragment
+            R.id.navigationInteresting -> interestingFragment
+            else -> Fragment()
         }
 
         supportFragmentManager.beginTransaction().apply {
-            replace(R.id.frameLayout, fragment!!)
+            replace(R.id.frameLayout, fragment)
             commit()
         }
     }

@@ -19,7 +19,7 @@ import org.opencv.android.OpenCVLoader
  * Экран для нейронной сети
  */
 
-class NeuralActivity: ChildActivity() {
+class NeuralActivity : ChildActivity() {
     private val imageEditor = ImageEditor() // Редактор изображений
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var net: Net // Нейронная сеть
@@ -123,7 +123,7 @@ class NeuralActivity: ChildActivity() {
         return result
     }
 
-    private val findFaces = fun () {
+    private val findFaces = fun() {
         // Получить imageView
         val imageView: ImageView = findViewById(R.id.neuralImageView)
 
@@ -139,9 +139,9 @@ class NeuralActivity: ChildActivity() {
 
         for (i in boxes.indices) {
             val (left,
-            top,
-            right,
-            bottom) = boxes[i]
+                top,
+                right,
+                bottom) = boxes[i]
 
             // Отрисовка прямоугольника вокруг обнаруженного объекта
             Imgproc.rectangle(

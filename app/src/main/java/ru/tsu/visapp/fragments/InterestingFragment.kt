@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment
  * Фрагмент "Интересное"
  */
 
-class InterestingFragment: Fragment() {
+class InterestingFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,9 +43,11 @@ class InterestingFragment: Fragment() {
                     R.id.neuralFrame -> {
                         intent = Intent(context, NeuralActivity::class.java)
                     }
+
                     R.id.vectorFrame -> {
                         intent = Intent(context, VectorActivity::class.java)
                     }
+
                     R.id.cubeFrame -> {
                         intent = Intent(context, CubeActivity::class.java)
                     }

@@ -36,7 +36,7 @@ import java.io.BufferedInputStream
  * Экран для фильтров
  */
 
-class FiltersActivity: ChildActivity() {
+class FiltersActivity : ChildActivity() {
     private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
     private lateinit var bitmap: Bitmap // Картинка для редактирования
@@ -76,7 +76,7 @@ class FiltersActivity: ChildActivity() {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
 
-        OpenCVLoader.initDebug();
+        OpenCVLoader.initDebug()
 
         val pathProto = getPath("deploy.prototxt")
         val pathCaffe = getPath("ssd.caffemodel")
@@ -315,8 +315,7 @@ class FiltersActivity: ChildActivity() {
         }
     }
 
-    // Получить пиксели изображения
-    // Обновить данные после изменения картинки фильтром
+    // Получить пиксели изображения и обновить данные
     private fun updateImageInfo() {
         // Размер
         width = bitmap.width
@@ -440,11 +439,11 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.correctionImage -> {
                     val brightnessValue = currentInstruction.items[0].progress
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
-
                     val correctedBitmap = bitmap
 
                     for (box in boxes) {
@@ -489,16 +488,13 @@ class FiltersActivity: ChildActivity() {
                             )
                         )
                     }
-
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.inversionImage -> {
-                    val isRedInverting =
-                        currentInstruction.items[0].progress == 1
-                    val isGreenInverting =
-                        currentInstruction.items[1].progress == 1
-                    val isBlueInverting =
-                        currentInstruction.items[2].progress == 1
+                    val isRedInverting = currentInstruction.items[0].progress == 1
+                    val isGreenInverting = currentInstruction.items[1].progress == 1
+                    val isBlueInverting = currentInstruction.items[2].progress == 1
 
                     for (box in boxes) {
                         imageEditor.setPixelsToBitmap(
@@ -519,11 +515,12 @@ class FiltersActivity: ChildActivity() {
                     }
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.popArtImage -> {
                     val threshold1 = currentInstruction.items[1].progress
                     val threshold2 = currentInstruction.items[2].progress
 
-                    // Обновление размера bitmapa
+                    // Обновление размера битмапа
                     bitmap = Bitmap.createBitmap(
                         2 * width,
                         2 * height,
@@ -544,6 +541,7 @@ class FiltersActivity: ChildActivity() {
                     }
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.glitchImage -> {
                     val frequency = currentInstruction.items[0].progress
                     val effect = currentInstruction.items[1].progress
@@ -568,22 +566,26 @@ class FiltersActivity: ChildActivity() {
                     }
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.scalingImage -> {}
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
                     val threshold = currentInstruction.items[2].progress
 
-                    imageEditor.setPixelsToBitmap(bitmap, unsharpMask.usm(
-                        pixels,
-                        width,
-                        height,
-                        radius,
-                        percent,
-                        threshold
-                    ))
+                    imageEditor.setPixelsToBitmap(
+                        bitmap, unsharpMask.usm(
+                            pixels,
+                            width,
+                            height,
+                            radius,
+                            percent,
+                            threshold
+                        )
+                    )
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.affinisImage -> {}
             }
 
@@ -592,7 +594,7 @@ class FiltersActivity: ChildActivity() {
     }
 
     // События ползунка
-    private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
+    private val onSeekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
             if (!fromUser) return
 
@@ -625,21 +627,7 @@ class FiltersActivity: ChildActivity() {
 
         if (::currentImage.isInitialized) {
             if (image == currentImage) return
-
             currentImage.background = null
-
-            when (currentImage.id) {
-                R.id.rotateImage -> {}
-                R.id.correctionImage -> {}
-                R.id.coloringImage -> {}
-                R.id.inversionImage -> {}
-                R.id.popArtImage -> {}
-                R.id.glitchImage -> {}
-                R.id.scalingImage -> {}
-                R.id.retouchImage -> {}
-                R.id.definitionImage -> {}
-                R.id.affinisImage -> {}
-            }
         }
         image.background = AppCompatResources.getDrawable(
             this,
@@ -661,18 +649,6 @@ class FiltersActivity: ChildActivity() {
             seekBarUnits[index].text = item.unit
         }
 
-        when (image.id) {
-            R.id.rotateImage -> {}
-            R.id.correctionImage -> {}
-            R.id.coloringImage -> {}
-            R.id.inversionImage -> {}
-            R.id.popArtImage -> {}
-            R.id.glitchImage -> {}
-            R.id.scalingImage -> {}
-            R.id.retouchImage -> {}
-            R.id.definitionImage -> {}
-            R.id.affinisImage -> {}
-        }
         currentImage = image
         updateImageInfo()
 
