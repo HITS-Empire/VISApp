@@ -26,26 +26,16 @@ class Coloring {
         val resultPixelsEditor: PixelsEditor
     ) {
         fun start(i: Int, j: Int) {
-            val pixel = pixelsEditor.getPixel(i, j) ?: 0
+            if (i in left..right && j in top..bottom) {
+                val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-            val alpha = pixel.alpha
-            var red = pixel.red
-            var green = pixel.green
-            var blue = pixel.blue
+                val alpha = pixel.alpha
+                val red = (pixel.red + redValue).coerceIn(0, 255)
+                val green = (pixel.green + greenValue).coerceIn(0, 255)
+                val blue = (pixel.blue + blueValue).coerceIn(0, 255)
 
-            if (i in left..right &&
-                j in top..bottom
-            ) {
-                red += redValue
-                green += greenValue
-                blue += blueValue
-
-                red = red.coerceIn(0, 255)
-                green = green.coerceIn(0, 255)
-                blue = blue.coerceIn(0, 255)
+                resultPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
-
-            resultPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
         }
     }
 
