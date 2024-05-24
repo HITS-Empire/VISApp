@@ -32,6 +32,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 class FiltersActivity : ChildActivity() {
     private lateinit var imageView: ImageView
+    private lateinit var loadingView: ImageView // Картинка при загрузке
     private lateinit var title: String // Название изображения
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
@@ -75,6 +76,7 @@ class FiltersActivity : ChildActivity() {
         initializeView(R.layout.activity_filters)
 
         imageView = findViewById(R.id.filtersImageView)
+        loadingView = findViewById(R.id.loadingImageView)
         switch = findViewById(R.id.filtersSwitch)
 
         title = System.currentTimeMillis().toString()
@@ -272,8 +274,6 @@ class FiltersActivity : ChildActivity() {
         // События нажатия на картинку
         imageView.setOnTouchListener { _, event ->
             if (!filterIsActive && currentImage.id == R.id.retouchImage) {
-                filterIsActive = true
-
                 val point = imageEditor.getPointFromImageView(
                     imageView,
                     event.x,
@@ -283,6 +283,8 @@ class FiltersActivity : ChildActivity() {
                 )
 
                 if (point != null) {
+                    changeFilterIsActive(true)
+
                     lifecycleScope.launch(Dispatchers.Default) {
                         val size = currentInstruction.items[1].progress
                         val coefficient = currentInstruction.items[2].progress
@@ -299,11 +301,10 @@ class FiltersActivity : ChildActivity() {
                         withContext(Dispatchers.Main) {
                             imageEditor.setPixelsToBitmap(bitmap, pixels)
                             imageView.setImageBitmap(bitmap)
+                            changeFilterIsActive(false)
                         }
                     }
                 }
-
-                filterIsActive = false
             }
             true
         }
@@ -312,6 +313,12 @@ class FiltersActivity : ChildActivity() {
         switch.setOnCheckedChangeListener { _, _ ->
             updateBoxes()
         }
+    }
+
+    // Изменить активность фильтра
+    private fun changeFilterIsActive(status: Boolean) {
+        filterIsActive = status
+        loadingView.visibility = if (status) View.VISIBLE else View.GONE
     }
 
     // Получить пиксели изображения и обновить данные
@@ -343,7 +350,7 @@ class FiltersActivity : ChildActivity() {
     private fun startFilter() {
         if (!filtersIsAvailable || filterIsActive) return
 
-        filterIsActive = true
+        changeFilterIsActive(true)
 
         lifecycleScope.launch(Dispatchers.Default) {
             when (currentImage.id) {
@@ -545,7 +552,9 @@ class FiltersActivity : ChildActivity() {
                 }
             }
 
-            filterIsActive = false
+            withContext(Dispatchers.Main) {
+                changeFilterIsActive(false)
+            }
         }
     }
 
