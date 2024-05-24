@@ -118,7 +118,7 @@ class FiltersActivity : ChildActivity() {
                 R.id.coloringImage,
                 arrayOf(
                     Item(0, 255, "Красный"),
-                    Item(0, 255, "Зеленый"),
+                    Item(0, 255, "Зелёный"),
                     Item(0, 255, "Синий")
                 )
             ),
@@ -126,7 +126,7 @@ class FiltersActivity : ChildActivity() {
                 R.id.inversionImage,
                 arrayOf(
                     Item(0, 1, "Красный"),
-                    Item(0, 1, "Зеленый"),
+                    Item(0, 1, "Зелёный"),
                     Item(0, 1, "Синий")
                 )
             ),
