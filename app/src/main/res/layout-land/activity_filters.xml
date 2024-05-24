@@ -7,11 +7,25 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
+    <ImageView
+        android:id="@+id/filtersImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="48dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginRight="460dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
     <ImageButton
         android:id="@+id/backButton"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="48dp"
         android:layout_marginTop="24dp"
         android:background="@null"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,76 +37,52 @@
         android:layout_width="144dp"
         android:layout_height="36dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
         android:clickable="true"
         android:gravity="center"
         android:text="@string/save_button"
         android:textColor="@color/white"
         android:textSize="22sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/filtersImageView"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/filtersImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="24dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="352dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/selectFilters"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginBottom="12dp"
-        android:text="@string/select_filters"
-        android:textColor="@color/white"
-        android:textSize="22sp"
-        app:layout_constraintBottom_toTopOf="@+id/filtersHorizontalMenu"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/firstSeekBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="24dp"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filtersImageView">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/filtersImageView"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/firstSeekBarTitle"
-            android:layout_width="82dp"
-            android:layout_height="match_parent"
-            android:gravity="right|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:gravity="center"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <SeekBar
             android:id="@+id/firstSeekBar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="82dp"
-            android:layout_marginRight="60dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="40dp"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
             android:progressDrawable="@drawable/seekbar_progress"
+            android:rotation="270"
             android:thumb="@drawable/seekbar_thumb"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -105,56 +95,57 @@
             android:inputType="number"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/firstSeekBarUnit"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/firstSeekBarUnit"
             android:layout_width="20dp"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
             android:gravity="left|center_vertical"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/secondSeekBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="24dp"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="24dp"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/firstSeekBarLayout">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/firstSeekBarLayout"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/secondSeekBarTitle"
-            android:layout_width="82dp"
-            android:layout_height="match_parent"
-            android:gravity="right|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:gravity="center"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <SeekBar
             android:id="@+id/secondSeekBar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="82dp"
-            android:layout_marginRight="60dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="40dp"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
             android:progressDrawable="@drawable/seekbar_progress"
+            android:rotation="270"
             android:thumb="@drawable/seekbar_thumb"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -167,56 +158,57 @@
             android:inputType="number"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/secondSeekBarUnit"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/secondSeekBarUnit"
             android:layout_width="20dp"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
             android:gravity="left|center_vertical"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/thirdSeekBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="24dp"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="24dp"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/secondSeekBarLayout">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/secondSeekBarLayout"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/thirdSeekBarTitle"
-            android:layout_width="82dp"
-            android:layout_height="match_parent"
-            android:gravity="right|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:gravity="center"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <SeekBar
             android:id="@+id/thirdSeekBar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="82dp"
-            android:layout_marginRight="60dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="40dp"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
             android:progressDrawable="@drawable/seekbar_progress"
+            android:rotation="270"
             android:thumb="@drawable/seekbar_thumb"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -229,41 +221,40 @@
             android:inputType="number"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/thirdSeekBarUnit"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/thirdSeekBarUnit"
             android:layout_width="20dp"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
             android:gravity="left|center_vertical"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <HorizontalScrollView
-        android:id="@+id/filtersHorizontalMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <ScrollView
+        android:id="@+id/filtersVerticalMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="36dp"
         android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/filtersLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:orientation="vertical">
 
             <FrameLayout
                 android:id="@+id/rotateFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/rotateImage"
@@ -273,9 +264,9 @@
 
                 <TextView
                     android:id="@+id/rotateTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_rotate"
                     android:textColor="@color/white" />
@@ -283,8 +274,8 @@
 
             <FrameLayout
                 android:id="@+id/correctionFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/correctionImage"
@@ -294,19 +285,18 @@
 
                 <TextView
                     android:id="@+id/correctionTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_correction"
                     android:textColor="@color/white" />
-
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/coloringFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/coloringImage"
@@ -316,19 +306,18 @@
 
                 <TextView
                     android:id="@+id/coloringTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_coloring"
                     android:textColor="@color/white" />
-
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/inversionFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/inversionImage"
@@ -338,19 +327,18 @@
 
                 <TextView
                     android:id="@+id/inversionTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_inversion"
                     android:textColor="@color/white" />
-
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/popArtFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/popArtImage"
@@ -360,19 +348,18 @@
 
                 <TextView
                     android:id="@+id/popArtTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_pop_art"
                     android:textColor="@color/white" />
-
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/glitchFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/glitchImage"
@@ -382,19 +369,18 @@
 
                 <TextView
                     android:id="@+id/glitchTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_glitch"
                     android:textColor="@color/white" />
-
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/scalingFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/scalingImage"
@@ -404,9 +390,9 @@
 
                 <TextView
                     android:id="@+id/scalingTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_scaling"
                     android:textColor="@color/white" />
@@ -415,8 +401,8 @@
 
             <FrameLayout
                 android:id="@+id/retouchFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/retouchImage"
@@ -426,9 +412,9 @@
 
                 <TextView
                     android:id="@+id/retouchTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_retouch"
                     android:textColor="@color/white" />
@@ -437,8 +423,8 @@
 
             <FrameLayout
                 android:id="@+id/definitionFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
+                android:layout_width="192dp"
+                android:layout_height="96dp">
 
                 <ImageView
                     android:id="@+id/definitionImage"
@@ -448,37 +434,26 @@
 
                 <TextView
                     android:id="@+id/definitionTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="96dp"
                     android:gravity="center"
                     android:text="@string/filters_definition"
                     android:textColor="@color/white" />
             </FrameLayout>
 
-            <FrameLayout
-                android:id="@+id/affinisFrame"
-                android:layout_width="96dp"
-                android:layout_height="128dp">
-
-                <ImageView
-                    android:id="@+id/affinisImage"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_colors" />
-
-                <TextView
-                    android:id="@+id/affinisTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="96dp"
-                    android:gravity="center"
-                    android:text="@string/filters_affinis"
-                    android:textColor="@color/white" />
-
-            </FrameLayout>
-
         </LinearLayout>
-    </HorizontalScrollView>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/selectFilters"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="@string/select_filters"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        app:layout_constraintStart_toStartOf="@+id/filtersVerticalMenu"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

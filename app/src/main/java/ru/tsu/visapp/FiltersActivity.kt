@@ -186,8 +186,7 @@ class FiltersActivity : ChildActivity() {
                     Item(0, 100, "Радиус"),
                     Item(0, 100, "Изогелия")
                 )
-            ),
-            Instruction(R.id.affinisImage, arrayOf(Item(), Item(), Item()))
+            )
         )
 
         // Получить картинку и установить её
@@ -207,8 +206,7 @@ class FiltersActivity : ChildActivity() {
             findViewById(R.id.glitchFrame),
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
-            findViewById(R.id.definitionFrame),
-            findViewById(R.id.affinisFrame)
+            findViewById(R.id.definitionFrame)
         )
 
         // Иконки фильтров (для подсветки)
@@ -221,8 +219,7 @@ class FiltersActivity : ChildActivity() {
             findViewById(R.id.glitchImage),
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
-            findViewById(R.id.definitionImage),
-            findViewById(R.id.affinisImage)
+            findViewById(R.id.definitionImage)
         )
 
         changeFilter(imagesWithFilters[0])
@@ -568,6 +565,7 @@ class FiltersActivity : ChildActivity() {
                 }
 
                 R.id.scalingImage -> {}
+
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
@@ -585,8 +583,6 @@ class FiltersActivity : ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
-
-                R.id.affinisImage -> {}
             }
 
             filterIsActive = false
