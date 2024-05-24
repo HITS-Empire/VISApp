@@ -8,7 +8,7 @@ import androidx.core.graphics.green
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.PixelsEditor
 
-class Scaling : UnsharpMask() {
+class Scaling {
     private val imageEditor = ImageEditor()
 
     fun increaseImage(
