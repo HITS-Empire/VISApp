@@ -269,7 +269,7 @@
                     android:id="@+id/rotateImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_rotation_foreground" />
 
                 <TextView
                     android:id="@+id/rotateTitle"
@@ -290,7 +290,7 @@
                     android:id="@+id/correctionImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_color_correction_foreground" />
 
                 <TextView
                     android:id="@+id/correctionTitle"
@@ -312,7 +312,7 @@
                     android:id="@+id/coloringImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_colors_foreground" />
 
                 <TextView
                     android:id="@+id/coloringTitle"
@@ -334,7 +334,7 @@
                     android:id="@+id/inversionImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_inversion_foreground" />
 
                 <TextView
                     android:id="@+id/inversionTitle"
@@ -356,7 +356,7 @@
                     android:id="@+id/popArtImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_pop_art_foreground" />
 
                 <TextView
                     android:id="@+id/popArtTitle"
@@ -378,7 +378,7 @@
                     android:id="@+id/glitchImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_glitch_foreground" />
 
                 <TextView
                     android:id="@+id/glitchTitle"
@@ -400,7 +400,7 @@
                     android:id="@+id/scalingImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_scaling_foreground" />
 
                 <TextView
                     android:id="@+id/scalingTitle"
@@ -422,7 +422,7 @@
                     android:id="@+id/retouchImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_retouch_foreground" />
 
                 <TextView
                     android:id="@+id/retouchTitle"
@@ -444,7 +444,7 @@
                     android:id="@+id/definitionImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_unsharp_mask_foreground" />
 
                 <TextView
                     android:id="@+id/definitionTitle"
