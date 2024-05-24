@@ -19,26 +19,26 @@
         android:id="@+id/galleryButton"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/round_soft_button"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/plusButton"
-        app:layout_constraintEnd_toStartOf="@+id/plusButton"
-        app:layout_constraintTop_toTopOf="@+id/plusButton"
-        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintBottom_toTopOf="@+id/plusButton"
+        app:layout_constraintEnd_toEndOf="@+id/plusButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/plusButton"
         app:srcCompat="@drawable/folder_outline_27" />
 
     <ImageButton
         android:id="@+id/cameraButton"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/round_soft_button"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/galleryButton"
-        app:layout_constraintEnd_toStartOf="@+id/galleryButton"
-        app:layout_constraintTop_toTopOf="@+id/galleryButton"
-        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintBottom_toTopOf="@+id/galleryButton"
+        app:layout_constraintEnd_toEndOf="@+id/galleryButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/galleryButton"
         app:srcCompat="@drawable/camera_outline_24" />
 
     <ImageButton
