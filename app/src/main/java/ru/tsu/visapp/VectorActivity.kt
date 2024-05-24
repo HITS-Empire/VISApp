@@ -12,6 +12,8 @@ import android.util.DisplayMetrics
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
 import android.graphics.drawable.BitmapDrawable
+import kotlin.math.abs
+import kotlin.math.pow
 
 /*
  * Экран для векторного редактора
@@ -24,8 +26,7 @@ class VectorActivity : ChildActivity() {
     private lateinit var paint: Paint
     private lateinit var imageEditor: ImageEditor
 
-    private val cords = ArrayList<ArrayList<Int>>()
-    private var k = 0
+    private val coordinates = ArrayList<ArrayList<Int>>()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +51,7 @@ class VectorActivity : ChildActivity() {
         canvas = Canvas(bitmap)
 
         paint = Paint()
-        paint.color = Color.RED
+        paint.color = Color.argb(255, 43, 203, 17)
         paint.strokeWidth = 15.0f
 
         imageView.setOnTouchListener { _, event ->
@@ -76,11 +77,12 @@ class VectorActivity : ChildActivity() {
                     }
 
                     // Добавление координаты в список
-                    cords.add(arrayListOf(point!![0], point[1]))
-                    k += 1
+                    coordinates.add(arrayListOf(point!![0], point[1]))
 
                     // Отрисовка сплайнов
-                    if (k > 3) drawSpline()
+                    if (coordinates.size > 3) {
+                        drawSpline()
+                    }
                 }
             }
 
@@ -91,71 +93,108 @@ class VectorActivity : ChildActivity() {
         imageView.background = BitmapDrawable(getResources(), bitmap)
     }
 
-    private fun drawSpline() {
-        var num = 0.0
-        for (i in 0 until 2 * k step 2) {
-            if (i > 0 && i < 2 * (k - 1)) {
-                val deltaX = cords[i / 2 + 1][0] - cords[i / 2][0]
-                val deltaY = cords[i / 2 + 1][1] - cords[i / 2][1]
-                num += sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())
-            }
-        }
-
-        cords[0] = cords[1]
-        cords.add(cords[cords.size - 1])
-
-        // В цикле по всем четвёркам точек
-        for (i in 1..cords.size - 3) {
-            val a = mutableListOf(0.0, 0.0, 0.0, 0.0)
-            val b = mutableListOf(0.0, 0.0, 0.0, 0.0)
-            val arrs = mapOf("a" to a, "b" to b)
-
-            // Считаем коэффициенты
-            getSplineCoefficient(i, arrs)
-
-            // Cоздаём массив промежуточных точек
-            val points = mutableMapOf<String, Double>()
-
-            for (j in 0 until num.toInt()) {
-                // Шаг интерполяции
-                val t = j.toDouble() / num
-
-                val c = arrs["a"]!![1] + t * (arrs["a"]!![2] + t * arrs["a"]!![3])
-                val d = arrs["b"]!![1] + t * (arrs["b"]!![2] + t * arrs["b"]!![3])
-
-                // Передаём массиву точек значения по методу beta-spline
-                points["X"] = arrs["a"]!![0] + t * c
-                points["Y"] = arrs["b"]!![0] + t * d
-
-                canvas.drawPoint(
-                    points["X"]!!.toFloat(),
-                    points["Y"]!!.toFloat(),
-                    paint
-                )
-                imageView.invalidate()
-            }
-        }
+    private fun getCoefficient(
+        index: Int,
+        arrs: MutableList<MutableList<Double>>
+    ) {
+        arrs[0][3] = (
+                -coordinates[index - 1][0] +
+                        3.0 * coordinates[index][0] -
+                        3.0 * coordinates[index + 1][0] +
+                        coordinates[index + 2][0]
+                ) / 6.0
+        arrs[0][2] = (
+                coordinates[index - 1][0] -
+                        2.0 * coordinates[index][0] +
+                        coordinates[index + 1][0]
+                ) / 2.0
+        arrs[0][1] = (
+                -coordinates[index - 1][0] +
+                        coordinates[index + 1][0]
+                ) / 2.0
+        arrs[0][0] = (
+                coordinates[index - 1][0] +
+                        4.0 * coordinates[index][0] +
+                        coordinates[index + 1][0]
+                ) / 6.0
+        arrs[1][3] = (
+                -coordinates[index - 1][1] +
+                        3.0 * coordinates[index][1] -
+                        3.0 * coordinates[index + 1][1] +
+                        coordinates[index + 2][1]
+                ) / 6.0
+        arrs[1][2] = (
+                coordinates[index - 1][1] -
+                        2.0 * coordinates[index][1] +
+                        coordinates[index + 1][1]
+                ) / 2.0
+        arrs[1][1] = (
+                -coordinates[index - 1][1] +
+                        coordinates[index + 1][1]
+                ) / 2.0
+        arrs[1][0] = (
+                coordinates[index - 1][1] +
+                        4.0 * coordinates[index][1] +
+                        coordinates[index + 1][1]
+                ) / 6.0
     }
 
-    private fun getSplineCoefficient(
-        i: Int,
-        arrs: Map<String, MutableList<Double>>
-    ) {
-        arrs["a"]!![3] =
-            (-cords[i - 1][0] + 3.0 * cords[i][0] - 3.0 * cords[i + 1][0] + cords[i + 2][0]) / 6.0
-        arrs["a"]!![2] =
-            (cords[i - 1][0] - 2.0 * cords[i][0] + cords[i + 1][0]) / 2.0
-        arrs["a"]!![1] =
-            (-cords[i - 1][0] + cords[i + 1][0]) / 2.0
-        arrs["a"]!![0] =
-            (cords[i - 1][0] + 4.0 * cords[i][0] + cords[i + 1][0]) / 6.0
-        arrs["b"]!![3] =
-            (-cords[i - 1][1] + 3.0 * cords[i][1] - 3.0 * cords[i + 1][1] + cords[i + 2][1]) / 6.0
-        arrs["b"]!![2] =
-            (cords[i - 1][1] - 2.0 * cords[i][1] + cords[i + 1][1]) / 2.0
-        arrs["b"]!![1] =
-            (-cords[i - 1][1] + cords[i + 1][1]) / 2.0
-        arrs["b"]!![0] =
-            (cords[i - 1][1] + 4.0 * cords[i][1] + cords[i + 1][1]) / 6.0
+    private fun drawSpline() {
+        var totalLength = 0.0
+        for (i in 0 until 2 * coordinates.size step 2) {
+            if (i > 0 && i < 2 * (coordinates.size - 1)) {
+                val deltaX =
+                    (coordinates[i / 2 + 1][0] - coordinates[i / 2][0]).toDouble()
+                val deltaY =
+                    (coordinates[i / 2 + 1][1] - coordinates[i / 2][1]).toDouble()
+                totalLength += sqrt(deltaX.pow(2.0) + deltaY.pow(2.0))
+            }
+        }
+
+        coordinates[0] = coordinates[1]
+        coordinates.add(coordinates[coordinates.size - 1])
+
+        // В цикле по всем четвёркам точек
+        for (i in 1..coordinates.size - 3) {
+            val currentPoints = mutableListOf(
+                mutableListOf(0.0, 0.0, 0.0, 0.0),
+                mutableListOf(0.0, 0.0, 0.0, 0.0)
+            )
+
+            // Считаем коэффициенты
+            getCoefficient(i, currentPoints)
+
+            // Массив точек сплайна
+            val path: ArrayList<ArrayList<Double>> = arrayListOf(arrayListOf())
+
+            for (j in 0 until totalLength.toInt()) {
+                // Шаг интерполяции
+                val step = j.toDouble() / totalLength
+
+                val newPointX =
+                    currentPoints[0][1] + step * (currentPoints[0][2] + step * currentPoints[0][3])
+                val newPointY =
+                    currentPoints[1][1] + step * (currentPoints[1][2] + step * currentPoints[1][3])
+
+                // Считаем текущую точку
+                val splinePoint = arrayListOf(
+                    currentPoints[0][0] + step * newPointX,
+                    currentPoints[1][0] + step * newPointY
+                )
+
+                path.add(ArrayList(splinePoint))
+            }
+
+            for (point in path) {
+                if (point.size == 2) {
+                    canvas.drawPoint(
+                        point[0].toFloat(),
+                        point[1].toFloat(),
+                        paint
+                    )
+                    imageView.invalidate()
+                }
+            }
+        }
     }
 }
