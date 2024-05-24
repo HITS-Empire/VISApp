@@ -40,8 +40,8 @@ class Retouching {
         var count = 0
 
         // Считаем средний цвет
-        for (i in centerX - retouchSize .. centerX + retouchSize) {
-            for (j in centerY - retouchSize .. centerY + retouchSize) {
+        for (i in centerX - retouchSize..centerX + retouchSize) {
+            for (j in centerY - retouchSize..centerY + retouchSize) {
                 val a = (i - centerX).toDouble().pow(2)
                 val b = (j - centerY).toDouble().pow(2)
                 if (a + b <= retouchSize.toDouble().pow(2)) {
@@ -60,17 +60,18 @@ class Retouching {
         totalBlue /= count
 
         // Обновляем пиксели
-        for (i in centerX - retouchSize .. centerX + retouchSize) {
-            for (j in centerY - retouchSize .. centerY + retouchSize) {
+        for (i in centerX - retouchSize..centerX + retouchSize) {
+            for (j in centerY - retouchSize..centerY + retouchSize) {
                 val a = (i - centerX).toDouble().pow(2)
                 val b = (j - centerY).toDouble().pow(2)
                 val distance = a + b
 
                 if (distance <= retouchSize.toDouble().pow(2)) {
                     val color = pixelsEditor.getPixel(i, j) ?: 0
-                    val alpha = (
-                        1 - distance / retouchSize.toDouble().pow(2)
-                    ) * ((coefficient + 5).toDouble() / 16)
+
+                    val c = 1 - distance / retouchSize.toDouble().pow(2)
+                    val d = (coefficient + 5).toDouble() / 16
+                    val alpha = c * d
 
                     val red = color.red * (1 - alpha) + totalRed * alpha
                     val green = color.green * (1 - alpha) + totalGreen * alpha

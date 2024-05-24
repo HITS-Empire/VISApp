@@ -61,9 +61,13 @@ class ColorCorrection {
         height: Int,
         brightnessValue: Int,
         saturationValue: Int,
-        contrastValue: Int
+        contrastValue: Int,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
     ): IntArray {
-        resultPixels = IntArray(pixels.size) { 0 }
+        resultPixels = pixels
 
         pixelsEditor = PixelsEditor(pixels, width, height)
         pixelsEditorResult = PixelsEditor(resultPixels, width, height)
@@ -71,59 +75,65 @@ class ColorCorrection {
         // Высчитывание среднего значения серого для всего изображения
         var meanGrayScale = 0
 
-        for (i in 0 ..< width) {
-            for (j in 0 ..< height) {
-                val pixel = pixelsEditor.getPixel(i, j)
+        for (i in 0..<width) {
+            for (j in 0..<height) {
+                if (i in left..right &&
+                    j in top..bottom
+                ) {
+                    val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                var red = pixel?.red ?: 0
-                var green = pixel?.green ?: 0
-                var blue = pixel?.blue ?: 0
+                    val red = pixel.red
+                    val green = pixel.green
+                    val blue = pixel.blue
 
-                meanGrayScale += (red * 0.2126 + green * 0.7152 + blue * 0.0722).toInt()
+                    meanGrayScale += (red * 0.2126 + green * 0.7152 + blue * 0.0722).toInt()
+                }
             }
         }
 
         meanGrayScale /= (width * height)
 
-        for (i in 0 ..< width) {
-            for (j in 0..< height) {
-                val pixel = pixelsEditor.getPixel(i, j)
+        for (i in 0..<width) {
+            for (j in 0..<height) {
+                val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                val alpha = pixel?.alpha ?: 0
-                var red = pixel?.red ?: 0
-                var green = pixel?.green ?: 0
-                var blue = pixel?.blue ?: 0
+                val alpha = pixel.alpha
+                var red = pixel.red
+                var green = pixel.green
+                var blue = pixel.blue
 
-                // Яркость
-                val (
-                    brightRed,
-                    brightGreen,
-                    brightBlue
-                ) = brightness(red, green, blue, brightnessValue)
+                if (i in left..right && j in top..bottom) {
+                    // Яркость
+                    val (
+                        brightRed,
+                        brightGreen,
+                        brightBlue
+                    ) = brightness(red, green, blue, brightnessValue)
 
-                // Насыщенность
-                val (
-                    saturationRed,
-                    saturationGreen,
-                    saturationBlue
-                ) = saturation(brightRed, brightGreen, brightBlue, saturationValue)
+                    // Насыщенность
+                    val (
+                        saturationRed,
+                        saturationGreen,
+                        saturationBlue
+                    ) = saturation(brightRed, brightGreen, brightBlue, saturationValue)
 
-                // Контраст
-                val (
-                    contrastRed,
-                    contrastGreen,
-                    contrastBlue
-                ) = contrast(
-                    saturationRed,
-                    saturationGreen,
-                    saturationBlue,
-                    meanGrayScale,
-                    contrastValue
-                )
+                    // Контраст
+                    val (
+                        contrastRed,
+                        contrastGreen,
+                        contrastBlue
+                    ) = contrast(
+                        saturationRed,
+                        saturationGreen,
+                        saturationBlue,
+                        meanGrayScale,
+                        contrastValue
+                    )
 
-                red = contrastRed.coerceIn(0, 255)
-                green = contrastGreen.coerceIn(0, 255)
-                blue = contrastBlue.coerceIn(0, 255)
+                    red = contrastRed.coerceIn(0, 255)
+                    green = contrastGreen.coerceIn(0, 255)
+                    blue = contrastBlue.coerceIn(0, 255)
+                }
 
                 pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }

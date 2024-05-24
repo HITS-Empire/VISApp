@@ -7,89 +7,87 @@
 
     <FrameLayout
         android:id="@+id/neuralFrame"
-        android:layout_width="140dp"
-        android:layout_height="180dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/vectorFrame"
+        android:layout_width="250dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="70dp"
+        app:layout_constraintBottom_toTopOf="@+id/vectorFrame"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.75">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/neuralImage"
             android:layout_width="140dp"
             android:layout_height="140dp"
             android:background="@drawable/blur_ripple"
-            app:srcCompat="@mipmap/ic_filters" />
+            app:srcCompat="@mipmap/ic_neural" />
 
         <TextView
             android:id="@+id/neuralTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="140dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="140dp"
             android:gravity="center"
             android:text="@string/interesting_neural"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/vectorFrame"
-        android:layout_width="140dp"
-        android:layout_height="180dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/cubeFrame"
+        android:layout_width="250dp"
+        android:layout_height="140dp"
+        app:layout_constraintBottom_toTopOf="@+id/cubeFrame"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/neuralFrame"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.75">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/neuralFrame">
 
         <ImageView
             android:id="@+id/vectorImage"
             android:layout_width="140dp"
             android:layout_height="140dp"
             android:background="@drawable/blur_ripple"
-            app:srcCompat="@mipmap/ic_filters" />
+            app:srcCompat="@mipmap/ic_spline" />
 
         <TextView
             android:id="@+id/vectorTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="140dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="140dp"
             android:gravity="center"
             android:text="@string/interesting_vector"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/cubeFrame"
-        android:layout_width="140dp"
-        android:layout_height="180dp"
+        android:layout_width="250dp"
+        android:layout_height="140dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/vectorFrame"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.75">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vectorFrame">
 
         <ImageView
             android:id="@+id/cubeImage"
             android:layout_width="140dp"
             android:layout_height="140dp"
             android:background="@drawable/blur_ripple"
-            app:srcCompat="@mipmap/ic_filters" />
+            app:srcCompat="@mipmap/ic_cube" />
 
         <TextView
             android:id="@+id/cubeTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="140dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="140dp"
             android:gravity="center"
             android:text="@string/interesting_cube"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
