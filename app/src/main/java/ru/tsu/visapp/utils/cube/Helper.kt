@@ -73,9 +73,9 @@ class Helper {
 
     // Пересечение с кубом
     fun box(
+        boxSize: Vec3,
         cameraPosition: Vec3,
         beamDirection: Vec3,
-        boxSize: Vec3,
         imagePixels: Array<IntArray>,
         width: Int,
         height: Int,

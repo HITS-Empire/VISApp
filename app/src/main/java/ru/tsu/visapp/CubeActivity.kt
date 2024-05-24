@@ -46,6 +46,7 @@ class CubeActivity : ChildActivity() {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
         val pixelsEditor = PixelsEditor(pixels, width, height)
 
+        val boxSize = Vec3(1)
         val cameraPosition = Vec3(-currentProgress / 10.0f, 0.0f, 0.0f)
         cameraPosition.rotateY(dy)
         cameraPosition.rotateZ(dx)
@@ -61,9 +62,9 @@ class CubeActivity : ChildActivity() {
                 beamDirection.rotateZ(dx)
 
                 val color = helper.box(
+                    boxSize,
                     cameraPosition,
                     beamDirection,
-                    Vec3(1),
                     imagePixels,
                     width,
                     height,
