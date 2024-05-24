@@ -1,31 +1,30 @@
 package ru.tsu.visapp
 
-import android.annotation.SuppressLint
+import kotlin.math.sqrt
+import android.os.Bundle
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
-import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.widget.ImageView
+import android.util.DisplayMetrics
 import ru.tsu.visapp.utils.ImageEditor
-import kotlin.math.sqrt
-
+import android.annotation.SuppressLint
+import android.graphics.drawable.BitmapDrawable
 
 /*
  * Экран для векторного редактора
  */
 
-class VectorActivity: ChildActivity() {
+class VectorActivity : ChildActivity() {
     private lateinit var imageView: ImageView
     private lateinit var bitmap: Bitmap
     private lateinit var canvas: Canvas
     private lateinit var paint: Paint
     private lateinit var imageEditor: ImageEditor
-    
-    private val coords = ArrayList<ArrayList<Int>>()
+
+    private val cords = ArrayList<ArrayList<Int>>()
     private var k = 0
 
     @SuppressLint("ClickableViewAccessibility")
@@ -52,7 +51,7 @@ class VectorActivity: ChildActivity() {
 
         paint = Paint()
         paint.color = Color.RED
-        paint.strokeWidth = 15F
+        paint.strokeWidth = 15.0f
 
         imageView.setOnTouchListener { _, event ->
             when (event.action) {
@@ -77,13 +76,11 @@ class VectorActivity: ChildActivity() {
                     }
 
                     // Добавление координаты в список
-                    coords.add(arrayListOf(point!![0], point[1]))
+                    cords.add(arrayListOf(point!![0], point[1]))
                     k += 1
 
                     // Отрисовка сплайнов
-                    if (k > 3) {
-                        drawSpline();
-                    }
+                    if (k > 3) drawSpline()
                 }
             }
 
@@ -98,23 +95,24 @@ class VectorActivity: ChildActivity() {
         var num = 0.0
         for (i in 0 until 2 * k step 2) {
             if (i > 0 && i < 2 * (k - 1)) {
-                val deltaX = coords[i / 2 + 1][0] - coords[i / 2][0]
-                val deltaY = coords[i / 2 + 1][1] - coords[i / 2][1]
+                val deltaX = cords[i / 2 + 1][0] - cords[i / 2][0]
+                val deltaY = cords[i / 2 + 1][1] - cords[i / 2][1]
                 num += sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())
             }
         }
 
-        coords[0] = coords[1]
-        coords.add(coords[coords.size - 1])
+        cords[0] = cords[1]
+        cords.add(cords[cords.size - 1])
 
         // В цикле по всем четвёркам точек
-        for (i in 1 .. coords.size - 3) {
+        for (i in 1..cords.size - 3) {
             val a = mutableListOf(0.0, 0.0, 0.0, 0.0)
             val b = mutableListOf(0.0, 0.0, 0.0, 0.0)
-            var arrs = mapOf("a" to a, "b" to b)
+            val arrs = mapOf("a" to a, "b" to b)
 
             // Считаем коэффициенты
-            arrs = _SplineCoefficient(i, arrs)
+            getSplineCoefficient(i, arrs)
+
             // Cоздаём массив промежуточных точек
             val points = mutableMapOf<String, Double>()
 
@@ -122,37 +120,42 @@ class VectorActivity: ChildActivity() {
                 // Шаг интерполяции
                 val t = j.toDouble() / num
 
-                // Передаём массиву точек значения по методу beta-spline
-                points["X"] = (arrs["a"]!![0] + t * (arrs["a"]!![1] + t * (arrs["a"]!![2] + t * arrs["a"]!![3])))
-                points["Y"] = (arrs["b"]!![0] + t * (arrs["b"]!![1] + t * (arrs["b"]!![2] + t * arrs["b"]!![3])))
+                val c = arrs["a"]!![1] + t * (arrs["a"]!![2] + t * arrs["a"]!![3])
+                val d = arrs["b"]!![1] + t * (arrs["b"]!![2] + t * arrs["b"]!![3])
 
-                    canvas.drawPoint(
-                        points["X"]!!.toFloat(),
-                        points["Y"]!!.toFloat(),
-                        paint
-                    )
-                    imageView.invalidate()
+                // Передаём массиву точек значения по методу beta-spline
+                points["X"] = arrs["a"]!![0] + t * c
+                points["Y"] = arrs["b"]!![0] + t * d
+
+                canvas.drawPoint(
+                    points["X"]!!.toFloat(),
+                    points["Y"]!!.toFloat(),
+                    paint
+                )
+                imageView.invalidate()
             }
         }
     }
 
-    private fun _SplineCoefficient(
+    private fun getSplineCoefficient(
         i: Int,
         arrs: Map<String, MutableList<Double>>
-    ): Map<String, MutableList<Double>> {
-        var newArrs = arrs
-
-        newArrs["a"]!![3] = (
-                (-coords[i - 1][0] + 3*coords[i][0] - 3*coords[i + 1][0] + coords[i + 2][0]) / 6
-                ).toDouble()
-        newArrs["a"]!![2] = ((coords[i - 1][0] - 2*coords[i][0] + coords[i + 1][0])/2).toDouble()
-        newArrs["a"]!![1] = ((-coords[i - 1][0] + coords[i + 1][0])/2).toDouble()
-        newArrs["a"]!![0] = ((coords[i - 1][0] + 4*coords[i][0] + coords[i + 1][0])/6).toDouble()
-        newArrs["b"]!![3] = ((-coords[i - 1][1] + 3*coords[i][1] - 3*coords[i + 1][1] + coords[i + 2][1])/6).toDouble()
-        newArrs["b"]!![2] = ((coords[i - 1][1] - 2*coords[i][1] + coords[i + 1][1])/2).toDouble()
-        newArrs["b"]!![1] = ((-coords[i - 1][1] + coords[i + 1][1])/2).toDouble()
-        newArrs["b"]!![0] = ((coords[i - 1][1] + 4*coords[i][1] + coords[i + 1][1])/6).toDouble()
-
-        return newArrs
+    ) {
+        arrs["a"]!![3] =
+            (-cords[i - 1][0] + 3.0 * cords[i][0] - 3.0 * cords[i + 1][0] + cords[i + 2][0]) / 6.0
+        arrs["a"]!![2] =
+            (cords[i - 1][0] - 2.0 * cords[i][0] + cords[i + 1][0]) / 2.0
+        arrs["a"]!![1] =
+            (-cords[i - 1][0] + cords[i + 1][0]) / 2.0
+        arrs["a"]!![0] =
+            (cords[i - 1][0] + 4.0 * cords[i][0] + cords[i + 1][0]) / 6.0
+        arrs["b"]!![3] =
+            (-cords[i - 1][1] + 3.0 * cords[i][1] - 3.0 * cords[i + 1][1] + cords[i + 2][1]) / 6.0
+        arrs["b"]!![2] =
+            (cords[i - 1][1] - 2.0 * cords[i][1] + cords[i + 1][1]) / 2.0
+        arrs["b"]!![1] =
+            (-cords[i - 1][1] + cords[i + 1][1]) / 2.0
+        arrs["b"]!![0] =
+            (cords[i - 1][1] + 4.0 * cords[i][1] + cords[i + 1][1]) / 6.0
     }
 }
