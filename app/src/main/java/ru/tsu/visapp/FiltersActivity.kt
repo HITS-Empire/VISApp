@@ -14,6 +14,8 @@ import android.widget.TextView
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
@@ -281,20 +283,24 @@ class FiltersActivity : ChildActivity() {
                 )
 
                 if (point != null) {
-                    val size = currentInstruction.items[1].progress
-                    val coefficient = currentInstruction.items[2].progress
+                    lifecycleScope.launch(Dispatchers.Default) {
+                        val size = currentInstruction.items[1].progress
+                        val coefficient = currentInstruction.items[2].progress
 
-                    retouching.retouch(
-                        pixels,
-                        width,
-                        height,
-                        point[0],
-                        point[1],
-                        size,
-                        coefficient
-                    )
-                    imageEditor.setPixelsToBitmap(bitmap, pixels)
-                    imageView.setImageBitmap(bitmap)
+                        retouching.retouch(
+                            pixels,
+                            width,
+                            height,
+                            point[0],
+                            point[1],
+                            size,
+                            coefficient
+                        )
+                        withContext(Dispatchers.Main) {
+                            imageEditor.setPixelsToBitmap(bitmap, pixels)
+                            imageView.setImageBitmap(bitmap)
+                        }
+                    }
                 }
 
                 filterIsActive = false
@@ -339,7 +345,7 @@ class FiltersActivity : ChildActivity() {
 
         filterIsActive = true
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.Default) {
             when (currentImage.id) {
                 R.id.rotateImage -> {
                     val angle = currentInstruction.items[1].progress
@@ -350,7 +356,9 @@ class FiltersActivity : ChildActivity() {
                         height,
                         angle
                     )
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.correctionImage -> {
@@ -375,7 +383,9 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.coloringImage -> {
@@ -400,7 +410,9 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.inversionImage -> {
@@ -425,7 +437,9 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.popArtImage -> {
@@ -451,7 +465,9 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.glitchImage -> {
@@ -476,7 +492,9 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
 
                 R.id.scalingImage -> {
@@ -490,7 +508,9 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
-                            imageView.setImageBitmap(bitmap)
+                            withContext(Dispatchers.Main) {
+                                imageView.setImageBitmap(bitmap)
+                            }
                         } else if (startScaleFactor > scaleFactor) {
                             bitmap = scaling.decreaseImage(
                                 width,
@@ -498,7 +518,9 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
-                            imageView.setImageBitmap(bitmap)
+                            withContext(Dispatchers.Main) {
+                                imageView.setImageBitmap(bitmap)
+                            }
                         }
                     }
                 }
@@ -519,7 +541,9 @@ class FiltersActivity : ChildActivity() {
                             threshold
                         )
                     )
-                    imageView.setImageBitmap(bitmap)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(bitmap)
+                    }
                 }
             }
 
