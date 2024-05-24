@@ -4,15 +4,13 @@
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:largeHeap="true"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.VISApp"
-        tools:targetApi="31">
+        tools:targetApi="26">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -36,10 +34,6 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".NeuralActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".StenographyActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
