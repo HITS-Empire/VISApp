@@ -21,7 +21,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 
-
 /*
  * Экран для фильтров
  */
