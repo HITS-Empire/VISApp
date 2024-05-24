@@ -26,7 +26,7 @@ class VectorActivity : ChildActivity() {
     private lateinit var paint: Paint
     private lateinit var imageEditor: ImageEditor
 
-    private val coordinates = ArrayList<ArrayList<Int>>()
+    private val coordinates = ArrayList<ArrayList<Double>>()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +51,7 @@ class VectorActivity : ChildActivity() {
         canvas = Canvas(bitmap)
 
         paint = Paint()
-        paint.color = Color.argb(255, 43, 203, 17)
+        paint.color = Color.WHITE
         paint.strokeWidth = 15.0f
 
         imageView.setOnTouchListener { _, event ->
@@ -77,7 +77,12 @@ class VectorActivity : ChildActivity() {
                     }
 
                     // Добавление координаты в список
-                    coordinates.add(arrayListOf(point!![0], point[1]))
+                    coordinates.add(
+                        arrayListOf(
+                            point!![0].toDouble(),
+                            point[1].toDouble()
+                        )
+                    )
 
                     // Отрисовка сплайнов
                     if (coordinates.size > 3) {
@@ -153,44 +158,44 @@ class VectorActivity : ChildActivity() {
 
     private fun getCoefficient(
         index: Int,
-        arrs: MutableList<MutableList<Double>>
+        currentPoints: MutableList<MutableList<Double>>
     ) {
-        arrs[0][3] = (
+        currentPoints[0][3] = (
                 -coordinates[index - 1][0] +
                         3.0 * coordinates[index][0] -
                         3.0 * coordinates[index + 1][0] +
                         coordinates[index + 2][0]
                 ) / 6.0
-        arrs[0][2] = (
+        currentPoints[0][2] = (
                 coordinates[index - 1][0] -
                         2.0 * coordinates[index][0] +
                         coordinates[index + 1][0]
                 ) / 2.0
-        arrs[0][1] = (
+        currentPoints[0][1] = (
                 -coordinates[index - 1][0] +
                         coordinates[index + 1][0]
                 ) / 2.0
-        arrs[0][0] = (
+        currentPoints[0][0] = (
                 coordinates[index - 1][0] +
                         4.0 * coordinates[index][0] +
                         coordinates[index + 1][0]
                 ) / 6.0
-        arrs[1][3] = (
+        currentPoints[1][3] = (
                 -coordinates[index - 1][1] +
                         3.0 * coordinates[index][1] -
                         3.0 * coordinates[index + 1][1] +
                         coordinates[index + 2][1]
                 ) / 6.0
-        arrs[1][2] = (
+        currentPoints[1][2] = (
                 coordinates[index - 1][1] -
                         2.0 * coordinates[index][1] +
                         coordinates[index + 1][1]
                 ) / 2.0
-        arrs[1][1] = (
+        currentPoints[1][1] = (
                 -coordinates[index - 1][1] +
                         coordinates[index + 1][1]
                 ) / 2.0
-        arrs[1][0] = (
+        currentPoints[1][0] = (
                 coordinates[index - 1][1] +
                         4.0 * coordinates[index][1] +
                         coordinates[index + 1][1]
@@ -201,32 +206,34 @@ class VectorActivity : ChildActivity() {
         var totalLength = 0.0
         for (i in 0 until 2 * coordinates.size step 2) {
             if (i > 0 && i < 2 * (coordinates.size - 1)) {
-                val deltaX =
-                    (coordinates[i / 2 + 1][0] - coordinates[i / 2][0]).toDouble()
-                val deltaY =
-                    (coordinates[i / 2 + 1][1] - coordinates[i / 2][1]).toDouble()
+                val deltaX = (coordinates[i / 2 + 1][0] - coordinates[i / 2][0])
+                val deltaY = (coordinates[i / 2 + 1][1] - coordinates[i / 2][1])
                 totalLength += sqrt(deltaX.pow(2.0) + deltaY.pow(2.0))
             }
         }
 
         coordinates[0] = coordinates[1]
         coordinates.add(coordinates[coordinates.size - 1])
+        totalLength = 0.0
+        for (i in 0 until 2 * coordinates.size step 2) {
+            if (i > 0 && i < 2 * (coordinates.size - 1)) {
+                val deltaX = (coordinates[i / 2 + 1][0] - coordinates[i / 2][0])
+                val deltaY = (coordinates[i / 2 + 1][1] - coordinates[i / 2][1])
+                totalLength += sqrt(deltaX.pow(2.0) + deltaY.pow(2.0))
+            }
+        }
 
-        // В цикле по всем четвёркам точек
         for (i in 1..coordinates.size - 3) {
             val currentPoints = mutableListOf(
                 mutableListOf(0.0, 0.0, 0.0, 0.0),
                 mutableListOf(0.0, 0.0, 0.0, 0.0)
             )
 
-            // Считаем коэффициенты
             getCoefficient(i, currentPoints)
 
-            // Массив точек сплайна
             val path: ArrayList<ArrayList<Double>> = arrayListOf(arrayListOf())
 
             for (j in 0 until totalLength.toInt()) {
-                // Шаг интерполяции
                 val step = j.toDouble() / totalLength
 
                 val newPointX =
@@ -234,7 +241,6 @@ class VectorActivity : ChildActivity() {
                 val newPointY =
                     currentPoints[1][1] + step * (currentPoints[1][2] + step * currentPoints[1][3])
 
-                // Считаем текущую точку
                 val splinePoint = arrayListOf(
                     currentPoints[0][0] + step * newPointX,
                     currentPoints[1][0] + step * newPointY
