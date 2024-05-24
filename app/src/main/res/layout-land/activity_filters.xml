@@ -456,4 +456,17 @@
         app:layout_constraintStart_toStartOf="@+id/filtersVerticalMenu"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Switch
+        android:id="@+id/filtersSwitch"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:switchMinWidth="80dp"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/secondSeekBarLayout"
+        app:layout_constraintEnd_toStartOf="@+id/selectFilters"
+        app:layout_constraintStart_toEndOf="@+id/saveButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

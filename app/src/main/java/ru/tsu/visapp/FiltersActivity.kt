@@ -1,9 +1,11 @@
 package ru.tsu.visapp
 
+import android.view.View
 import android.os.Bundle
 import android.widget.Toast
 import java.lang.Integer.min
 import java.lang.Integer.max
+import android.widget.Switch
 import android.widget.SeekBar
 import ru.tsu.visapp.filters.*
 import android.graphics.Bitmap
@@ -25,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
  * Экран для фильтров
  */
 
+@SuppressLint("UseSwitchCompatOrMaterialCode")
 class FiltersActivity : ChildActivity() {
     private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
@@ -41,6 +44,8 @@ class FiltersActivity : ChildActivity() {
     private lateinit var seekBars: Array<SeekBar> // Сами ползунки
     private lateinit var seekBarEditors: Array<EditText> // Отображения текущего значения
     private lateinit var seekBarUnits: Array<TextView> // Единицы измерения ползунка
+
+    private lateinit var switch: Switch // Свитч для нейросети
 
     private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
     private lateinit var currentInstruction: Instruction // Текущая инструкция
@@ -68,6 +73,7 @@ class FiltersActivity : ChildActivity() {
         initializeView(R.layout.activity_filters)
 
         imageView = findViewById(R.id.filtersImageView)
+        switch = findViewById(R.id.filtersSwitch)
 
         title = System.currentTimeMillis().toString()
         imageEditor.contentResolver = contentResolver
@@ -295,6 +301,11 @@ class FiltersActivity : ChildActivity() {
             }
             true
         }
+
+        // События изменения свитча
+        switch.setOnCheckedChangeListener { _, _ ->
+            updateBoxes()
+        }
     }
 
     // Получить пиксели изображения и обновить данные
@@ -302,7 +313,24 @@ class FiltersActivity : ChildActivity() {
         width = bitmap.width
         height = bitmap.height
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
-        boxes = neuralNetwork.getBoundingBoxes(bitmap, true)
+
+        updateBoxes()
+    }
+
+    // Обновить данные о нейросети
+    private fun updateBoxes() {
+        boxes = if (switch.isChecked) {
+            neuralNetwork.getBoundingBoxes(bitmap, true)
+        } else {
+            arrayListOf(
+                arrayListOf(
+                    0,
+                    0,
+                    bitmap.width - 1,
+                    bitmap.height - 1
+                )
+            )
+        }
     }
 
     // Запустить функцию фильтра
@@ -454,6 +482,7 @@ class FiltersActivity : ChildActivity() {
 
                 R.id.scalingImage -> {
                     val scaleFactor = currentInstruction.items[1].progress
+
                     if (scaleFactor > 9 && bitmap.height > 20 && bitmap.width > 20) {
                         if (startScaleFactor < scaleFactor) {
                             bitmap = scaling.increaseImage(
@@ -462,6 +491,7 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
+                            imageView.setImageBitmap(bitmap)
                         } else if (startScaleFactor > scaleFactor) {
                             bitmap = scaling.decreaseImage(
                                 width,
@@ -469,9 +499,9 @@ class FiltersActivity : ChildActivity() {
                                 pixels,
                                 scaleFactor
                             )
+                            imageView.setImageBitmap(bitmap)
                         }
                     }
-                    imageView.setImageBitmap(bitmap)
                 }
 
                 R.id.definitionImage -> {
@@ -551,6 +581,17 @@ class FiltersActivity : ChildActivity() {
             seekBars[index].max = item.max
             seekBarEditors[index].setText(item.start.toString())
             seekBarUnits[index].text = item.unit
+        }
+
+        // Изменить видимость свитча
+        switch.visibility = when (image.id) {
+            R.id.correctionImage,
+            R.id.coloringImage,
+            R.id.inversionImage,
+            R.id.popArtImage,
+            R.id.glitchImage -> View.VISIBLE
+
+            else -> View.GONE
         }
 
         currentImage = image

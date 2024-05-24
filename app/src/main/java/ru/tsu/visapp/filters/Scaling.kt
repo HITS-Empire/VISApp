@@ -2,9 +2,9 @@ package ru.tsu.visapp.filters
 
 import android.graphics.Color
 import android.graphics.Bitmap
+import androidx.core.graphics.red
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
-import androidx.core.graphics.red
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.PixelsEditor
 
@@ -26,6 +26,7 @@ class Scaling : UnsharpMask() {
 
         val newBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
         val newPixels = imageEditor.getPixelsFromBitmap(newBitmap)
+        val newPixelsEditor = PixelsEditor(newPixels, newWidth, newHeight)
 
         val forX = width.toFloat() / newWidth
         val forY = height.toFloat() / newHeight
@@ -48,43 +49,42 @@ class Scaling : UnsharpMask() {
                 val dStartX = scaledX - startX
                 val dStartY = scaledY - startY
 
-                val red = bilinInt(
-                    dStartX,
-                    dStartY,
-                    pixelUp.red,
-                    pixelRight.red,
-                    pixelDown.red,
-                    pixelLeft.red
+                newPixelsEditor.setPixel(
+                    i,
+                    j,
+                    Color.argb(
+                        255,
+                        bilinInt(
+                            dStartX,
+                            dStartY,
+                            pixelUp.red,
+                            pixelRight.red,
+                            pixelDown.red,
+                            pixelLeft.red
+                        ),
+                        bilinInt(
+                            dStartX,
+                            dStartY,
+                            pixelUp.green,
+                            pixelRight.green,
+                            pixelDown.green,
+                            pixelLeft.green
+                        ),
+                        bilinInt(
+                            dStartX,
+                            dStartY,
+                            pixelUp.blue,
+                            pixelRight.blue,
+                            pixelDown.blue,
+                            pixelLeft.blue
+                        )
+                    )
                 )
-                val green = bilinInt(
-                    dStartX,
-                    dStartY,
-                    pixelUp.green,
-                    pixelRight.green,
-                    pixelDown.green,
-                    pixelLeft.green
-                )
-                val blue = bilinInt(
-                    dStartX,
-                    dStartY,
-                    pixelUp.blue,
-                    pixelRight.blue,
-                    pixelDown.blue,
-                    pixelLeft.blue
-                )
-
-                val newColor = Color.argb(
-                    255,
-                    red,
-                    green,
-                    blue
-                )
-
-                newPixels[i + j * newWidth] = newColor
             }
         }
 
         imageEditor.setPixelsToBitmap(newBitmap, newPixels)
+
         return newBitmap
     }
 
@@ -98,8 +98,8 @@ class Scaling : UnsharpMask() {
     ): Int {
         val averageUpRight = linInt(pixelUp, pixelRight, dStartX)
         val averageDownLeft = linInt(pixelDown, pixelLeft, dStartX)
-        val average = linInt(averageUpRight, averageDownLeft, dStartY)
-        return average
+
+        return linInt(averageUpRight, averageDownLeft, dStartY)
     }
 
     fun decreaseImage(
@@ -110,16 +110,17 @@ class Scaling : UnsharpMask() {
     ): Bitmap {
         val floatScaleFactor = scaleFactor.toFloat() / 100
 
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+
         val newWidth = (width * floatScaleFactor).toInt()
         val newHeight = (height * floatScaleFactor).toInt()
+
         val newBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val newPixels = imageEditor.getPixelsFromBitmap(newBitmap)
+        val newPixelsEditor = PixelsEditor(newPixels, newWidth, newHeight)
 
         val forX = width.toFloat() / newWidth
         val forY = height.toFloat() / newHeight
-
-        val pixelsEditor = PixelsEditor(pixels, width, height)
-
-        val newPixels = imageEditor.getPixelsFromBitmap(newBitmap)
 
         for (i in 0 until newWidth) {
             for (j in 0 until newHeight) {
@@ -140,63 +141,66 @@ class Scaling : UnsharpMask() {
                 val pixelDown = pixelsEditor.getPixel(startX, newY) ?: 0
                 val pixelLeft = pixelsEditor.getPixel(newX, newY) ?: 0
 
-                val pixelUpLeft = pixelsEditor.getPixel(startX, startY - 1) ?: pixelUp
-                val pixelUpRight = pixelsEditor.getPixel(newX + 1, startY) ?: pixelRight
-                val pixelDownRight = pixelsEditor.getPixel(startX, newY + 1) ?: pixelDown
-                val pixelDownRightLeft = pixelsEditor.getPixel(newX + 1, newY + 1) ?: pixelLeft
+                val pixelUpLeft = pixelsEditor.getPixel(startX, startY - 1)
+                    ?: pixelUp
+                val pixelUpRight = pixelsEditor.getPixel(newX + 1, startY)
+                    ?: pixelRight
+                val pixelDownRight = pixelsEditor.getPixel(startX, newY + 1)
+                    ?: pixelDown
+                val pixelDownRightLeft = pixelsEditor.getPixel(newX + 1, newY + 1)
+                    ?: pixelLeft
 
-                val red = triInt(
-                    dStartX,
-                    dStartY,
-                    diffStartX,
-                    pixelUp.red,
-                    pixelRight.red,
-                    pixelDown.red,
-                    pixelLeft.red,
-                    pixelUpLeft.red,
-                    pixelUpRight.red,
-                    pixelDownRight.red,
-                    pixelDownRightLeft.red,
+                newPixelsEditor.setPixel(
+                    i,
+                    j,
+                    Color.argb(
+                        255,
+                        triInt(
+                            dStartX,
+                            dStartY,
+                            diffStartX,
+                            pixelUp.red,
+                            pixelRight.red,
+                            pixelDown.red,
+                            pixelLeft.red,
+                            pixelUpLeft.red,
+                            pixelUpRight.red,
+                            pixelDownRight.red,
+                            pixelDownRightLeft.red
+                        ),
+                        triInt(
+                            dStartX,
+                            dStartY,
+                            diffStartX,
+                            pixelUp.green,
+                            pixelRight.green,
+                            pixelDown.green,
+                            pixelLeft.green,
+                            pixelUpLeft.green,
+                            pixelUpRight.green,
+                            pixelDownRight.green,
+                            pixelDownRightLeft.green
+                        ),
+                        triInt(
+                            dStartX,
+                            dStartY,
+                            diffStartX,
+                            pixelUp.blue,
+                            pixelRight.blue,
+                            pixelDown.blue,
+                            pixelLeft.blue,
+                            pixelUpLeft.blue,
+                            pixelUpRight.blue,
+                            pixelDownRight.blue,
+                            pixelDownRightLeft.blue
+                        )
+                    )
                 )
-                val green = triInt(
-                    dStartX,
-                    dStartY,
-                    diffStartX,
-                    pixelUp.green,
-                    pixelRight.green,
-                    pixelDown.green,
-                    pixelLeft.green,
-                    pixelUpLeft.green,
-                    pixelUpRight.green,
-                    pixelDownRight.green,
-                    pixelDownRightLeft.green
-                )
-                val blue = triInt(
-                    dStartX,
-                    dStartY,
-                    diffStartX,
-                    pixelUp.blue,
-                    pixelRight.blue,
-                    pixelDown.blue,
-                    pixelLeft.blue,
-                    pixelUpLeft.blue,
-                    pixelUpRight.blue,
-                    pixelDownRight.blue,
-                    pixelDownRightLeft.blue,
-                )
-
-                val newColor = Color.argb(
-                    255,
-                    red,
-                    green,
-                    blue
-                )
-
-                newPixels[i + j * newWidth] = newColor
             }
         }
 
         imageEditor.setPixelsToBitmap(newBitmap, newPixels)
+
         return newBitmap
     }
 
