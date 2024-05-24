@@ -41,14 +41,14 @@ class Glitch {
         pixelsEditor = PixelsEditor(pixels, width, height)
         val pixelsEditorGlitched = PixelsEditor(glitchedPixels, width, height)
 
-        for (i in 0 ..< width) {
-            for (j in 0..< height) {
+        for (i in 0..<width) {
+            for (j in 0..<height) {
                 val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
                 if (
                     i - delta < 0 ||
                     i + delta >= width ||
-                    !(i in left .. right && j in top .. bottom)
+                    !(i in left..right && j in top..bottom)
                 ) {
                     pixelsEditorGlitched.setPixel(
                         i,
@@ -95,47 +95,52 @@ class Glitch {
         var offset = false // Сдвигается ли текущая строка
         var offsetProbability = offsetFrequency // Вероятность смены переменной offset
 
-        for (j in 0..< height) {
-            /* Перестаем или начинаем сдвигать с
-               вероятностью offsetProbability и обновляем эту вероятность */
+        for (j in 0..<height) {
+            /* Перестаем или начинаем сдвигать с вероятностью
+             * offsetProbability и обновляем эту вероятность
+             */
             if ((0..100).random() < offsetProbability) {
                 offset = !offset
-                offsetProbability =
-                    if (offsetProbability == offsetFrequency)
-                        // Чем меньше, тем шире в среднем сдвинутые прямоугольники
-                        5 * width / 100
-                    else
-                        offsetFrequency
+
+                // Чем меньше, тем шире в среднем сдвинутые прямоугольники
+                offsetProbability = if (offsetProbability == offsetFrequency) {
+                    5 * width / 100
+                } else {
+                    offsetFrequency
+                }
             }
-            for (i in 0 ..< width) {
+            for (i in 0..<width) {
                 // Случайное значение текущего сдвига в пределах offsetSize
-                val currentOffset =
-                    (offsetSize - offsetSize / 10 ..
-                            offsetSize + offsetSize / 10).random()
+                val a = offsetSize - offsetSize / 10
+                val b = offsetSize + offsetSize / 10
+                val currentOffset = (a..b).random()
+
                 // Сдвиг
                 if (
                     offset &&
-                    i in left .. right &&
-                    j in top .. bottom
-                    )
+                    i in left..right &&
+                    j in top..bottom
+                ) {
                     pixelsEditorResult.setPixel(
                         i,
                         j,
-                        if (i + currentOffset in 0..<width)
+                        if (i + currentOffset in 0..<width) {
                             pixelsEditor.getPixel(i + currentOffset, j) ?: 0
-                        else
+                        } else {
                             pixelsEditor.getPixel(i, j) ?: 0
+                        }
                     )
-                else
+                } else {
                     pixelsEditorResult.setPixel(
                         i,
                         j,
                         pixelsEditor.getPixel(i, j) ?: 0
                     )
+                }
             }
         }
 
-        return  resultPixels
+        return resultPixels
     }
 
     fun rgbGlitch(
@@ -149,26 +154,24 @@ class Glitch {
         top: Int,
         right: Int,
         bottom: Int
-    ): IntArray {
-        return offset(
-            anaglyph(
-                pixels,
-                width,
-                height,
-                scaleDelta(delta, width),
-                left,
-                top,
-                right,
-                bottom
-            ),
+    ): IntArray = offset(
+        anaglyph(
+            pixels,
             width,
             height,
-            scaleFrequency(frequency, width),
-            scaleOffset(offset, width),
+            scaleDelta(delta, width),
             left,
             top,
             right,
             bottom
-        )
-    }
+        ),
+        width,
+        height,
+        scaleFrequency(frequency, width),
+        scaleOffset(offset, width),
+        left,
+        top,
+        right,
+        bottom
+    )
 }

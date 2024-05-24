@@ -75,15 +75,16 @@ class ColorCorrection {
         // Высчитывание среднего значения серого для всего изображения
         var meanGrayScale = 0
 
-        for (i in 0 ..< width) {
-            for (j in 0 ..< height) {
-                if (i in left .. right &&
-                    j in top .. bottom) {
+        for (i in 0..<width) {
+            for (j in 0..<height) {
+                if (i in left..right &&
+                    j in top..bottom
+                ) {
                     val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
-                    var red = pixel.red
-                    var green = pixel.green
-                    var blue = pixel.blue
+                    val red = pixel.red
+                    val green = pixel.green
+                    val blue = pixel.blue
 
                     meanGrayScale += (red * 0.2126 + green * 0.7152 + blue * 0.0722).toInt()
                 }
@@ -92,8 +93,8 @@ class ColorCorrection {
 
         meanGrayScale /= (width * height)
 
-        for (i in 0 ..< width) {
-            for (j in 0..< height) {
+        for (i in 0..<width) {
+            for (j in 0..<height) {
                 val pixel = pixelsEditor.getPixel(i, j) ?: 0
 
                 val alpha = pixel.alpha
@@ -101,8 +102,7 @@ class ColorCorrection {
                 var green = pixel.green
                 var blue = pixel.blue
 
-                if (i in left .. right &&
-                    j in top .. bottom) {
+                if (i in left..right && j in top..bottom) {
                     // Яркость
                     val (
                         brightRed,

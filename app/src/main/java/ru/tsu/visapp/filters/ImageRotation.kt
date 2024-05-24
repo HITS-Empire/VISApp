@@ -44,26 +44,50 @@ class ImageRotation {
         val centerRow = rows / 2
         val centerCol = cols / 2
 
-        if (angle in 0 .. 90) {
-            maxRow = centerRow + (rows - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
-            maxCol = centerCol + (cols - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
-            minRow = centerRow + (0 - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
-            minCol = centerCol + (0 - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
-        } else if (angle in 90 .. 180) {
-            maxRow = centerRow + (0 - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
-            maxCol = centerCol + (0 - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
-            minRow = centerRow + (rows - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
-            minCol = centerCol + (cols - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
-        } else if (angle in 180 .. 270) {
-            maxRow = centerRow + (0 - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
-            maxCol = centerCol + (0 - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
-            minRow = centerRow + (rows - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
-            minCol = centerCol + (cols - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
-        } else {
-            maxRow = centerRow + (rows - centerRow) * cos(radians) - (cols - centerCol) * sin(radians)
-            maxCol = centerCol + (cols - centerCol) * cos(radians) + (0 - centerRow) * sin(radians)
-            minRow = centerRow + (0 - centerRow) * cos(radians) - (0 - centerCol) * sin(radians)
-            minCol = centerCol + (0 - centerCol) * cos(radians) + (rows - centerRow) * sin(radians)
+        when (angle) {
+            in 0..90 -> {
+                maxRow = centerRow + (rows - centerRow) * cos(radians) -
+                        (0 - centerCol) * sin(radians)
+                maxCol = centerCol + (cols - centerCol) * cos(radians) +
+                        (rows - centerRow) * sin(radians)
+                minRow = centerRow + (0 - centerRow) * cos(radians) -
+                        (cols - centerCol) * sin(radians)
+                minCol = centerCol + (0 - centerCol) * cos(radians) +
+                        (0 - centerRow) * sin(radians)
+            }
+
+            in 90..180 -> {
+                maxRow = centerRow + (0 - centerRow) * cos(radians) -
+                        (0 - centerCol) * sin(radians)
+                maxCol = centerCol + (0 - centerCol) * cos(radians) +
+                        (rows - centerRow) * sin(radians)
+                minRow = centerRow + (rows - centerRow) * cos(radians) -
+                        (cols - centerCol) * sin(radians)
+                minCol = centerCol + (cols - centerCol) * cos(radians) +
+                        (0 - centerRow) * sin(radians)
+            }
+
+            in 180..270 -> {
+                maxRow = centerRow + (0 - centerRow) * cos(radians) -
+                        (cols - centerCol) * sin(radians)
+                maxCol = centerCol + (0 - centerCol) * cos(radians) +
+                        (0 - centerRow) * sin(radians)
+                minRow = centerRow + (rows - centerRow) * cos(radians) -
+                        (0 - centerCol) * sin(radians)
+                minCol = centerCol + (cols - centerCol) * cos(radians) +
+                        (rows - centerRow) * sin(radians)
+            }
+
+            else -> {
+                maxRow = centerRow + (rows - centerRow) * cos(radians) -
+                        (cols - centerCol) * sin(radians)
+                maxCol = centerCol + (cols - centerCol) * cos(radians) +
+                        (0 - centerRow) * sin(radians)
+                minRow = centerRow + (0 - centerRow) * cos(radians) -
+                        (0 - centerCol) * sin(radians)
+                minCol = centerCol + (0 - centerCol) * cos(radians) +
+                        (rows - centerRow) * sin(radians)
+            }
         }
 
         return arrayOf(maxRow, maxCol, minRow, minCol)
@@ -81,30 +105,27 @@ class ImageRotation {
         private val initPixelsEditor: PixelsEditor,
         private val newPixelsEditor: PixelsEditor,
     ) {
-        suspend fun start(i: Int, j: Int) {
+        fun start(i: Int, j: Int) {
             // Вычисление координат для пикселя в новом изображении
             val newI = (halfWidth + (i - halfWidth) * cos(radians) -
-                (j - halfHeight) * sin(radians) - minWidth).toInt()
+                    (j - halfHeight) * sin(radians) - minWidth).toInt()
             var newJ = (halfHeight + (j - halfHeight) * cos(radians) +
-                (i - halfWidth) * sin(radians) - minHeight).toInt()
+                    (i - halfWidth) * sin(radians) - minHeight).toInt()
 
             newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
 
             // Заполнение пропущенных пикселей
-            if (angle in 0 .. 180) {
+            if (angle in 0..180) {
                 // Если предыдущее значение пустой пиксель
                 if (newJ > 0 && newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
                     if (i > 0 && j > 0) {
                         while (newPixelsEditor.getPixel(newI, newJ - 1) == 0) {
                             newJ--
 
-                            if ((
-                                newPixelsEditor.getPixel(newI + 1, newJ + 1) != 0
-                            ) || (
-                                newJ < 1
-                            )) {
-                                break
-                            }
+                            val a = newPixelsEditor.getPixel(newI + 1, newJ + 1) != 0
+                            val b = newJ < 1
+
+                            if (a || b) break
                         }
                     }
                     newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
@@ -116,13 +137,10 @@ class ImageRotation {
                         while (newPixelsEditor.getPixel(newI, newJ + 1) == 0) {
                             newJ++
 
-                            if ((
-                                newPixelsEditor.getPixel(newI - 1, newJ - 1) != 0
-                            ) || (
-                                newJ + 1 >= newHeight
-                            )) {
-                                break
-                            }
+                            val a = newPixelsEditor.getPixel(newI - 1, newJ - 1) != 0
+                            val b = newJ + 1 >= newHeight
+
+                            if (a || b) break
                         }
                     }
                     newPixelsEditor.setPixel(newI, newJ, initPixelsEditor.getPixel(i, j))
