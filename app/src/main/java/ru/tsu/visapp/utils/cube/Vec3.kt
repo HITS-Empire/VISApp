@@ -85,4 +85,8 @@ class Vec3(var x: Float, var y: Float, var z: Float) {
         y = vec3.y
         z = vec3.z
     }
+
+    fun dot(vec3: Vec3) : Float {
+        return x * vec3.x + y * vec3.y + z * vec3.z
+    }
 }
