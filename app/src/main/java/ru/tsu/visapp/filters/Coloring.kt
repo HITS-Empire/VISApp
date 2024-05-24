@@ -8,11 +8,6 @@ import androidx.core.graphics.green
 import ru.tsu.visapp.utils.PixelsEditor
 
 class Coloring {
-    private lateinit var pixelsEditor: PixelsEditor
-    private lateinit var pixelsEditorResult: PixelsEditor
-
-    private lateinit var resultPixels: IntArray
-
     fun coloring(
         pixels: IntArray,
         width: Int,
@@ -25,10 +20,10 @@ class Coloring {
         right: Int,
         bottom: Int
     ): IntArray {
-        resultPixels = IntArray(pixels.size) { 0 }
+        val resultPixels = pixels.copyOf()
 
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+        val resultPixelsEditor = PixelsEditor(resultPixels, width, height)
 
         for (i in 0..<width) {
             for (j in 0..<height) {
@@ -51,7 +46,7 @@ class Coloring {
                     blue = blue.coerceIn(0, 255)
                 }
 
-                pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
+                resultPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
 

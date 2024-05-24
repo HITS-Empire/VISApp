@@ -9,11 +9,6 @@ import androidx.core.graphics.green
 import ru.tsu.visapp.utils.PixelsEditor
 
 class Glitch {
-    private lateinit var pixelsEditor: PixelsEditor
-    private lateinit var pixelsEditorResult: PixelsEditor
-
-    private lateinit var resultPixels: IntArray
-
     private fun scaleFrequency(number: Int, width: Int): Int {
         return max(1, (number.toDouble() * width.toDouble() / 2000.0).toInt())
     }
@@ -36,10 +31,10 @@ class Glitch {
         right: Int,
         bottom: Int
     ): IntArray {
-        val glitchedPixels = IntArray(pixels.size) { 0 }
+        val glitchedPixels = pixels.copyOf()
 
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        val pixelsEditorGlitched = PixelsEditor(glitchedPixels, width, height)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+        val glitchedPixelsEditor = PixelsEditor(glitchedPixels, width, height)
 
         for (i in 0..<width) {
             for (j in 0..<height) {
@@ -50,7 +45,7 @@ class Glitch {
                     i + delta >= width ||
                     !(i in left..right && j in top..bottom)
                 ) {
-                    pixelsEditorGlitched.setPixel(
+                    glitchedPixelsEditor.setPixel(
                         i,
                         j,
                         Color.argb(
@@ -69,7 +64,7 @@ class Glitch {
                 val green = pixelsEditor.getPixel(i + delta, j)?.green ?: 0
                 val blue = pixelsEditor.getPixel(i + delta, j)?.blue ?: 0
 
-                pixelsEditorGlitched.setPixel(i, j, Color.argb(alpha, red, green, blue))
+                glitchedPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
 
@@ -87,16 +82,16 @@ class Glitch {
         right: Int,
         bottom: Int
     ): IntArray {
-        resultPixels = pixels
+        val resultPixels = pixels.copyOf()
 
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+        val resultPixelsEditor = PixelsEditor(resultPixels, width, height)
 
         var offset = false // Сдвигается ли текущая строка
         var offsetProbability = offsetFrequency // Вероятность смены переменной offset
 
         for (j in 0..<height) {
-            /* Перестаем или начинаем сдвигать с вероятностью
+            /* Перестаём или начинаем сдвигать с вероятностью
              * offsetProbability и обновляем эту вероятность
              */
             if ((0..100).random() < offsetProbability) {
@@ -121,7 +116,7 @@ class Glitch {
                     i in left..right &&
                     j in top..bottom
                 ) {
-                    pixelsEditorResult.setPixel(
+                    resultPixelsEditor.setPixel(
                         i,
                         j,
                         if (i + currentOffset in 0..<width) {
@@ -131,7 +126,7 @@ class Glitch {
                         }
                     )
                 } else {
-                    pixelsEditorResult.setPixel(
+                    resultPixelsEditor.setPixel(
                         i,
                         j,
                         pixelsEditor.getPixel(i, j) ?: 0

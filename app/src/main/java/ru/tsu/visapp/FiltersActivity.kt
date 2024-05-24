@@ -1,9 +1,11 @@
 package ru.tsu.visapp
 
+import android.view.View
 import android.os.Bundle
 import android.widget.Toast
 import java.lang.Integer.min
 import java.lang.Integer.max
+import android.widget.Switch
 import android.widget.SeekBar
 import ru.tsu.visapp.filters.*
 import android.graphics.Bitmap
@@ -25,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
  * Экран для фильтров
  */
 
+@SuppressLint("UseSwitchCompatOrMaterialCode")
 class FiltersActivity : ChildActivity() {
     private lateinit var imageView: ImageView
     private lateinit var title: String // Название изображения
@@ -32,6 +35,7 @@ class FiltersActivity : ChildActivity() {
     private lateinit var pixels: IntArray // Массив пикселей
     private var width = 0 // Ширина картинки
     private var height = 0 // Высота картинки
+    private var startScaleFactor = 100
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
 
@@ -40,6 +44,8 @@ class FiltersActivity : ChildActivity() {
     private lateinit var seekBars: Array<SeekBar> // Сами ползунки
     private lateinit var seekBarEditors: Array<EditText> // Отображения текущего значения
     private lateinit var seekBarUnits: Array<TextView> // Единицы измерения ползунка
+
+    private lateinit var switch: Switch // Свитч для нейросети
 
     private lateinit var filtersSeekBarInstructions: Array<Instruction> // Описание для ползунков
     private lateinit var currentInstruction: Instruction // Текущая инструкция
@@ -54,6 +60,7 @@ class FiltersActivity : ChildActivity() {
     private val inversion = Inversion() // Инверсия
     private val popArt = PopArt() // Поп арт
     private val glitch = Glitch() // Глитч
+    private var scaling = Scaling() // Масштабирование
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
@@ -66,6 +73,7 @@ class FiltersActivity : ChildActivity() {
         initializeView(R.layout.activity_filters)
 
         imageView = findViewById(R.id.filtersImageView)
+        switch = findViewById(R.id.filtersSwitch)
 
         title = System.currentTimeMillis().toString()
         imageEditor.contentResolver = contentResolver
@@ -293,6 +301,11 @@ class FiltersActivity : ChildActivity() {
             }
             true
         }
+
+        // События изменения свитча
+        switch.setOnCheckedChangeListener { _, _ ->
+            updateBoxes()
+        }
     }
 
     // Получить пиксели изображения и обновить данные
@@ -300,7 +313,24 @@ class FiltersActivity : ChildActivity() {
         width = bitmap.width
         height = bitmap.height
         pixels = imageEditor.getPixelsFromBitmap(bitmap)
-        boxes = neuralNetwork.getBoundingBoxes(bitmap, true)
+
+        updateBoxes()
+    }
+
+    // Обновить данные о нейросети
+    private fun updateBoxes() {
+        boxes = if (switch.isChecked) {
+            neuralNetwork.getBoundingBoxes(bitmap, true)
+        } else {
+            arrayListOf(
+                arrayListOf(
+                    0,
+                    0,
+                    bitmap.width - 1,
+                    bitmap.height - 1
+                )
+            )
+        }
     }
 
     // Запустить функцию фильтра
@@ -327,11 +357,10 @@ class FiltersActivity : ChildActivity() {
                     val brightnessValue = currentInstruction.items[0].progress
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
-                    val correctedBitmap = bitmap
 
                     for (box in boxes) {
                         imageEditor.setPixelsToBitmap(
-                            correctedBitmap,
+                            bitmap,
                             colorCorrection.correctColor(
                                 pixels,
                                 width,
@@ -346,7 +375,7 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(correctedBitmap)
+                    imageView.setImageBitmap(bitmap)
                 }
 
                 R.id.coloringImage -> {
@@ -450,7 +479,29 @@ class FiltersActivity : ChildActivity() {
                     imageView.setImageBitmap(bitmap)
                 }
 
-                R.id.scalingImage -> {}
+                R.id.scalingImage -> {
+                    val scaleFactor = currentInstruction.items[1].progress
+
+                    if (scaleFactor > 9 && bitmap.height > 20 && bitmap.width > 20) {
+                        if (startScaleFactor < scaleFactor) {
+                            bitmap = scaling.increaseImage(
+                                width,
+                                height,
+                                pixels,
+                                scaleFactor
+                            )
+                            imageView.setImageBitmap(bitmap)
+                        } else if (startScaleFactor > scaleFactor) {
+                            bitmap = scaling.decreaseImage(
+                                width,
+                                height,
+                                pixels,
+                                scaleFactor
+                            )
+                            imageView.setImageBitmap(bitmap)
+                        }
+                    }
+                }
 
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
@@ -458,7 +509,8 @@ class FiltersActivity : ChildActivity() {
                     val threshold = currentInstruction.items[2].progress
 
                     imageEditor.setPixelsToBitmap(
-                        bitmap, unsharpMask.usm(
+                        bitmap,
+                        unsharpMask.usm(
                             pixels,
                             width,
                             height,
@@ -529,6 +581,16 @@ class FiltersActivity : ChildActivity() {
             seekBars[index].max = item.max
             seekBarEditors[index].setText(item.start.toString())
             seekBarUnits[index].text = item.unit
+        }
+
+        // Изменить видимость свитча
+        switch.visibility = when (image.id) {
+            R.id.correctionImage,
+            R.id.coloringImage,
+            R.id.inversionImage,
+            R.id.glitchImage -> View.VISIBLE
+
+            else -> View.GONE
         }
 
         currentImage = image

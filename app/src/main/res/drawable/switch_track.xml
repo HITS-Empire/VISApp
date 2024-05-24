@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <solid android:color="@color/white" />
+            <size android:height="40dp" />
+        </shape>
+    </item>
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:startColor="@color/green"
+                android:endColor="@color/blue" />
+            <size android:height="40dp" />
+        </shape>
+    </item>
+</selector>
