@@ -60,7 +60,7 @@ class FiltersActivity : ChildActivity() {
     private val inversion = Inversion() // Инверсия
     private val popArt = PopArt() // Поп арт
     private val glitch = Glitch() // Глитч
-    private var scaling = Scaling()
+    private var scaling = Scaling() // Масштабирование
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
@@ -357,11 +357,10 @@ class FiltersActivity : ChildActivity() {
                     val brightnessValue = currentInstruction.items[0].progress
                     val saturationValue = currentInstruction.items[1].progress
                     val contrastValue = currentInstruction.items[2].progress
-                    val correctedBitmap = bitmap
 
                     for (box in boxes) {
                         imageEditor.setPixelsToBitmap(
-                            correctedBitmap,
+                            bitmap,
                             colorCorrection.correctColor(
                                 pixels,
                                 width,
@@ -376,7 +375,7 @@ class FiltersActivity : ChildActivity() {
                             )
                         )
                     }
-                    imageView.setImageBitmap(correctedBitmap)
+                    imageView.setImageBitmap(bitmap)
                 }
 
                 R.id.coloringImage -> {
@@ -510,7 +509,8 @@ class FiltersActivity : ChildActivity() {
                     val threshold = currentInstruction.items[2].progress
 
                     imageEditor.setPixelsToBitmap(
-                        bitmap, unsharpMask.usm(
+                        bitmap,
+                        unsharpMask.usm(
                             pixels,
                             width,
                             height,
@@ -588,7 +588,6 @@ class FiltersActivity : ChildActivity() {
             R.id.correctionImage,
             R.id.coloringImage,
             R.id.inversionImage,
-            R.id.popArtImage,
             R.id.glitchImage -> View.VISIBLE
 
             else -> View.GONE

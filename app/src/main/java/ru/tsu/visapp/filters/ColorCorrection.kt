@@ -8,11 +8,6 @@ import androidx.core.graphics.green
 import ru.tsu.visapp.utils.PixelsEditor
 
 class ColorCorrection {
-    private lateinit var pixelsEditor: PixelsEditor
-    private lateinit var pixelsEditorResult: PixelsEditor
-
-    private lateinit var resultPixels: IntArray
-
     private fun brightness(
         red: Int,
         green: Int,
@@ -67,10 +62,10 @@ class ColorCorrection {
         right: Int,
         bottom: Int
     ): IntArray {
-        resultPixels = pixels
+        val resultPixels = pixels.copyOf()
 
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(resultPixels, width, height)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+        val resultPixelsEditor = PixelsEditor(resultPixels, width, height)
 
         // Высчитывание среднего значения серого для всего изображения
         var meanGrayScale = 0
@@ -135,7 +130,7 @@ class ColorCorrection {
                     blue = contrastBlue.coerceIn(0, 255)
                 }
 
-                pixelsEditorResult.setPixel(i, j, Color.argb(alpha, red, green, blue))
+                resultPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
 

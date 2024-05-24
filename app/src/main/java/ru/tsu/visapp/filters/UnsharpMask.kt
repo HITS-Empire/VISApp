@@ -8,7 +8,7 @@ import androidx.core.graphics.alpha
 import ru.tsu.visapp.utils.PixelsEditor
 
 open class UnsharpMask {
-    protected fun gaussianBlur(
+    private fun gaussianBlur(
         pixels: IntArray,
         width: Int,
         height: Int,
