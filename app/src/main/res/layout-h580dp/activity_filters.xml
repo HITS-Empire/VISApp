@@ -465,7 +465,7 @@
                     android:id="@+id/affinisImage"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    app:srcCompat="@mipmap/ic_filters" />
+                    app:srcCompat="@mipmap/ic_colors" />
 
                 <TextView
                     android:id="@+id/affinisTitle"
