@@ -7,7 +7,10 @@
     <string name="select_filters">Выберите фильтры</string>
     <string name="filters_rotate">Поворот</string>
     <string name="filters_correction">Коррекция</string>
-    <string name="filters_coloring">Цвет</string>
+    <string name="filters_coloring">Цвета</string>
+    <string name="filters_inversion">Инверсия</string>
+    <string name="filters_pop_art">Поп арт</string>
+    <string name="filters_glitch">Глитч</string>
     <string name="filters_scaling">Масштаб</string>
     <string name="filters_retouch">Ретушь</string>
     <string name="filters_definition">Чёткость</string>
@@ -15,6 +18,7 @@
     <string name="interesting_neural">Нейросеть</string>
     <string name="interesting_vector">Вектор</string>
     <string name="interesting_cube">3D-куб</string>
+    <string name="title_stenography">Стенография</string>
     <string name="title_neural">Распознавание лиц</string>
     <string name="title_vector">Векторный редактор</string>
     <string name="title_cube">3D-куб</string>

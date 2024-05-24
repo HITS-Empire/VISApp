@@ -12,7 +12,6 @@ import android.widget.TextView
 import android.widget.ImageView
 import kotlinx.coroutines.launch
 import android.widget.FrameLayout
-import ru.tsu.visapp.filters.Scaling
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
@@ -30,10 +29,8 @@ class FiltersActivity: ChildActivity() {
     private lateinit var title: String // Название изображения
     private lateinit var bitmap: Bitmap // Картинка для редактирования
     private lateinit var pixels: IntArray // Массив пикселей
-    private lateinit var startBitmap: Bitmap // Начальная картинка
     private var width = 0 // Ширина картинки
     private var height = 0 // Высота картинки
-    private var previousScaleFactor = 100 // Коэффициент предыдущего изменения изображения
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
 
@@ -49,8 +46,10 @@ class FiltersActivity: ChildActivity() {
     private val imageEditor = ImageEditor() // Редактор изображений
     private val imageRotation = ImageRotation() // Поворот изображения
     private val colorCorrection = ColorCorrection() // Цветокоррекция
-    private val scaling = Scaling() // Масштабирование
     private val coloring = Coloring() // Цвета
+    private val inversion = Inversion() // Инверсия
+    private val popArt = PopArt() // Поп арт
+    private val glitch = Glitch() // Глитч
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
@@ -119,10 +118,34 @@ class FiltersActivity: ChildActivity() {
                 )
             ),
             Instruction(
+                R.id.inversionImage,
+                arrayOf(
+                    Item(0, 1, "Красный"),
+                    Item(0, 1, "Зеленый"),
+                    Item(0, 1, "Синий")
+                )
+            ),
+            Instruction(
+                R.id.popArtImage,
+                arrayOf(
+                    Item(),
+                    Item(85, 255, "Порог 1"),
+                    Item(170, 255, "Порог 2")
+                )
+            ),
+            Instruction(
+                R.id.glitchImage,
+                arrayOf(
+                    Item(0, 100, "Частота", "%"),
+                    Item(0, 100, "Эффект", "%"),
+                    Item(0, 100, "Сдвиг", "%")
+                )
+            ),
+            Instruction(
                 R.id.scalingImage,
                 arrayOf(
                     Item(),
-                    Item(100, 500, "Масштаб", "%"),
+                    Item(50, 100, "Масштаб", "%"),
                     Item()
                 )
             ),
@@ -148,7 +171,6 @@ class FiltersActivity: ChildActivity() {
         // Получить картинку и установить её
         val savedImageUri = imageEditor.getSavedImageUri(this, null)
         bitmap = imageEditor.createBitmapByUri(savedImageUri)
-        startBitmap = bitmap
         imageView.setImageBitmap(bitmap)
         updatePixelsInfo()
 
@@ -157,6 +179,9 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.rotateFrame),
             findViewById(R.id.correctionFrame),
             findViewById(R.id.coloringFrame),
+            findViewById(R.id.inversionFrame),
+            findViewById(R.id.popArtFrame),
+            findViewById(R.id.glitchFrame),
             findViewById(R.id.scalingFrame),
             findViewById(R.id.retouchFrame),
             findViewById(R.id.definitionFrame),
@@ -168,6 +193,9 @@ class FiltersActivity: ChildActivity() {
             findViewById(R.id.rotateImage),
             findViewById(R.id.correctionImage),
             findViewById(R.id.coloringImage),
+            findViewById(R.id.inversionImage),
+            findViewById(R.id.popArtImage),
+            findViewById(R.id.glitchImage),
             findViewById(R.id.scalingImage),
             findViewById(R.id.retouchImage),
             findViewById(R.id.definitionImage),
@@ -308,6 +336,7 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
+
                 R.id.coloringImage -> {
                     val redValue = currentInstruction.items[0].progress
                     val greenValue = currentInstruction.items[1].progress
@@ -326,30 +355,69 @@ class FiltersActivity: ChildActivity() {
                     )
                     imageView.setImageBitmap(bitmap)
                 }
-                R.id.scalingImage -> {
-                    val scaleFactor = currentInstruction.items[1].progress
-                    val difference = scaleFactor - previousScaleFactor
-                    println(difference)
-                    if (difference > 0) {
-                        bitmap = scaling.increaseImage(
-                            width,
-                            height,
-                            imageEditor.getPixelsFromBitmap(startBitmap),
-                            200
-                        )
-                    } else if (difference < 0) {
-                        bitmap = scaling.decreaseImage(
-                            width,
-                            height,
-                            pixels,//imageEditor.getPixelsFromBitmap(startBitmap),
-                            50
-                        )
-                    }
+                R.id.inversionImage -> {
+                    val isRedInverting =
+                        currentInstruction.items[0].progress == 1
+                    val isGreenInverting =
+                        currentInstruction.items[1].progress == 1
+                    val isBlueInverting =
+                        currentInstruction.items[2].progress == 1
 
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        inversion.inverse(
+                            pixels,
+                            width,
+                            height,
+                            isRedInverting,
+                            isGreenInverting,
+                            isBlueInverting
+                        )
+                    )
                     imageView.setImageBitmap(bitmap)
-
-                    previousScaleFactor = scaleFactor
                 }
+                R.id.popArtImage -> {
+                    val threshold1 = currentInstruction.items[1].progress
+                    val threshold2 = currentInstruction.items[2].progress
+
+                    // Обновление размера bitmapa
+                    bitmap = Bitmap.createBitmap(
+                        2 * width,
+                        2 * height,
+                        Bitmap.Config.ARGB_8888
+                    )
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        popArt.popArtFiltering(
+                            pixels,
+                            width,
+                            height,
+                            threshold1,
+                            threshold2
+                        )
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.glitchImage -> {
+                    val frequency = currentInstruction.items[0].progress
+                    val effect = currentInstruction.items[1].progress
+                    val offset = currentInstruction.items[2].progress
+
+                    imageEditor.setPixelsToBitmap(
+                        bitmap,
+                        glitch.rgbGlitch(
+                            pixels,
+                            width,
+                            height,
+                            frequency,
+                            effect,
+                            offset
+                        )
+                    )
+                    imageView.setImageBitmap(bitmap)
+                }
+                R.id.scalingImage -> {}
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress
                     val radius = currentInstruction.items[1].progress
@@ -413,6 +481,9 @@ class FiltersActivity: ChildActivity() {
                 R.id.rotateImage -> {}
                 R.id.correctionImage -> {}
                 R.id.coloringImage -> {}
+                R.id.inversionImage -> {}
+                R.id.popArtImage -> {}
+                R.id.glitchImage -> {}
                 R.id.scalingImage -> {}
                 R.id.retouchImage -> {}
                 R.id.definitionImage -> {}
@@ -443,6 +514,9 @@ class FiltersActivity: ChildActivity() {
             R.id.rotateImage -> {}
             R.id.correctionImage -> {}
             R.id.coloringImage -> {}
+            R.id.inversionImage -> {}
+            R.id.popArtImage -> {}
+            R.id.glitchImage -> {}
             R.id.scalingImage -> {}
             R.id.retouchImage -> {}
             R.id.definitionImage -> {}
