@@ -31,11 +31,9 @@ class Helper {
         dx: Float,
         dy: Float
     ): Int {
-        return (
-            abs(i * cos(dx) - i * sin(dx)).toInt() % width
-        ) + (
-            abs(j * cos(dy) - j * sin(dy)).toInt() % width * height
-        )
+        val a = abs(i * cos(dx) - i * sin(dx)).toInt() % width
+        val b = abs(j * cos(dy) - j * sin(dy)).toInt() % width * height
+        return a + b
     }
 
     private fun Boolean.toFloat(): Float = if (this) 1.0f else 0.0f
