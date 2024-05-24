@@ -35,6 +35,7 @@ class FiltersActivity : ChildActivity() {
     private lateinit var pixels: IntArray // Массив пикселей
     private var width = 0 // Ширина картинки
     private var height = 0 // Высота картинки
+    private var startScaleFactor = 100
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
 
@@ -59,6 +60,7 @@ class FiltersActivity : ChildActivity() {
     private val inversion = Inversion() // Инверсия
     private val popArt = PopArt() // Поп арт
     private val glitch = Glitch() // Глитч
+    private var scaling = Scaling()
     private val retouching = Retouching() // Ретушь
     private val unsharpMask = UnsharpMask() // Нерезкое маскирование
 
@@ -478,7 +480,27 @@ class FiltersActivity : ChildActivity() {
                     imageView.setImageBitmap(bitmap)
                 }
 
-                R.id.scalingImage -> {}
+                R.id.scalingImage -> {
+                    val scaleFactor = currentInstruction.items[1].progress
+                    if (scaleFactor > 9 && bitmap.height > 20 && bitmap.width > 20) {
+                        if (startScaleFactor < scaleFactor) {
+                            bitmap = scaling.increaseImage(
+                                width,
+                                height,
+                                pixels,
+                                scaleFactor
+                            )
+                        } else if (startScaleFactor > scaleFactor) {
+                            bitmap = scaling.decreaseImage(
+                                width,
+                                height,
+                                pixels,
+                                scaleFactor
+                            )
+                        }
+                    }
+                    imageView.setImageBitmap(bitmap)
+                }
 
                 R.id.definitionImage -> {
                     val percent = currentInstruction.items[0].progress

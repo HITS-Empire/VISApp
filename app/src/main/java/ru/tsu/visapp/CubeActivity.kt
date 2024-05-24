@@ -12,6 +12,9 @@ import android.widget.ImageButton
 import android.graphics.BitmapFactory
 import ru.tsu.visapp.utils.ImageEditor
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
+import ru.tsu.visapp.filters.Scaling
 import ru.tsu.visapp.utils.ImageGetter
 import ru.tsu.visapp.utils.PixelsEditor
 
@@ -23,25 +26,29 @@ class CubeActivity : ChildActivity() {
     private val width = 99 // Ширина картинки
     private val height = 99 // Высота картинки
 
+    private val scaling = Scaling() // Масштабирование изображения
+
     private var currentProgress = 50 // Текущий прогресс в процентах
     private var isTerrible = false // Включен ли режим профсоюза
     // Раньше был режим "позорного куба", переименовывать не стали...
 
     private lateinit var bitmap: Bitmap
+    private lateinit var modeButton: Button
     private lateinit var imageView: ImageView
     private lateinit var imagePixels: Array<IntArray>
-    private lateinit var modeButton: Button
+    private lateinit var initImagePixels: Array<IntArray>
 
-    private val imageEditor = ImageEditor()
     private val helper = Helper()
+    private val imageEditor = ImageEditor()
 
     private var dx = 0.4f // Угол по X
     private var dy = 0.4f // Угол по Y
 
     // Кнопки галереи и камеры
-    private lateinit var galleryButton: ImageButton
     private lateinit var cameraButton: ImageButton
+    private lateinit var galleryButton: ImageButton
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun renderCube() {
         val pixels = imageEditor.getPixelsFromBitmap(bitmap)
         val pixelsEditor = PixelsEditor(pixels, width, height)
@@ -51,7 +58,7 @@ class CubeActivity : ChildActivity() {
         cameraPosition.rotateY(dy)
         cameraPosition.rotateZ(dx)
 
-        val light = Vec3(-0.5f, dx, dy).normalize()
+        val light = cameraPosition
 
         for (i in 0 until width) {
             for (j in 0 until height) {
@@ -66,14 +73,14 @@ class CubeActivity : ChildActivity() {
                     cameraPosition,
                     beamDirection,
                     imagePixels,
-                    width,
-                    height,
+                    sqrt(imagePixels[0].size.toFloat()).toInt(),
+                    sqrt(imagePixels[0].size.toFloat()).toInt(),
                     i,
                     j,
                     dx,
                     dy,
                     light,
-                    isTerrible
+                    isTerrible,
                 )
                 pixelsEditor.setPixel(i, j, color ?: 0)
             }
@@ -91,6 +98,7 @@ class CubeActivity : ChildActivity() {
         return imageEditor.getPixelsFromBitmap(imageBitmap)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun changeMode(mode: Boolean) {
         isTerrible = mode
 
@@ -113,6 +121,7 @@ class CubeActivity : ChildActivity() {
         val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,6 +139,7 @@ class CubeActivity : ChildActivity() {
 
         imageEditor.contentResolver = contentResolver
         imageView = findViewById(R.id.cubeImageView)
+
         imagePixels = arrayOf(
             getPixelsFromDrawable(R.drawable.digit_1),
             getPixelsFromDrawable(R.drawable.digit_2),
@@ -138,6 +148,19 @@ class CubeActivity : ChildActivity() {
             getPixelsFromDrawable(R.drawable.digit_5),
             getPixelsFromDrawable(R.drawable.digit_6)
         )
+
+        initImagePixels = arrayOf(
+            IntArray(1),
+            IntArray(1),
+            IntArray(1),
+            IntArray(1),
+            IntArray(1),
+            IntArray(1)
+        )
+
+        for (i in 0 until imagePixels.size) {
+            initImagePixels[i] = imagePixels[i]
+        }
 
         galleryButton = findViewById(R.id.galleryButton)
         cameraButton = findViewById(R.id.cameraButton)
@@ -153,7 +176,10 @@ class CubeActivity : ChildActivity() {
 
         var startX1: Float
         var startX2: Float
-        var startDistance = 0.0f
+        var startY1: Float
+        var startY2: Float
+        var startDistanceX = 0.0f
+        var startDistanceY = 0.0f
 
         imageView.setOnTouchListener { _, event ->
             when (event.actionMasked) {
@@ -161,7 +187,13 @@ class CubeActivity : ChildActivity() {
                     if (event.pointerCount == 2) {
                         startX1 = event.getX(0)
                         startX2 = event.getX(1)
-                        startDistance = abs(startX1 - startX2)
+
+                        startDistanceX = abs(startX1 - startX2)
+
+                        startY1 = event.getX(0)
+                        startY2 = event.getX(1)
+
+                        startDistanceY = abs(startY1 - startY2)
                     }
                 }
 
@@ -182,16 +214,21 @@ class CubeActivity : ChildActivity() {
                     } else if (event.pointerCount == 2) {
                         val x1 = event.getX(0)
                         val x2 = event.getX(1)
-                        val currentDistance = abs(x1 - x2)
+                        val y1 = event.getY(0)
+                        val y2 = event.getY(1)
+                        val currentDistanceX = abs(x1 - x2)
+                        val currentDistanceY = abs(y1 - y2)
 
-                        if (currentDistance < startDistance && currentProgress < 100) {
+                        if ((currentDistanceX < startDistanceX || currentDistanceY < startDistanceY) && currentProgress < 100) {
                             currentProgress++
                             renderCube()
-                        } else if (currentDistance > startDistance && currentProgress > 15) {
+                        } else if ((currentDistanceX > startDistanceX || currentDistanceY > startDistanceY) && currentProgress > 30) {
                             currentProgress--
                             renderCube()
                         }
-                        startDistance = currentDistance
+
+                        startDistanceX = currentDistanceX
+                        startDistanceY = currentDistanceY
                     }
                 }
             }
