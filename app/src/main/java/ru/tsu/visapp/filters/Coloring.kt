@@ -1,14 +1,55 @@
 package ru.tsu.visapp.filters
 
 import android.graphics.Color
+import kotlinx.coroutines.async
 import androidx.core.graphics.red
 import androidx.core.graphics.blue
+import kotlinx.coroutines.awaitAll
 import androidx.core.graphics.alpha
 import androidx.core.graphics.green
+import kotlinx.coroutines.Dispatchers
 import ru.tsu.visapp.utils.PixelsEditor
+import kotlinx.coroutines.coroutineScope
 
 class Coloring {
-    fun coloring(
+    data class ProcessPixel(
+        val width: Int,
+        val height: Int,
+        val redValue: Int,
+        val greenValue: Int,
+        val blueValue: Int,
+        val left: Int,
+        val top: Int,
+        val right: Int,
+        val bottom: Int,
+        val pixelsEditor: PixelsEditor,
+        val resultPixelsEditor: PixelsEditor
+    ) {
+        fun start(i: Int, j: Int) {
+            val pixel = pixelsEditor.getPixel(i, j) ?: 0
+
+            val alpha = pixel.alpha
+            var red = pixel.red
+            var green = pixel.green
+            var blue = pixel.blue
+
+            if (i in left..right &&
+                j in top..bottom
+            ) {
+                red += redValue
+                green += greenValue
+                blue += blueValue
+
+                red = red.coerceIn(0, 255)
+                green = green.coerceIn(0, 255)
+                blue = blue.coerceIn(0, 255)
+            }
+
+            resultPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
+        }
+    }
+
+    suspend fun coloring(
         pixels: IntArray,
         width: Int,
         height: Int,
@@ -19,37 +60,46 @@ class Coloring {
         top: Int,
         right: Int,
         bottom: Int
-    ): IntArray {
+    ): IntArray = coroutineScope {
         val resultPixels = pixels.copyOf()
 
         val pixelsEditor = PixelsEditor(pixels, width, height)
         val resultPixelsEditor = PixelsEditor(resultPixels, width, height)
 
-        for (i in 0..<width) {
-            for (j in 0..<height) {
-                val pixel = pixelsEditor.getPixel(i, j) ?: 0
+        val processPixel = ProcessPixel(
+            width,
+            height,
+            redValue,
+            greenValue,
+            blueValue,
+            left,
+            top,
+            right,
+            bottom,
+            pixelsEditor,
+            resultPixelsEditor
+        )
 
-                val alpha = pixel.alpha
-                var red = pixel.red
-                var green = pixel.green
-                var blue = pixel.blue
+        val halfWidth = width / 2
+        val halfHeight = height / 2
 
-                if (i in left..right &&
-                    j in top..bottom
-                ) {
-                    red += redValue
-                    green += greenValue
-                    blue += blueValue
-
-                    red = red.coerceIn(0, 255)
-                    green = green.coerceIn(0, 255)
-                    blue = blue.coerceIn(0, 255)
+        val jobs = arrayOf(
+            arrayOf(0, halfWidth, 0, halfHeight),
+            arrayOf(halfWidth, width, 0, halfHeight),
+            arrayOf(0, halfWidth, halfHeight, height),
+            arrayOf(halfWidth, width, halfHeight, height)
+        ).map { a ->
+            async(Dispatchers.Default) {
+                for (i in a[0] until a[1]) {
+                    for (j in a[2] until a[3]) {
+                        processPixel.start(i, j)
+                    }
                 }
-
-                resultPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
 
-        return resultPixels
+        jobs.awaitAll()
+
+        return@coroutineScope resultPixels
     }
 }

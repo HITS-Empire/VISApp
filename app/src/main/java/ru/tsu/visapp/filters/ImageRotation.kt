@@ -104,7 +104,7 @@ class ImageRotation {
         private val halfWidth: Int,
         private val halfHeight: Int,
         private val initPixelsEditor: PixelsEditor,
-        private val newPixelsEditor: PixelsEditor,
+        private val newPixelsEditor: PixelsEditor
     ) {
         fun start(i: Int, j: Int) {
             // Вычисление координат для пикселя в новом изображении
