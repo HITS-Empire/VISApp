@@ -1,32 +1,32 @@
 package ru.tsu.visapp
 
-import android.annotation.SuppressLint
+import kotlin.math.sqrt
+import android.os.Bundle
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
-import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.widget.ImageView
+import android.util.DisplayMetrics
 import ru.tsu.visapp.utils.ImageEditor
-import kotlin.math.sqrt
-
+import android.annotation.SuppressLint
+import android.graphics.drawable.BitmapDrawable
+import kotlin.math.abs
+import kotlin.math.pow
 
 /*
  * Экран для векторного редактора
  */
 
-class VectorActivity: ChildActivity() {
+class VectorActivity : ChildActivity() {
     private lateinit var imageView: ImageView
     private lateinit var bitmap: Bitmap
     private lateinit var canvas: Canvas
     private lateinit var paint: Paint
     private lateinit var imageEditor: ImageEditor
-    
-    private val coords = ArrayList<ArrayList<Int>>()
-    private var k = 0
+
+    private val coordinates = ArrayList<ArrayList<Double>>()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,8 +51,8 @@ class VectorActivity: ChildActivity() {
         canvas = Canvas(bitmap)
 
         paint = Paint()
-        paint.color = Color.RED
-        paint.strokeWidth = 15F
+        paint.color = Color.WHITE
+        paint.strokeWidth = 15.0f
 
         imageView.setOnTouchListener { _, event ->
             when (event.action) {
@@ -77,12 +77,16 @@ class VectorActivity: ChildActivity() {
                     }
 
                     // Добавление координаты в список
-                    coords.add(arrayListOf(point!![0], point[1]))
-                    k += 1
+                    coordinates.add(
+                        arrayListOf(
+                            point!![0].toDouble(),
+                            point[1].toDouble()
+                        )
+                    )
 
                     // Отрисовка сплайнов
-                    if (k > 3) {
-                        drawSpline();
+                    if (coordinates.size > 3) {
+                        drawSpline()
                     }
                 }
             }
@@ -94,65 +98,169 @@ class VectorActivity: ChildActivity() {
         imageView.background = BitmapDrawable(getResources(), bitmap)
     }
 
-    private fun drawSpline() {
-        var num = 0.0
-        for (i in 0 until 2 * k step 2) {
-            if (i > 0 && i < 2 * (k - 1)) {
-                val deltaX = coords[i / 2 + 1][0] - coords[i / 2][0]
-                val deltaY = coords[i / 2 + 1][1] - coords[i / 2][1]
-                num += sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())
+    // Антиалиасинг кривых
+    private fun antiAliasing(
+        path: ArrayList<ArrayList<Double>>
+    ): ArrayList<ArrayList<Double>> {
+        val newPath = ArrayList<ArrayList<Double>>()
+
+        for (i in 0 until path.size - 1) {
+            if (path[i].size == 2) {
+                val x1 = path[i][0]
+                val y1 = path[i][1]
+                val x2 = path[i + 1][0]
+                val y2 = path[i + 1][1]
+
+                val dx = abs(x2 - x1)
+                val dy = abs(y2 - y1)
+
+                if (dx >= dy) {
+                    val xStep = if (x1 < x2) 1 else -1
+                    val yStep = dy / dx * xStep
+                    var y = y1
+
+                    if (x1 < x2) {
+                        for (x in x1.toInt() until x2.toInt()) {
+                            newPath.add(arrayListOf(x.toDouble(), y))
+                            y += yStep
+                        }
+                    } else {
+                        for (x in x1.toInt() downTo x2.toInt()) {
+                            newPath.add(arrayListOf(x.toDouble(), y))
+                            y += yStep
+                        }
+                    }
+                } else {
+                    val yStep = if (y1 < y2) 1 else -1
+                    val xStep = dx / dy * yStep
+                    var x = x1
+
+                    if (y1 < y2) {
+                        for (y in y1.toInt() until y2.toInt()) {
+                            newPath.add(arrayListOf(x, y.toDouble()))
+                            x += xStep
+                        }
+                    } else {
+                        for (y in y1.toInt() downTo y2.toInt()) {
+                            newPath.add(arrayListOf(x, y.toDouble()))
+                            x += xStep
+                        }
+                    }
+                }
             }
         }
 
-        coords[0] = coords[1]
-        coords.add(coords[coords.size - 1])
+        // Добавление последней точки
+        newPath.add(path.last())
 
-        // В цикле по всем четвёркам точек
-        for (i in 1 .. coords.size - 3) {
-            val a = mutableListOf(0.0, 0.0, 0.0, 0.0)
-            val b = mutableListOf(0.0, 0.0, 0.0, 0.0)
-            var arrs = mapOf("a" to a, "b" to b)
+        return newPath
+    }
 
-            // Считаем коэффициенты
-            arrs = _SplineCoefficient(i, arrs)
-            // Cоздаём массив промежуточных точек
-            val points = mutableMapOf<String, Double>()
+    private fun getCoefficient(
+        index: Int,
+        currentPoints: MutableList<MutableList<Double>>
+    ) {
+        currentPoints[0][3] = (
+                -coordinates[index - 1][0] +
+                        3.0 * coordinates[index][0] -
+                        3.0 * coordinates[index + 1][0] +
+                        coordinates[index + 2][0]
+                ) / 6.0
+        currentPoints[0][2] = (
+                coordinates[index - 1][0] -
+                        2.0 * coordinates[index][0] +
+                        coordinates[index + 1][0]
+                ) / 2.0
+        currentPoints[0][1] = (
+                -coordinates[index - 1][0] +
+                        coordinates[index + 1][0]
+                ) / 2.0
+        currentPoints[0][0] = (
+                coordinates[index - 1][0] +
+                        4.0 * coordinates[index][0] +
+                        coordinates[index + 1][0]
+                ) / 6.0
+        currentPoints[1][3] = (
+                -coordinates[index - 1][1] +
+                        3.0 * coordinates[index][1] -
+                        3.0 * coordinates[index + 1][1] +
+                        coordinates[index + 2][1]
+                ) / 6.0
+        currentPoints[1][2] = (
+                coordinates[index - 1][1] -
+                        2.0 * coordinates[index][1] +
+                        coordinates[index + 1][1]
+                ) / 2.0
+        currentPoints[1][1] = (
+                -coordinates[index - 1][1] +
+                        coordinates[index + 1][1]
+                ) / 2.0
+        currentPoints[1][0] = (
+                coordinates[index - 1][1] +
+                        4.0 * coordinates[index][1] +
+                        coordinates[index + 1][1]
+                ) / 6.0
+    }
 
-            for (j in 0 until num.toInt()) {
-                // Шаг интерполяции
-                val t = j.toDouble() / num
+    private fun drawSpline() {
+        var totalLength = 0.0
+        for (i in 0 until 2 * coordinates.size step 2) {
+            if (i > 0 && i < 2 * (coordinates.size - 1)) {
+                val deltaX = (coordinates[i / 2 + 1][0] - coordinates[i / 2][0])
+                val deltaY = (coordinates[i / 2 + 1][1] - coordinates[i / 2][1])
+                totalLength += sqrt(deltaX.pow(2.0) + deltaY.pow(2.0))
+            }
+        }
 
-                // Передаём массиву точек значения по методу beta-spline
-                points["X"] = (arrs["a"]!![0] + t * (arrs["a"]!![1] + t * (arrs["a"]!![2] + t * arrs["a"]!![3])))
-                points["Y"] = (arrs["b"]!![0] + t * (arrs["b"]!![1] + t * (arrs["b"]!![2] + t * arrs["b"]!![3])))
+        coordinates[0] = coordinates[1]
+        coordinates.add(coordinates[coordinates.size - 1])
+        totalLength = 0.0
+        for (i in 0 until 2 * coordinates.size step 2) {
+            if (i > 0 && i < 2 * (coordinates.size - 1)) {
+                val deltaX = (coordinates[i / 2 + 1][0] - coordinates[i / 2][0])
+                val deltaY = (coordinates[i / 2 + 1][1] - coordinates[i / 2][1])
+                totalLength += sqrt(deltaX.pow(2.0) + deltaY.pow(2.0))
+            }
+        }
 
+        for (i in 1..coordinates.size - 3) {
+            val currentPoints = mutableListOf(
+                mutableListOf(0.0, 0.0, 0.0, 0.0),
+                mutableListOf(0.0, 0.0, 0.0, 0.0)
+            )
+
+            getCoefficient(i, currentPoints)
+
+            val path: ArrayList<ArrayList<Double>> = arrayListOf(arrayListOf())
+
+            for (j in 0 until totalLength.toInt()) {
+                val step = j.toDouble() / totalLength
+
+                val newPointX =
+                    currentPoints[0][1] + step * (currentPoints[0][2] + step * currentPoints[0][3])
+                val newPointY =
+                    currentPoints[1][1] + step * (currentPoints[1][2] + step * currentPoints[1][3])
+
+                val splinePoint = arrayListOf(
+                    currentPoints[0][0] + step * newPointX,
+                    currentPoints[1][0] + step * newPointY
+                )
+
+                path.add(ArrayList(splinePoint))
+            }
+
+            val newPath = antiAliasing(path)
+
+            for (point in newPath) {
+                if (point.size == 2) {
                     canvas.drawPoint(
-                        points["X"]!!.toFloat(),
-                        points["Y"]!!.toFloat(),
+                        point[0].toFloat(),
+                        point[1].toFloat(),
                         paint
                     )
                     imageView.invalidate()
+                }
             }
         }
-    }
-
-    private fun _SplineCoefficient(
-        i: Int,
-        arrs: Map<String, MutableList<Double>>
-    ): Map<String, MutableList<Double>> {
-        var newArrs = arrs
-
-        newArrs["a"]!![3] = (
-                (-coords[i - 1][0] + 3*coords[i][0] - 3*coords[i + 1][0] + coords[i + 2][0]) / 6
-                ).toDouble()
-        newArrs["a"]!![2] = ((coords[i - 1][0] - 2*coords[i][0] + coords[i + 1][0])/2).toDouble()
-        newArrs["a"]!![1] = ((-coords[i - 1][0] + coords[i + 1][0])/2).toDouble()
-        newArrs["a"]!![0] = ((coords[i - 1][0] + 4*coords[i][0] + coords[i + 1][0])/6).toDouble()
-        newArrs["b"]!![3] = ((-coords[i - 1][1] + 3*coords[i][1] - 3*coords[i + 1][1] + coords[i + 2][1])/6).toDouble()
-        newArrs["b"]!![2] = ((coords[i - 1][1] - 2*coords[i][1] + coords[i + 1][1])/2).toDouble()
-        newArrs["b"]!![1] = ((-coords[i - 1][1] + coords[i + 1][1])/2).toDouble()
-        newArrs["b"]!![0] = ((coords[i - 1][1] + 4*coords[i][1] + coords[i + 1][1])/6).toDouble()
-
-        return newArrs
     }
 }
