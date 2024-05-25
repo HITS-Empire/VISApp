@@ -23,6 +23,7 @@ class CubeActivity : ChildActivity() {
     private val width = 99 // Ширина картинки
     private val height = 99 // Высота картинки
 
+    private var countOfImages = 0 // Количество заменённых изображений
     private var currentProgress = 50 // Текущий прогресс в процентах
     private var isTerrible = false // Включен ли режим профсоюза
     // Раньше был режим "позорного куба", переименовывать не стали...
@@ -110,13 +111,9 @@ class CubeActivity : ChildActivity() {
         val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
         val newPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
 
-        for (i in initImagePixels.indices) {
-            if (!initImagePixels[i].first.contentEquals(newPixels)) {
-                initImagePixels[i] = Pair(newPixels, imageBitmap.width)
-                imagePixels[i] = initImagePixels[i]
-                break
-            }
-        }
+        initImagePixels[countOfImages % 6] = Pair(newPixels, imageBitmap.width)
+        imagePixels[countOfImages % 6] = initImagePixels[countOfImages % 6]
+        countOfImages++
 
         renderCube()
     }
