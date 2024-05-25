@@ -21,7 +21,7 @@ class Helper {
         Color.argb(255, 37, 175, 252)
     )
 
-    fun vec3ToUV(vec3: Vec3, width: Int, height: Int): Vec2 {
+    private fun vec3ToUV(vec3: Vec3, width: Int, height: Int): Vec2 {
         var u: Float
         var v: Float
         val absX = abs(vec3.x)
@@ -55,7 +55,7 @@ class Helper {
     }
 
 
-    fun getTexture(
+    private fun getTexture(
         pixels: IntArray,
         uv: Vec2,
         width: Int,
@@ -97,10 +97,14 @@ class Helper {
         val bFourth = fourthColor.blue
         val aFourth = fourthColor.alpha
 
-        val r = ((rFirst * (1 - dx) + rThird * dx) * (1 - dy) + (rSecond * (1 - dx) + rFourth * dx) * dy).toInt()
-        val g = ((gFirst * (1 - dx) + gThird * dx) * (1 - dy) + (gSecond * (1 - dx) + gFourth * dx) * dy).toInt()
-        val b = ((bFirst * (1 - dx) + bThird * dx) * (1 - dy) + (bSecond * (1 - dx) + bFourth * dx) * dy).toInt()
-        val a = ((aFirst * (1 - dx) + aThird * dx) * (1 - dy) + (aSecond * (1 - dx) + aFourth * dx) * dy).toInt()
+        val r =
+            ((rFirst * (1 - dx) + rThird * dx) * (1 - dy) + (rSecond * (1 - dx) + rFourth * dx) * dy).toInt()
+        val g =
+            ((gFirst * (1 - dx) + gThird * dx) * (1 - dy) + (gSecond * (1 - dx) + gFourth * dx) * dy).toInt()
+        val b =
+            ((bFirst * (1 - dx) + bThird * dx) * (1 - dy) + (bSecond * (1 - dx) + bFourth * dx) * dy).toInt()
+        val a =
+            ((aFirst * (1 - dx) + aThird * dx) * (1 - dy) + (aSecond * (1 - dx) + aFourth * dx) * dy).toInt()
 
         return Color.argb(a, r, g, b)
     }
@@ -167,21 +171,20 @@ class Helper {
         val zxy = Vec3(t1.z, t1.x, t1.y)
 
         val normal = -sign(beamDirection) * step(yzx, t1) * step(zxy, t1)
-        val newColor = max(
-            0.0f,
-            (beamDirection - Vec3(2.0f) * Vec3(normal.dot(beamDirection)) * normal).dot(light)
-        ).pow(2)
-
-
+        val newColor = 3.0f / tN
+        // val newColor = 2 / tN + max(
+        //     0.0f,
+        //     (beamDirection - Vec3(2.0f) * Vec3(normal.dot(beamDirection)) * normal).dot(light)
+        // ).pow(2) / 10.0f
 
         if (!isTerrible) {
             return when {
-                normal.x == -1.0f -> multiplicationColor(colors[0], 2 / tN + newColor / 10)
-                normal.y == -1.0f -> multiplicationColor(colors[1], 2 / tN + newColor / 10)
-                normal.x == 1.0f -> multiplicationColor(colors[2], 2 / tN + newColor / 10)
-                normal.y == 1.0f -> multiplicationColor(colors[3], 2 / tN + newColor / 10)
-                normal.z == 1.0f -> multiplicationColor(colors[4], 2 / tN + newColor / 10)
-                normal.z == -1.0f -> multiplicationColor(colors[5], 2 / tN + newColor / 10)
+                normal.x == -1.0f -> multiplicationColor(colors[0], newColor)
+                normal.y == -1.0f -> multiplicationColor(colors[1], newColor)
+                normal.x == 1.0f -> multiplicationColor(colors[2], newColor)
+                normal.y == 1.0f -> multiplicationColor(colors[3], newColor)
+                normal.z == 1.0f -> multiplicationColor(colors[4], newColor)
+                normal.z == -1.0f -> multiplicationColor(colors[5], newColor)
                 else -> null
             }
         }

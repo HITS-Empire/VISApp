@@ -7,14 +7,10 @@ import androidx.core.graphics.red
 import androidx.core.graphics.blue
 import androidx.core.graphics.alpha
 import androidx.core.graphics.green
+import kotlinx.coroutines.coroutineScope
 import ru.tsu.visapp.utils.PixelsEditor
 
 class PopArt {
-    private lateinit var pixelsEditor: PixelsEditor
-    private lateinit var pixelsEditorResult: PixelsEditor
-
-    private lateinit var resultPixels: IntArray
-
     private val inversion = Inversion() // Инверсия
     private val coloring = Coloring() // Изменение цвета
 
@@ -27,8 +23,8 @@ class PopArt {
     ): IntArray {
         val tripledPixels = IntArray(pixels.size) { 0 }
 
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        val pixelsEditorTripled = PixelsEditor(tripledPixels, width, height)
+        val pixelsEditor = PixelsEditor(pixels, width, height)
+        val tripledPixelsEditor = PixelsEditor(tripledPixels, width, height)
 
         for (i in 0..<width) {
             for (j in 0..<height) {
@@ -55,24 +51,23 @@ class PopArt {
                     blue = 255
                 }
 
-                pixelsEditorTripled.setPixel(i, j, Color.argb(alpha, red, green, blue))
+                tripledPixelsEditor.setPixel(i, j, Color.argb(alpha, red, green, blue))
             }
         }
 
         return tripledPixels
     }
 
-    fun popArtFiltering(
+    suspend fun popArtFiltering(
         pixels: IntArray,
         width: Int,
         height: Int,
         threshold1: Int,
         threshold2: Int
-    ): IntArray {
-        resultPixels = IntArray(pixels.size * 4) { 0 }
+    ): IntArray = coroutineScope {
+        val resultPixels = IntArray(pixels.size * 4) { 0 }
 
-        pixelsEditor = PixelsEditor(pixels, width, height)
-        pixelsEditorResult = PixelsEditor(
+        val resultPixelsEditor = PixelsEditor(
             resultPixels,
             2 * width,
             2 * height
@@ -116,7 +111,7 @@ class PopArt {
 
         for (i in 0..<width) {
             for (j in 0..<height) {
-                pixelsEditorResult.setPixel(
+                resultPixelsEditor.setPixel(
                     i,
                     j,
                     firstImageEditor.getPixel(i, j)
@@ -153,7 +148,7 @@ class PopArt {
 
         for (i in 0..<width) {
             for (j in 0..<height) {
-                pixelsEditorResult.setPixel(
+                resultPixelsEditor.setPixel(
                     i + width,
                     j,
                     secondImageEditor.getPixel(i, j)
@@ -190,7 +185,7 @@ class PopArt {
 
         for (i in 0..<width) {
             for (j in 0..<height) {
-                pixelsEditorResult.setPixel(
+                resultPixelsEditor.setPixel(
                     i,
                     j + height,
                     thirdImageEditor.getPixel(i, j)
@@ -198,7 +193,7 @@ class PopArt {
             }
         }
 
-        // Четвертое изображение
+        // Четвёртое изображение
         val fourthImage = coloring.coloring(
             inversion.inverse(
                 thresholdedImage,
@@ -227,7 +222,7 @@ class PopArt {
 
         for (i in 0..<width) {
             for (j in 0..<height) {
-                pixelsEditorResult.setPixel(
+                resultPixelsEditor.setPixel(
                     i + width,
                     j + height,
                     fourthImageEditor.getPixel(i, j)
@@ -235,6 +230,6 @@ class PopArt {
             }
         }
 
-        return resultPixels
+        return@coroutineScope resultPixels
     }
 }

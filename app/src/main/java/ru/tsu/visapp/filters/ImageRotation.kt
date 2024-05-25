@@ -6,6 +6,7 @@ import kotlin.math.cos
 import android.graphics.Bitmap
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.Dispatchers
 import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.PixelsEditor
 import kotlinx.coroutines.coroutineScope
@@ -103,7 +104,7 @@ class ImageRotation {
         private val halfWidth: Int,
         private val halfHeight: Int,
         private val initPixelsEditor: PixelsEditor,
-        private val newPixelsEditor: PixelsEditor,
+        private val newPixelsEditor: PixelsEditor
     ) {
         fun start(i: Int, j: Int) {
             // Вычисление координат для пикселя в новом изображении
@@ -201,7 +202,7 @@ class ImageRotation {
             arrayOf(0, halfWidth, halfHeight, initHeight),
             arrayOf(halfWidth, initWidth, halfHeight, initHeight)
         ).map { a ->
-            async {
+            async(Dispatchers.Default) {
                 for (i in a[0] until a[1]) {
                     for (j in a[2] until a[3]) {
                         processPixel.start(i, j)
