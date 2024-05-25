@@ -9,12 +9,10 @@ import android.view.MotionEvent
 import android.widget.ImageView
 import ru.tsu.visapp.utils.cube.*
 import android.widget.ImageButton
-import android.graphics.BitmapFactory
-import ru.tsu.visapp.utils.ImageEditor
-import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import ru.tsu.visapp.filters.Scaling
+import android.graphics.BitmapFactory
+import android.annotation.SuppressLint
+import ru.tsu.visapp.utils.ImageEditor
 import ru.tsu.visapp.utils.ImageGetter
 import ru.tsu.visapp.utils.PixelsEditor
 
