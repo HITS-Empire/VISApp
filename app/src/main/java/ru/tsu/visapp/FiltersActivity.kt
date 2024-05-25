@@ -41,6 +41,7 @@ class FiltersActivity : ChildActivity() {
     private var startScaleFactor = 100
 
     private lateinit var currentImage: ImageView // Картинка текущего фильтра
+    private var currentIndexOfFilter = 0 // Индекс текущего фильтра
 
     private lateinit var seekBarLayouts: Array<ConstraintLayout> // Контейнеры для ползунков
     private lateinit var seekBarTitles: Array<TextView> // Названия ползунков
@@ -74,6 +75,10 @@ class FiltersActivity : ChildActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeView(R.layout.activity_filters)
+
+        if (savedInstanceState != null) {
+            currentIndexOfFilter = savedInstanceState.getInt("currentIndexOfFilter")
+        }
 
         imageView = findViewById(R.id.filtersImageView)
         loadingView = findViewById(R.id.loadingImageView)
@@ -217,12 +222,12 @@ class FiltersActivity : ChildActivity() {
             findViewById(R.id.definitionImage)
         )
 
-        changeFilter(imagesWithFilters[0])
+        changeFilter(imagesWithFilters[currentIndexOfFilter], currentIndexOfFilter)
 
         // События кликов по фреймам
         framesWithFilters.forEachIndexed { index, frame ->
             frame.setOnClickListener {
-                changeFilter(imagesWithFilters[index])
+                changeFilter(imagesWithFilters[index], index)
             }
         }
 
@@ -313,6 +318,13 @@ class FiltersActivity : ChildActivity() {
         switch.setOnCheckedChangeListener { _, _ ->
             updateBoxes()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt("currentIndexOfFilter", currentIndexOfFilter)
+        updateImageInfo()
     }
 
     // Изменить активность фильтра
@@ -587,7 +599,7 @@ class FiltersActivity : ChildActivity() {
     }
 
     // Сменить фильтр, ориентируясь на его картинку
-    private fun changeFilter(image: ImageView) {
+    private fun changeFilter(image: ImageView, indexOfFilter: Int) {
         filtersIsAvailable = false
 
         if (::currentImage.isInitialized) {
@@ -625,6 +637,7 @@ class FiltersActivity : ChildActivity() {
         }
 
         currentImage = image
+        currentIndexOfFilter = indexOfFilter
         updateImageInfo()
 
         filtersIsAvailable = true
