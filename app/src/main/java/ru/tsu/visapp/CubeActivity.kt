@@ -111,11 +111,9 @@ class CubeActivity : ChildActivity() {
         val imageBitmap = imageEditor.createBitmapByUri(savedImageUri)
         val newPixels = imageEditor.getPixelsFromBitmap(imageBitmap)
 
-        if (countOfImages != 6) {
-            initImagePixels[countOfImages] = Pair(newPixels, imageBitmap.width)
-            imagePixels[countOfImages] = initImagePixels[countOfImages]
-            countOfImages++
-        }
+        initImagePixels[countOfImages % 6] = Pair(newPixels, imageBitmap.width)
+        imagePixels[countOfImages % 6] = initImagePixels[countOfImages % 6]
+        countOfImages++
 
         renderCube()
     }
