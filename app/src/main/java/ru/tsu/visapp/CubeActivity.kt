@@ -23,7 +23,7 @@ class CubeActivity : ChildActivity() {
     private val width = 99 // Ширина картинки
     private val height = 99 // Высота картинки
 
-    private var countOfImages = 0; // Количество зимененных изображений
+    private var countOfImages = 0 // Количество заменённых изображений
     private var currentProgress = 50 // Текущий прогресс в процентах
     private var isTerrible = false // Включен ли режим профсоюза
     // Раньше был режим "позорного куба", переименовывать не стали...
