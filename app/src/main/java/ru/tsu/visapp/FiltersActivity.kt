@@ -321,11 +321,10 @@ class FiltersActivity : ChildActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        updateImageInfo()
-
         super.onSaveInstanceState(outState)
 
         outState.putInt("currentIndexOfFilter", currentIndexOfFilter)
+        updateImageInfo()
     }
 
     // Изменить активность фильтра
